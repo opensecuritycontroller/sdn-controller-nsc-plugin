@@ -1,0 +1,105 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>com.mcafee.vmidc</groupId>
+		<artifactId>vmiDCAll</artifactId>
+		<version>1.0</version>
+		<relativePath>../vmiDCAll/</relativePath>
+	</parent>
+
+	<artifactId>NscSdnControllerPlugin</artifactId>
+	<name>NscSdnControllerPlugin</name>
+
+	<dependencies>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.17</version>
+		</dependency>
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.11</version>
+		</dependency>
+		<dependency>
+			<groupId>com.mcafee.vmidc</groupId>
+			<artifactId>IscSdnControllerPlugin</artifactId>
+			<version>1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.mcafee.vmidc</groupId>
+			<artifactId>vmiDCCommon</artifactId>
+			<version>1.0</version>
+		</dependency>
+
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.12.4</version>
+				<configuration>
+					<skipTests>true</skipTests>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.3.2</version>
+				<configuration>
+					<source>1.7</source>
+					<target>1.7</target>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.5</version>
+				<configuration>
+					<finalName>NscSdnControllerPlugin</finalName>
+					<archive>
+						<manifestEntries>
+							<Build-Time>${maven.build.timestamp}</Build-Time>
+							<Implementation-Build>${buildNumber}</Implementation-Build>
+							<Implementation-Version>${productVersion}</Implementation-Version>
+						</manifestEntries>
+					</archive>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.7</version>
+				<executions>
+					<!-- Copy src/main/webapp directory -->
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<tasks>
+								<copy file="${basedir}/NscSdnControllerPlugin.json"
+									todir="${basedir}/../vmiDCServer/sdn_ctrl_plugins" />
+								<copy file="${basedir}/target/NscSdnControllerPlugin.jar"
+									todir="${basedir}/../vmiDCServer/sdn_ctrl_plugins" />
+
+								<copy file="${basedir}/NscSdnControllerPlugin.json"
+									todir="${basedir}/../serverBOM/root/opt/vmidc/bin/sdn_ctrl_plugins" />
+								<copy file="${basedir}/target/NscSdnControllerPlugin.jar"
+									todir="${basedir}/../serverBOM/root/opt/vmidc/bin/sdn_ctrl_plugins" />
+							</tasks>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+		</plugins>
+	</build>
+
+</project>

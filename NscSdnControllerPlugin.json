@@ -1,0 +1,11 @@
+{
+    "metaDataVersion": "1.0",
+    "pluginName": "NSC",
+    "jarFilename": "NscSdnControllerPlugin.jar",
+    "sdnControllerApiClass": "com.intelsecurity.isc.controller.api.NeutronSdnControllerApi",
+    "minIscVersion": {
+        "major": 1,
+        "minor": 0,
+        "build": 2000
+    }
+}
