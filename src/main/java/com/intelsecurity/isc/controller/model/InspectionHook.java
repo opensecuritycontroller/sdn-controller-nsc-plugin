@@ -5,11 +5,11 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import com.intelsecurity.isc.plugin.controller.DefaultNetworkPortElement;
+import com.intelsecurity.isc.plugin.controller.DefaultNetworkPort;
 import com.intelsecurity.isc.plugin.controller.FailurePolicyType;
+import com.intelsecurity.isc.plugin.controller.TagEncapsulationType;
 import com.intelsecurity.isc.plugin.controller.element.InspectionHookElement;
 import com.intelsecurity.isc.plugin.controller.element.NetworkPortElement;
-import com.intelsecurity.isc.plugin.controller.element.TagEncapsulationType;
 
 @XmlRootElement(name = "inspection_hook")
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -86,11 +86,11 @@ public class InspectionHook implements InspectionHookElement {
 
     @Override
     public NetworkPortElement getInspectedPort() {
-        return new DefaultNetworkPortElement(this.inspectedPortId, null);
+        return new DefaultNetworkPort(this.inspectedPortId, null);
     }
 
     @Override
     public NetworkPortElement getInspectionPort() {
-        return new DefaultNetworkPortElement(this.inspectionPortId, null);
+        return new DefaultNetworkPort(this.inspectionPortId, null);
     }
 }
