@@ -172,4 +172,9 @@ public class NeutronSdnControllerApi implements SdnControllerApi {
         this.vc = vc;
     }
 
+    @Override
+    public boolean isOffboxRedirectionSupported() {
+        return false;
+    }
+
 }
