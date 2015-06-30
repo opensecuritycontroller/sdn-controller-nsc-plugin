@@ -76,6 +76,9 @@ public class InspectionHook implements InspectionHookElement {
 
     @Override
     public FailurePolicyType getFailurePolicyType() {
+        if (this.failurePolicyType == null) {
+            return null;
+        }
         return FailurePolicyType.fromText(this.failurePolicyType);
     }
 
