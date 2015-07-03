@@ -5,6 +5,7 @@ import org.apache.log4j.Logger;
 import com.intelsecurity.isc.controller.model.InspectionHook;
 import com.intelsecurity.isc.controller.model.InspectionPort;
 import com.intelsecurity.isc.plugin.controller.FailurePolicyType;
+import com.intelsecurity.isc.plugin.controller.Status;
 import com.intelsecurity.isc.plugin.controller.TagEncapsulationType;
 import com.intelsecurity.isc.plugin.controller.api.SdnControllerApi;
 import com.intelsecurity.isc.plugin.controller.element.InspectionHookElement;
@@ -177,4 +178,13 @@ public class NeutronSdnControllerApi implements SdnControllerApi {
         return false;
     }
 
+    @Override
+    public Status getStatus() throws Exception {
+        Status status = null;
+        NeutronSecurityControllerApi nsca = new NeutronSecurityControllerApi(this.vc);
+        // TODO: Future, we should not rely on list ports instead we should send a valid status based on is SDN controller ready to serve  
+        nsca.getInspectionPorts();
+        status = new Status(getName(), getVersion(), true);
+        return status;
+    }
 }
