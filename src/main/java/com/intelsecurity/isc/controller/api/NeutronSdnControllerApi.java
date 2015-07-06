@@ -182,7 +182,8 @@ public class NeutronSdnControllerApi implements SdnControllerApi {
     public Status getStatus() throws Exception {
         Status status = null;
         NeutronSecurityControllerApi nsca = new NeutronSecurityControllerApi(this.vc);
-        // TODO: Future, we should not rely on list ports instead we should send a valid status based on is SDN controller ready to serve  
+        // TODO: Future. We should not rely on list ports instead we should send a valid status
+        // based on is SDN controller ready to serve
         nsca.getInspectionPorts();
         status = new Status(getName(), getVersion(), true);
         return status;

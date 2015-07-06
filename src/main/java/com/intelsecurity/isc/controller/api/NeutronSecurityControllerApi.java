@@ -40,7 +40,11 @@ public class NeutronSecurityControllerApi {
         paramMap.putSingle("inspected_port_id", inspectedPortId);
         InspectionHooks inspectionHooks = this.client.getResource("inspectionhooks", InspectionHooks.class, paramMap);
         if (inspectionHooks != null) {
-            return inspectionHooks.inspectionHooks.get(0);
+        	for (InspectionHook hook : inspectionHooks.inspectionHooks) {
+        		if (hook.getInspectionPort().getPortId().equals(inspectionPortId)) {
+        			return inspectionHooks.inspectionHooks.get(0);
+        		}
+        	}
         }
         return null;
     }
