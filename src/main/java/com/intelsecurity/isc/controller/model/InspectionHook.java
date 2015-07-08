@@ -56,7 +56,8 @@ public class InspectionHook implements InspectionHookElement {
     @Override
     public String toString() {
         return "InspectionHook [id=" + id + ", inspectedPortId=" + inspectedPortId + ", inspectionPortId="
-                + inspectionPortId + ", order=" + order + ", tag=" + tag + "]";
+                + inspectionPortId + ", tag=" + tag + ", order=" + order + ", encType=" + encType
+                + ", failurePolicyType=" + failurePolicyType + "]";
     }
 
     @Override

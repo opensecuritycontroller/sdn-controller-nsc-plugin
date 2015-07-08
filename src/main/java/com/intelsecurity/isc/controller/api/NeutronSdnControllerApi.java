@@ -188,4 +188,38 @@ public class NeutronSdnControllerApi implements SdnControllerApi {
         status = new Status(getName(), getVersion(), true);
         return status;
     }
+
+    @Override
+    public void setInspectionHookOrder(NetworkPortElement inspectedPort, NetworkPortElement inspectionPort, Long order)
+            throws Exception {
+        NeutronSecurityControllerApi nsca = new NeutronSecurityControllerApi(this.vc);
+        InspectionHook inspectionHook = nsca.getInspectionHookByPorts(inspectedPort.getPortId(),
+                inspectionPort.getPortId());
+        inspectionHook.order = order;
+        nsca.updateInspectionHook(inspectionHook.id, inspectionHook);
+    }
+
+    @Override
+    public Long getInspectionHookOrder(NetworkPortElement inspectedPort, NetworkPortElement inspectionPort)
+            throws Exception {
+        InspectionHookElement inspectionHook = getInspectionHook(inspectedPort, inspectionPort);
+        return inspectionHook == null ? null : inspectionHook.getOrder();
+    }
+
+    @Override
+    public void updateInspectionHook(NetworkPortElement inspectedPort, NetworkPortElement inspectionPort, Long tag,
+            TagEncapsulationType encType, Long order, FailurePolicyType failurePolicyType) throws Exception {
+        NeutronSecurityControllerApi nsca = new NeutronSecurityControllerApi(this.vc);
+        InspectionHookElement hook = getInspectionHook(inspectedPort, inspectionPort);
+
+        InspectionHook inspectionHook = new InspectionHook();
+        inspectionHook.inspectedPortId = inspectedPort.getPortId();
+        inspectionHook.inspectionPortId = inspectionPort.getPortId();
+        inspectionHook.order = order;
+        inspectionHook.tag = tag;
+        inspectionHook.encType = encType.toString();
+        inspectionHook.failurePolicyType = failurePolicyType.toString();
+
+        nsca.updateInspectionHook(hook.getHookId(), inspectionHook);
+    }
 }

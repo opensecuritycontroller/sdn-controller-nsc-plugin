@@ -31,18 +31,15 @@ public class NeutronSecurityControllerApi {
         return this.client.getResource("inspectionhooks/" + inspectionHookId, InspectionHook.class);
     }
 
-    public InspectionHook getInspectionHookByInspectedPort(String inspectedPortId) throws Exception {
-        return getInspectionHookByPorts(inspectedPortId, null);
-    }
-
     public InspectionHook getInspectionHookByPorts(String inspectedPortId, String inspectionPortId) throws Exception {
         MultivaluedMap<String, String> paramMap = new MultivaluedMapImpl();
         paramMap.putSingle("inspected_port_id", inspectedPortId);
         InspectionHooks inspectionHooks = this.client.getResource("inspectionhooks", InspectionHooks.class, paramMap);
         if (inspectionHooks != null) {
         	for (InspectionHook hook : inspectionHooks.inspectionHooks) {
-        		if (hook.getInspectionPort().getPortId().equals(inspectionPortId)) {
-        			return inspectionHooks.inspectionHooks.get(0);
+                if (hook.getInspectionPort() != null && hook.getInspectionPort().getPortId() != null
+                        && hook.getInspectionPort().getPortId().equals(inspectionPortId)) {
+        			return hook;
         		}
         	}
         }
@@ -70,7 +67,7 @@ public class NeutronSecurityControllerApi {
     }
 
     public void deleteInspectionHookByPorts(String inspectedPortId, String inspectionPortId) throws Exception {
-        InspectionHook inspectionHook = getInspectionHookByInspectedPort(inspectedPortId);
+        InspectionHook inspectionHook = getInspectionHookByPorts(inspectedPortId, inspectionPortId);
         if (inspectionHook != null) {
             deleteInspectionHook(inspectionHook.id);
         }
