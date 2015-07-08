@@ -69,7 +69,9 @@ public class NeutronSdnControllerApi implements SdnControllerApi {
     public void removeAllInspectionHooks(NetworkPortElement inspectedPort) throws Exception {
         NeutronSecurityControllerApi nsca = new NeutronSecurityControllerApi(this.vc);
         try {
-            nsca.deleteInspectionHookByPorts(inspectedPort.getPortId(), null);
+            for (InspectionHook hook : nsca.getInspectionHooksByPort(inspectedPort.getPortId())) {
+                nsca.deleteInspectionHook(hook.getHookId());
+            }
         } catch (RestClientException rce) {
             Integer responseCode = rce.getResponseCode();
             if (responseCode == null || !rce.getResponseCode().equals(ClientResponse.Status.NOT_FOUND.getStatusCode())) {
