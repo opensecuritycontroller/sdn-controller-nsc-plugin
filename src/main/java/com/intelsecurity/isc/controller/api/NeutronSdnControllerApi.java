@@ -224,4 +224,9 @@ public class NeutronSdnControllerApi implements SdnControllerApi {
 
         nsca.updateInspectionHook(hook.getHookId(), inspectionHook);
     }
+
+    @Override
+    public boolean isServiceFunctionChainingSupported() {
+        return false;
+    }
 }
