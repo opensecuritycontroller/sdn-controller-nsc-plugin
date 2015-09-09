@@ -227,6 +227,6 @@ public class NeutronSdnControllerApi implements SdnControllerApi {
 
     @Override
     public boolean isServiceFunctionChainingSupported() {
-        return false;
+        return true;
     }
 }
