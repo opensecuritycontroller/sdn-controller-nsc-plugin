@@ -28,6 +28,13 @@
 			<artifactId>vmiDCCommon</artifactId>
 			<version>1.0</version>
 		</dependency>
+		
+		<!-- jclouds OpenStack dependencies -->
+        <dependency>
+            <groupId>org.apache.jclouds.labs</groupId>
+            <artifactId>openstack-neutron</artifactId>
+            <version>${jclouds.version}</version>
+        </dependency>
 
 	</dependencies>
 
@@ -71,7 +78,6 @@
 				<artifactId>maven-antrun-plugin</artifactId>
 				<version>1.7</version>
 				<executions>
-					<!-- Copy src/main/webapp directory -->
 					<execution>
 						<phase>package</phase>
 						<goals>

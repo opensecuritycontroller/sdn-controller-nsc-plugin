@@ -1,27 +1,62 @@
 package com.intelsecurity.isc.controller.model;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import org.jclouds.openstack.neutron.v2.domain.Port;
 
-@XmlRootElement(name = "inspection_port")
-@XmlAccessorType(XmlAccessType.FIELD)
-public class InspectionPort {
+import com.google.common.collect.ImmutableMap;
+import com.intelsecurity.isc.plugin.controller.DefaultNetworkPort;
+import com.intelsecurity.isc.plugin.controller.element.InspectionPortElement;
+import com.intelsecurity.isc.plugin.controller.element.NetworkPortElement;
 
-    @XmlElement
-    public String id;
+public class InspectionPort implements InspectionPortElement {
 
-    @XmlElement(name = "port_id")
-    public String portId;
-
-    @XmlElement(name = "inspection_hooks")
-    public List<InspectionHook> inspectionHooks;
+    private String portId;
 
     @Override
     public String toString() {
-        return "InspectedPort [id=" + id + ", portId=" + portId + ", inspectionHooks=" + inspectionHooks + "]";
+        return "InspectedPort [portId=" + this.portId + "]";
     }
+
+    @Override
+    public String getId() {
+        return this.portId;
+    }
+
+    public void setId(String portId) {
+        this.portId = portId;
+    }
+
+    @Override
+    public NetworkPortElement getInspectionPort() {
+        return new DefaultNetworkPort(this.portId, null);
+    }
+
+    public static ImmutableMap<String, Object> updateBindingProfile(String portId,
+            ImmutableMap<String, Object> existingPortProfile) {
+        Map<String, Object> updatedPortProfile = new HashMap<>(existingPortProfile);
+        updatedPortProfile.put("inspectionport_id", portId);
+
+        return ImmutableMap.copyOf(updatedPortProfile);
+    }
+
+    public static ImmutableMap<String, Object> removeBindingProfile(ImmutableMap<String, Object> existingPortProfile) {
+        Map<String, Object> updatedPortProfile = new HashMap<>(existingPortProfile);
+        updatedPortProfile.remove("inspectionport_id");
+
+        return ImmutableMap.copyOf(updatedPortProfile);
+    }
+
+    public static boolean isRegistered(Port port) {
+        ImmutableMap<String, Object> portProfile = port.getProfile();
+        for (String attributeName : portProfile.keySet()) {
+            if (attributeName.equals("inspectionport_id")) {
+                // Inspection port already registered
+                return true;
+            }
+        }
+        return false;
+    }
+
 }
