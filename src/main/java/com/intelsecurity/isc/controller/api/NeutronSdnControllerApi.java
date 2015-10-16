@@ -305,4 +305,9 @@ public class NeutronSdnControllerApi implements SdnControllerApi {
         // Nothing to do
     }
 
+    @Override
+    public boolean isUsingProviderCreds() {
+        return true;
+    }
+
 }

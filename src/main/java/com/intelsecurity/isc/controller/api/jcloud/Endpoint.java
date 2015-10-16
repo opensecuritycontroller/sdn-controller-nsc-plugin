@@ -20,11 +20,11 @@ public class Endpoint {
     }
 
     public Endpoint(VirtualizationConnectorElement vc) {
-        this.endPointIP = vc.getControllerIpAddress();
-        this.tenant = vc.getAdminTenantName();
-        this.user = vc.getControllerUsername();
-        this.password = EncryptionUtil.decrypt(vc.getControllerPassword());
-        this.isHttps = vc.isHttps();
+        this.endPointIP = vc.getProviderIpAddress();
+        this.tenant = vc.getProviderAdminTenantName();
+        this.user = vc.getProviderUsername();
+        this.password = EncryptionUtil.decrypt(vc.getProviderPassword());
+        this.isHttps = vc.isProviderHttps();
     }
 
     public Endpoint(VirtualizationConnectorElement vc, String tenant) {
