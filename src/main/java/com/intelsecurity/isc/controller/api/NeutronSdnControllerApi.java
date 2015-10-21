@@ -7,6 +7,7 @@ import org.apache.log4j.Logger;
 import com.intelsecurity.isc.controller.api.jcloud.Endpoint;
 import com.intelsecurity.isc.controller.model.InspectionHook;
 import com.intelsecurity.isc.plugin.controller.FailurePolicyType;
+import com.intelsecurity.isc.plugin.controller.FlowQueryInfo;
 import com.intelsecurity.isc.plugin.controller.Status;
 import com.intelsecurity.isc.plugin.controller.TagEncapsulationType;
 import com.intelsecurity.isc.plugin.controller.api.SdnControllerApi;
@@ -308,6 +309,24 @@ public class NeutronSdnControllerApi implements SdnControllerApi {
     @Override
     public boolean isUsingProviderCreds() {
         return true;
+    }
+
+    @Override
+    public List<FlowQueryInfo> queryPortInfo(List<FlowQueryInfo> portsQuery) throws Exception {
+        return portsQuery;
+    }
+
+    @Override
+    public void quarantinePort(String portId) throws Exception {
+    }
+
+    @Override
+    public void unquarantinePort(String portId) throws Exception {
+    }
+
+    @Override
+    public boolean isPortquarantine(String portId) throws Exception {
+        return false;
     }
 
 }
