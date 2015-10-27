@@ -1,13 +1,16 @@
 package com.intelsecurity.isc.controller.api;
 
+import java.util.HashMap;
 import java.util.List;
 
+import org.apache.commons.lang.NotImplementedException;
 import org.apache.log4j.Logger;
 
 import com.intelsecurity.isc.controller.api.jcloud.Endpoint;
 import com.intelsecurity.isc.controller.model.InspectionHook;
 import com.intelsecurity.isc.plugin.controller.FailurePolicyType;
-import com.intelsecurity.isc.plugin.controller.FlowQueryInfo;
+import com.intelsecurity.isc.plugin.controller.FlowInfo;
+import com.intelsecurity.isc.plugin.controller.FlowPortInfo;
 import com.intelsecurity.isc.plugin.controller.Status;
 import com.intelsecurity.isc.plugin.controller.TagEncapsulationType;
 import com.intelsecurity.isc.plugin.controller.api.SdnControllerApi;
@@ -312,8 +315,8 @@ public class NeutronSdnControllerApi implements SdnControllerApi {
     }
 
     @Override
-    public List<FlowQueryInfo> queryPortInfo(List<FlowQueryInfo> portsQuery) throws Exception {
-        return portsQuery;
+    public HashMap<String, FlowPortInfo> queryPortInfo(HashMap<String, FlowInfo> portsQuery) throws Exception {
+        throw new NotImplementedException("NSC SDN Controller does not support flow based query");
     }
 
     @Override
@@ -326,6 +329,11 @@ public class NeutronSdnControllerApi implements SdnControllerApi {
 
     @Override
     public boolean isPortquarantine(String portId) throws Exception {
+        return false;
+    }
+
+    @Override
+    public boolean isSupportQueryPortInfo() {
         return false;
     }
 
