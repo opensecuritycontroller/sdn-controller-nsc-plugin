@@ -320,19 +320,6 @@ public class NeutronSdnControllerApi implements SdnControllerApi {
     }
 
     @Override
-    public void quarantinePort(String portId) throws Exception {
-    }
-
-    @Override
-    public void unquarantinePort(String portId) throws Exception {
-    }
-
-    @Override
-    public boolean isPortquarantine(String portId) throws Exception {
-        return false;
-    }
-
-    @Override
     public boolean isSupportQueryPortInfo() {
         return false;
     }
