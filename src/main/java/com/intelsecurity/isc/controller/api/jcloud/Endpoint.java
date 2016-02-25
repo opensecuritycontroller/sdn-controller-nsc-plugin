@@ -1,7 +1,6 @@
 package com.intelsecurity.isc.controller.api.jcloud;
 
 import com.intelsecurity.isc.plugin.controller.element.VirtualizationConnectorElement;
-import com.mcafee.vmidc.util.EncryptionUtil;
 
 public class Endpoint {
 
@@ -23,7 +22,7 @@ public class Endpoint {
         this.endPointIP = vc.getProviderIpAddress();
         this.tenant = vc.getProviderAdminTenantName();
         this.user = vc.getProviderUsername();
-        this.password = EncryptionUtil.decrypt(vc.getProviderPassword());
+        this.password = vc.getProviderPassword();
         this.isHttps = vc.isProviderHttps();
     }
 
