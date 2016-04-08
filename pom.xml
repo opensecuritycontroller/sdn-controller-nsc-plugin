@@ -23,19 +23,19 @@
 			<artifactId>IscSdnControllerPlugin</artifactId>
 			<version>1.0</version>
 		</dependency>
-		
-		<!-- jclouds OpenStack dependencies -->
-        <dependency>
-            <groupId>org.apache.jclouds.labs</groupId>
-            <artifactId>openstack-neutron</artifactId>
-            <version>${jclouds.version}</version>
-        </dependency>
 
-        <dependency>
-            <groupId>org.apache.directory.studio</groupId>
-            <artifactId>org.apache.commons.lang</artifactId>
-            <version>2.6</version>
-        </dependency>
+		<!-- jclouds OpenStack dependencies -->
+		<dependency>
+			<groupId>org.apache.jclouds.labs</groupId>
+			<artifactId>openstack-neutron</artifactId>
+			<version>${jclouds.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.directory.studio</groupId>
+			<artifactId>org.apache.commons.lang</artifactId>
+			<version>2.6</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -85,8 +85,7 @@
 						</goals>
 						<configuration>
 							<tasks>
-								<copy file="${basedir}/NscSdnControllerPlugin.json"
-									todir="${basedir}/../vmiDCServer/sdn_ctrl_plugins" />
+								<copy file="${basedir}/NscSdnControllerPlugin.json" todir="${basedir}/../vmiDCServer/sdn_ctrl_plugins" />
 								<copy file="${basedir}/target/NscSdnControllerPlugin.jar"
 									todir="${basedir}/../vmiDCServer/sdn_ctrl_plugins" />
 
@@ -94,6 +93,14 @@
 									todir="${basedir}/../serverBOM/root/opt/vmidc/bin/sdn_ctrl_plugins" />
 								<copy file="${basedir}/target/NscSdnControllerPlugin.jar"
 									todir="${basedir}/../serverBOM/root/opt/vmidc/bin/sdn_ctrl_plugins" />
+
+                                <!-- Create plugin zip -->
+								<copy file="${basedir}/NscSdnControllerPlugin.json" tofile="${project.build.directory}/meta.json" />
+
+								<zip destfile="${project.build.directory}/NscSdnControllerPlugin.zip">
+									<fileset file="${project.build.directory}/meta.json" />
+									<fileset file="${project.build.directory}/NscSdnControllerPlugin.jar" />
+								</zip>
 							</tasks>
 						</configuration>
 					</execution>
