@@ -4,8 +4,8 @@
     "jarFilename": "NscSdnControllerPlugin.jar",
     "sdnControllerApiClass": "com.intelsecurity.isc.controller.api.NeutronSdnControllerApi",
     "minIscVersion": {
-        "major": 1,
-        "minor": 0,
-        "build": 2000
+        "major": 2,
+        "minor": 5,
+        "build": 3584
     }
 }
