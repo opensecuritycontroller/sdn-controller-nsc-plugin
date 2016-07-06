@@ -26,6 +26,13 @@
 
 		<!-- jclouds OpenStack dependencies -->
 		<dependency>
+			<!-- TODO:2.5 Not sure why we need to call this out explicitly... -->
+			<groupId>org.apache.jclouds</groupId>
+			<artifactId>jclouds-core</artifactId>
+			<version>${jclouds.version}</version>
+		</dependency>
+
+		<dependency>
 			<groupId>org.apache.jclouds.labs</groupId>
 			<artifactId>openstack-neutron</artifactId>
 			<version>${jclouds.version}</version>
@@ -94,35 +101,36 @@
 								<copy file="${basedir}/target/NscSdnControllerPlugin.jar"
 									todir="${basedir}/../serverBOM/root/opt/vmidc/bin/sdn_ctrl_plugins" />
 
-                                <!-- Create plugin zip -->
+								<!-- Create plugin zip -->
 								<copy file="${basedir}/NscSdnControllerPlugin.json" tofile="${project.build.directory}/meta.json" />
 
 								<zip destfile="${project.build.directory}/NscSdnControllerPlugin.zip">
 									<fileset file="${project.build.directory}/meta.json" />
-									<fileset file="${project.build.directory}/NscSdnControllerPlugin.jar" />
+									<fileset
+										file="${project.build.directory}/NscSdnControllerPlugin.jar" />
 								</zip>
 							</tasks>
 						</configuration>
 					</execution>
 				</executions>
 			</plugin>
-			
+
 			<plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <version>3.0.0</version>
-                <configuration>
-                    <finalName>NscSdnControllerPlugin</finalName>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>attach-sources</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>3.0.0</version>
+				<configuration>
+					<finalName>NscSdnControllerPlugin</finalName>
+				</configuration>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 
 		</plugins>
 	</build>
