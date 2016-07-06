@@ -10,7 +10,18 @@
 
 	<artifactId>NscSdnControllerPlugin</artifactId>
 	<name>NscSdnControllerPlugin</name>
-
+	
+	<repositories>
+		<repository>
+			<!-- TODO:2.5 Remove this before release -->
+			<id>jclouds-snapshots</id>
+			<url>https://repository.apache.org/content/repositories/snapshots</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+	
 	<dependencies>
 		<dependency>
 			<groupId>log4j</groupId>
