@@ -2,7 +2,6 @@ package com.intelsecurity.isc.controller.api;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.log4j.Logger;
@@ -38,13 +37,13 @@ public class NeutronSdnControllerApi implements SdnControllerApi {
 
     @Override
     public InspectionHookElement getInspectionHook(NetworkPortElement inspectedPort,
-            Set<NetworkPortElement> inspectionPorts)
+            NetworkPortElement inspectionPort)
             throws NetworkPortNotFoundException, Exception {
         NeutronSecurityControllerApi neutronApi = null;
         try {
             neutronApi = new NeutronSecurityControllerApi(new Endpoint(this.vc));
             InspectionHook inspectionHookElement = neutronApi.getInspectionHookByPorts(this.region,
-                    inspectedPort.getPortId(), inspectionPorts.iterator().next().getPortId());
+                    inspectedPort.getPortId(), inspectionPort.getPortId());
             return inspectionHookElement;
         } finally {
             if (neutronApi != null) {
@@ -54,13 +53,13 @@ public class NeutronSdnControllerApi implements SdnControllerApi {
     }
 
     @Override
-    public void installInspectionHook(NetworkPortElement inspectedPort, Set<NetworkPortElement> inspectionPorts,
+    public void installInspectionHook(NetworkPortElement inspectedPort, NetworkPortElement inspectionPort,
             Long tag, TagEncapsulationType encType, Long order, FailurePolicyType failurePolicyType)
             throws NetworkPortNotFoundException, Exception {
 
         InspectionHook inspectionHook = new InspectionHook();
         inspectionHook.setInspectedPortId(inspectedPort.getPortId());
-        inspectionHook.setInspectionPortId(inspectionPorts.iterator().next().getPortId());
+        inspectionHook.setInspectionPortId(inspectionPort.getPortId());
         inspectionHook.setOrder(order);
         inspectionHook.setTag(tag);
         inspectionHook.setEncType(encType.toString());
@@ -92,13 +91,13 @@ public class NeutronSdnControllerApi implements SdnControllerApi {
     }
 
     @Override
-    public void removeInspectionHook(NetworkPortElement inspectedPort, Set<NetworkPortElement> inspectionPorts)
+    public void removeInspectionHook(NetworkPortElement inspectedPort, NetworkPortElement inspectionPort)
             throws Exception {
         NeutronSecurityControllerApi neutronApi = null;
         try {
             neutronApi = new NeutronSecurityControllerApi(new Endpoint(this.vc));
             neutronApi.deleteInspectionHookByPorts(this.region, inspectedPort.getPortId(),
-                    inspectionPorts.iterator().next().getPortId());
+                    inspectionPort.getPortId());
         } catch (NetworkPortNotFoundException nfe) {
             this.log.info(String.format("Port with Id: '%s' not found", nfe.getPortId()));
         } finally {
@@ -109,20 +108,20 @@ public class NeutronSdnControllerApi implements SdnControllerApi {
     }
 
     @Override
-    public Long getInspectionHookTag(NetworkPortElement inspectedPort, Set<NetworkPortElement> inspectionPorts)
+    public Long getInspectionHookTag(NetworkPortElement inspectedPort, NetworkPortElement inspectionPort)
             throws NetworkPortNotFoundException, Exception {
-        InspectionHookElement inspectionHook = getInspectionHook(inspectedPort, inspectionPorts);
+        InspectionHookElement inspectionHook = getInspectionHook(inspectedPort, inspectionPort);
         return inspectionHook == null ? null : inspectionHook.getTag();
     }
 
     @Override
-    public void setInspectionHookTag(NetworkPortElement inspectedPort, Set<NetworkPortElement> inspectionPorts, Long tag)
+    public void setInspectionHookTag(NetworkPortElement inspectedPort, NetworkPortElement inspectionPort, Long tag)
             throws NetworkPortNotFoundException, Exception {
         NeutronSecurityControllerApi neutronApi = null;
         try {
             neutronApi = new NeutronSecurityControllerApi(new Endpoint(this.vc));
             InspectionHook inspectionHook = neutronApi.getInspectionHookByPorts(this.region, inspectedPort.getPortId(),
-                    inspectionPorts.iterator().next().getPortId());
+                    inspectionPort.getPortId());
             inspectionHook.setTag(tag);
             neutronApi.updateInspectionHook(this.region, inspectionHook);
         } finally {
@@ -134,21 +133,21 @@ public class NeutronSdnControllerApi implements SdnControllerApi {
 
     @Override
     public FailurePolicyType getInspectionHookFailurePolicy(NetworkPortElement inspectedPort,
-            Set<NetworkPortElement> inspectionPorts) throws NetworkPortNotFoundException, Exception {
-        InspectionHookElement inspectionHook = getInspectionHook(inspectedPort, inspectionPorts);
+            NetworkPortElement inspectionPort) throws NetworkPortNotFoundException, Exception {
+        InspectionHookElement inspectionHook = getInspectionHook(inspectedPort, inspectionPort);
 
         return inspectionHook == null ? null : inspectionHook.getFailurePolicyType();
     }
 
     @Override
     public void setInspectionHookFailurePolicy(NetworkPortElement inspectedPort,
-            Set<NetworkPortElement> inspectionPorts,
+            NetworkPortElement inspectionPort,
             FailurePolicyType failurePolicyType) throws NetworkPortNotFoundException, Exception {
         NeutronSecurityControllerApi neutronApi = null;
         try {
             neutronApi = new NeutronSecurityControllerApi(new Endpoint(this.vc));
             InspectionHook inspectionHook = neutronApi.getInspectionHookByPorts(this.region, inspectedPort.getPortId(),
-                    inspectionPorts.iterator().next().getPortId());
+                    inspectionPort.getPortId());
             inspectionHook.setFailurePolicyType(failurePolicyType.toString());
             neutronApi.updateInspectionHook(this.region, inspectionHook);
         } finally {
@@ -242,14 +241,14 @@ public class NeutronSdnControllerApi implements SdnControllerApi {
     }
 
     @Override
-    public void setInspectionHookOrder(NetworkPortElement inspectedPort, Set<NetworkPortElement> inspectionPorts,
+    public void setInspectionHookOrder(NetworkPortElement inspectedPort, NetworkPortElement inspectionPort,
             Long order)
             throws NetworkPortNotFoundException, Exception {
         NeutronSecurityControllerApi neutronApi = null;
         try {
             neutronApi = new NeutronSecurityControllerApi(new Endpoint(this.vc));
             InspectionHook inspectionHook = neutronApi.getInspectionHookByPorts(this.region, inspectedPort.getPortId(),
-                    inspectionPorts.iterator().next().getPortId());
+                    inspectionPort.getPortId());
             inspectionHook.setOrder(order);
             neutronApi.updateInspectionHook(this.region, inspectionHook);
         } finally {
@@ -260,14 +259,14 @@ public class NeutronSdnControllerApi implements SdnControllerApi {
     }
 
     @Override
-    public Long getInspectionHookOrder(NetworkPortElement inspectedPort, Set<NetworkPortElement> inspectionPorts)
+    public Long getInspectionHookOrder(NetworkPortElement inspectedPort, NetworkPortElement inspectionPort)
             throws NetworkPortNotFoundException, Exception {
-        InspectionHookElement inspectionHook = getInspectionHook(inspectedPort, inspectionPorts);
+        InspectionHookElement inspectionHook = getInspectionHook(inspectedPort, inspectionPort);
         return inspectionHook == null ? null : inspectionHook.getOrder();
     }
 
     @Override
-    public void updateInspectionHook(NetworkPortElement inspectedPort, Set<NetworkPortElement> inspectionPorts,
+    public void updateInspectionHook(NetworkPortElement inspectedPort, NetworkPortElement inspectionPort,
             Long tag,
             TagEncapsulationType encType, Long order, FailurePolicyType failurePolicyType)
             throws NetworkPortNotFoundException, Exception {
@@ -275,9 +274,9 @@ public class NeutronSdnControllerApi implements SdnControllerApi {
         try {
             neutronApi = new NeutronSecurityControllerApi(new Endpoint(this.vc));
             InspectionHook inspectionHook = neutronApi.getInspectionHookByPorts(this.region, inspectedPort.getPortId(),
-                    inspectionPorts.iterator().next().getPortId());
+                    inspectionPort.getPortId());
             inspectionHook.setInspectedPortId(inspectedPort.getPortId());
-            inspectionHook.setInspectionPortId(inspectionPorts.iterator().next().getPortId());
+            inspectionHook.setInspectionPortId(inspectionPort.getPortId());
             inspectionHook.setOrder(order);
             inspectionHook.setTag(tag);
             inspectionHook.setEncType(encType.toString());
@@ -330,9 +329,5 @@ public class NeutronSdnControllerApi implements SdnControllerApi {
         return false;
     }
 
-    @Override
-    public boolean isPortGroupSupported() {
-        return false;
-    }
-
+   
 }
