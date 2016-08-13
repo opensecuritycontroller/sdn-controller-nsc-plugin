@@ -7,21 +7,35 @@ import java.util.Map.Entry;
 import org.jclouds.openstack.neutron.v2.domain.Port;
 
 import com.google.common.collect.ImmutableMap;
+import com.intelsecurity.isc.plugin.controller.DefaultInspectionPort;
 import com.intelsecurity.isc.plugin.controller.DefaultNetworkPort;
 import com.intelsecurity.isc.plugin.controller.FailurePolicyType;
 import com.intelsecurity.isc.plugin.controller.TagEncapsulationType;
 import com.intelsecurity.isc.plugin.controller.element.InspectionHookElement;
+import com.intelsecurity.isc.plugin.controller.element.InspectionPortElement;
 import com.intelsecurity.isc.plugin.controller.element.NetworkPortElement;
 
 public class InspectionHook implements InspectionHookElement {
 
+    private static final String KEY_FAILURE_POLICY_TYPE = "failure_policy_type";
+    private static final String KEY_ORDER = "order";
+    private static final String KEY_TAG = "tag";
+    private static final String KEY_INSPECTED_PORT_ID = "inspected_port_id";
+    private static final String KEY_INSPECTION_EGRESS_PORT_ID = "inspection_egress_port_id";
+    private static final String KEY_INSPECTIONHOOK_ID = "inspectionhook_id";
+    private static final String KEY_ENC_TYPE = "enc_type";
+    private static final String KEY_INSPECTION_INGRESS_PORT_ID = "inspection_port_id";
+
     private String id;
     private String inspectedPortId;
-    private String inspectionPortId;
+    private InspectionPortElement inspectionPort;
     private Long tag;
     private Long order;
     private String encType;
     private String failurePolicyType;
+
+    public InspectionHook() {
+    }
 
     public InspectionHook(InspectionHookElement inspectionHookElement) {
         this.tag = inspectionHookElement.getTag();
@@ -33,17 +47,14 @@ public class InspectionHook implements InspectionHookElement {
         this.id = inspectionHookElement.getHookId();
         this.inspectedPortId = inspectionHookElement.getInspectedPort() == null ? null : inspectionHookElement
                 .getInspectedPort().getPortId();
-        this.inspectionPortId = inspectionHookElement.getInspectionPort() == null ? null : inspectionHookElement
-                .getInspectionPort().getPortId();
-    }
-
-    public InspectionHook() {
+        this.inspectionPort = inspectionHookElement.getInspectionPort() == null ? null : inspectionHookElement
+                .getInspectionPort();
     }
 
     @Override
     public String toString() {
         return "InspectionHook [id=" + this.id + ", inspectedPortId=" + this.inspectedPortId + ", inspectionPortId="
-                + this.inspectionPortId + ", tag=" + this.tag + ", order=" + this.order + ", encType=" + this.encType
+                + this.inspectionPort + ", tag=" + this.tag + ", order=" + this.order + ", encType=" + this.encType
                 + ", failurePolicyType=" + this.failurePolicyType + "]";
     }
 
@@ -55,12 +66,13 @@ public class InspectionHook implements InspectionHookElement {
         this.inspectedPortId = inspectedPortId;
     }
 
-    public String getInspectionPortId() {
-        return this.inspectionPortId;
+    @Override
+    public InspectionPortElement getInspectionPort() {
+        return this.inspectionPort;
     }
 
-    public void setInspectionPortId(String inspectionPortId) {
-        this.inspectionPortId = inspectionPortId;
+    public void setInspectionPort(InspectionPortElement inspectionPort) {
+        this.inspectionPort = inspectionPort;
     }
 
     public void setHookId(String id) {
@@ -116,12 +128,6 @@ public class InspectionHook implements InspectionHookElement {
         return new DefaultNetworkPort(this.inspectedPortId, null);
     }
 
-    @Override
-    public NetworkPortElement getInspectionPort() {
-        return new DefaultNetworkPort(this.inspectionPortId, null);
-    }
-
-
     /**
      * Generates an inspection hook the port if all attributes are present. Return null otherwise.
      *
@@ -129,40 +135,48 @@ public class InspectionHook implements InspectionHookElement {
     public static InspectionHook generateInspectionHookFromPort(Port port) {
         ImmutableMap<String, Object> portProfile = port.getProfile();
         InspectionHook inspectionHook = new InspectionHook();
+        DefaultNetworkPort ingressPort = new DefaultNetworkPort();
+        DefaultNetworkPort egressPort = new DefaultNetworkPort();
+
+        inspectionHook.inspectionPort = new DefaultInspectionPort(ingressPort, egressPort);
         int relaventAttributes = 0;
         for (Entry<String, Object> attribute : portProfile.entrySet()) {
             switch (attribute.getKey()) {
-                case "enc_type":
+                case KEY_ENC_TYPE:
                     inspectionHook.encType = attribute.getValue().toString();
                     relaventAttributes++;
                     break;
-                case "inspectionhook_id":
+                case KEY_INSPECTIONHOOK_ID:
                     inspectionHook.id = attribute.getValue().toString();
                     relaventAttributes++;
                     break;
-                case "inspection_port_id":
-                    inspectionHook.inspectionPortId = attribute.getValue().toString();
+                case KEY_INSPECTION_INGRESS_PORT_ID:
+                    ingressPort.setPortId(attribute.getValue().toString());
                     relaventAttributes++;
                     break;
-                case "inspected_port_id":
+                case KEY_INSPECTION_EGRESS_PORT_ID:
+                    egressPort.setPortId(attribute.getValue().toString());
+                    relaventAttributes++;
+                    break;
+                case KEY_INSPECTED_PORT_ID:
                     inspectionHook.inspectedPortId = attribute.getValue().toString();
                     relaventAttributes++;
                     break;
-                case "tag":
+                case KEY_TAG:
                     inspectionHook.tag = new Double(attribute.getValue().toString()).longValue();
                     relaventAttributes++;
                     break;
-                case "order":
+                case KEY_ORDER:
                     inspectionHook.order = new Double(attribute.getValue().toString()).longValue();
                     relaventAttributes++;
                     break;
-                case "failure_policy_type":
+                case KEY_FAILURE_POLICY_TYPE:
                     inspectionHook.failurePolicyType = attribute.getValue().toString();
                     relaventAttributes++;
                     break;
             }
         }
-        return relaventAttributes >= 6 ? inspectionHook : null;
+        return relaventAttributes >= 7 ? inspectionHook : null;
     }
 
     /**
@@ -173,19 +187,20 @@ public class InspectionHook implements InspectionHookElement {
             ImmutableMap<String, Object> existingPortProfile) {
         Map<String, Object> updatedPortProfile = new HashMap<>(existingPortProfile);
 
-        updatedPortProfile.put("enc_type", inspectionHook.encType);
+        updatedPortProfile.put(KEY_ENC_TYPE, inspectionHook.encType);
 
-        updatedPortProfile.put("inspectionhook_id", inspectionHook.id);
+        updatedPortProfile.put(KEY_INSPECTIONHOOK_ID, inspectionHook.id);
 
-        updatedPortProfile.put("inspection_port_id", inspectionHook.inspectionPortId);
+        updatedPortProfile.put(KEY_INSPECTION_INGRESS_PORT_ID, inspectionHook.inspectionPort.getIngressPort().getPortId());
+        updatedPortProfile.put(KEY_INSPECTION_EGRESS_PORT_ID, inspectionHook.inspectionPort.getEgressPort().getPortId());
 
-        updatedPortProfile.put("inspected_port_id", inspectionHook.inspectedPortId);
+        updatedPortProfile.put(KEY_INSPECTED_PORT_ID, inspectionHook.inspectedPortId);
 
-        updatedPortProfile.put("tag", inspectionHook.tag);
+        updatedPortProfile.put(KEY_TAG, inspectionHook.tag);
 
-        updatedPortProfile.put("order", inspectionHook.order);
+        updatedPortProfile.put(KEY_ORDER, inspectionHook.order);
 
-        updatedPortProfile.put("failure_policy_type", inspectionHook.failurePolicyType);
+        updatedPortProfile.put(KEY_FAILURE_POLICY_TYPE, inspectionHook.failurePolicyType);
 
         return ImmutableMap.copyOf(updatedPortProfile);
     }
@@ -193,13 +208,14 @@ public class InspectionHook implements InspectionHookElement {
     public static ImmutableMap<String, Object> removeBindingProfile(ImmutableMap<String, Object> existingPortProfile) {
         Map<String, Object> updatedPortProfile = new HashMap<>(existingPortProfile);
 
-        updatedPortProfile.remove("enc_type");
-        updatedPortProfile.remove("inspectionhook_id");
-        updatedPortProfile.remove("inspection_port_id");
-        updatedPortProfile.remove("inspected_port_id");
-        updatedPortProfile.remove("tag");
-        updatedPortProfile.remove("order");
-        updatedPortProfile.remove("failure_policy_type");
+        updatedPortProfile.remove(KEY_ENC_TYPE);
+        updatedPortProfile.remove(KEY_INSPECTIONHOOK_ID);
+        updatedPortProfile.remove(KEY_INSPECTION_INGRESS_PORT_ID);
+        updatedPortProfile.remove(KEY_INSPECTION_EGRESS_PORT_ID);
+        updatedPortProfile.remove(KEY_INSPECTED_PORT_ID);
+        updatedPortProfile.remove(KEY_TAG);
+        updatedPortProfile.remove(KEY_ORDER);
+        updatedPortProfile.remove(KEY_FAILURE_POLICY_TYPE);
 
         return ImmutableMap.copyOf(updatedPortProfile);
     }
