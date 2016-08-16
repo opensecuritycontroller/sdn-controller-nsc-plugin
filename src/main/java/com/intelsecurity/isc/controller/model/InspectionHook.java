@@ -142,38 +142,38 @@ public class InspectionHook implements InspectionHookElement {
         int relaventAttributes = 0;
         for (Entry<String, Object> attribute : portProfile.entrySet()) {
             switch (attribute.getKey()) {
-                case KEY_ENC_TYPE:
-                    inspectionHook.encType = attribute.getValue().toString();
-                    relaventAttributes++;
-                    break;
-                case KEY_INSPECTIONHOOK_ID:
-                    inspectionHook.id = attribute.getValue().toString();
-                    relaventAttributes++;
-                    break;
-                case KEY_INSPECTION_INGRESS_PORT_ID:
-                    ingressPort.setPortId(attribute.getValue().toString());
-                    relaventAttributes++;
-                    break;
-                case KEY_INSPECTION_EGRESS_PORT_ID:
-                    egressPort.setPortId(attribute.getValue().toString());
-                    relaventAttributes++;
-                    break;
-                case KEY_INSPECTED_PORT_ID:
-                    inspectionHook.inspectedPortId = attribute.getValue().toString();
-                    relaventAttributes++;
-                    break;
-                case KEY_TAG:
-                    inspectionHook.tag = new Double(attribute.getValue().toString()).longValue();
-                    relaventAttributes++;
-                    break;
-                case KEY_ORDER:
-                    inspectionHook.order = new Double(attribute.getValue().toString()).longValue();
-                    relaventAttributes++;
-                    break;
-                case KEY_FAILURE_POLICY_TYPE:
-                    inspectionHook.failurePolicyType = attribute.getValue().toString();
-                    relaventAttributes++;
-                    break;
+            case KEY_ENC_TYPE:
+                inspectionHook.encType = attribute.getValue() == null ? null : attribute.getValue().toString();
+                relaventAttributes++;
+                break;
+            case KEY_INSPECTIONHOOK_ID:
+                inspectionHook.id = attribute.getValue().toString();
+                relaventAttributes++;
+                break;
+            case KEY_INSPECTION_INGRESS_PORT_ID:
+                ingressPort.setPortId(attribute.getValue().toString());
+                relaventAttributes++;
+                break;
+            case KEY_INSPECTION_EGRESS_PORT_ID:
+                egressPort.setPortId(attribute.getValue().toString());
+                relaventAttributes++;
+                break;
+            case KEY_INSPECTED_PORT_ID:
+                inspectionHook.inspectedPortId = attribute.getValue().toString();
+                relaventAttributes++;
+                break;
+            case KEY_TAG:
+                inspectionHook.tag = attribute.getValue() == null ? null : new Double(attribute.getValue().toString()).longValue();
+                relaventAttributes++;
+                break;
+            case KEY_ORDER:
+                inspectionHook.order = new Double(attribute.getValue().toString()).longValue();
+                relaventAttributes++;
+                break;
+            case KEY_FAILURE_POLICY_TYPE:
+                inspectionHook.failurePolicyType = attribute.getValue().toString();
+                relaventAttributes++;
+                break;
             }
         }
         return relaventAttributes >= 7 ? inspectionHook : null;
@@ -188,18 +188,12 @@ public class InspectionHook implements InspectionHookElement {
         Map<String, Object> updatedPortProfile = new HashMap<>(existingPortProfile);
 
         updatedPortProfile.put(KEY_ENC_TYPE, inspectionHook.encType);
-
         updatedPortProfile.put(KEY_INSPECTIONHOOK_ID, inspectionHook.id);
-
         updatedPortProfile.put(KEY_INSPECTION_INGRESS_PORT_ID, inspectionHook.inspectionPort.getIngressPort().getPortId());
         updatedPortProfile.put(KEY_INSPECTION_EGRESS_PORT_ID, inspectionHook.inspectionPort.getEgressPort().getPortId());
-
         updatedPortProfile.put(KEY_INSPECTED_PORT_ID, inspectionHook.inspectedPortId);
-
         updatedPortProfile.put(KEY_TAG, inspectionHook.tag);
-
         updatedPortProfile.put(KEY_ORDER, inspectionHook.order);
-
         updatedPortProfile.put(KEY_FAILURE_POLICY_TYPE, inspectionHook.failurePolicyType);
 
         return ImmutableMap.copyOf(updatedPortProfile);
