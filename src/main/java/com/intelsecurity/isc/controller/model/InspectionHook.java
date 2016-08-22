@@ -4,8 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.lang.StringUtils;
 import org.jclouds.openstack.neutron.v2.domain.Port;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.intelsecurity.isc.plugin.controller.DefaultInspectionPort;
 import com.intelsecurity.isc.plugin.controller.DefaultNetworkPort;
@@ -143,7 +145,7 @@ public class InspectionHook implements InspectionHookElement {
         for (Entry<String, Object> attribute : portProfile.entrySet()) {
             switch (attribute.getKey()) {
             case KEY_ENC_TYPE:
-                inspectionHook.encType = attribute.getValue() == null ? null : attribute.getValue().toString();
+                inspectionHook.encType = isAttributeEmpty(attribute.getValue()) ? null : attribute.getValue().toString();
                 relaventAttributes++;
                 break;
             case KEY_INSPECTIONHOOK_ID:
@@ -163,7 +165,7 @@ public class InspectionHook implements InspectionHookElement {
                 relaventAttributes++;
                 break;
             case KEY_TAG:
-                inspectionHook.tag = attribute.getValue() == null ? null : new Double(attribute.getValue().toString()).longValue();
+                inspectionHook.tag = isAttributeEmpty(attribute.getValue()) ? null : new Double(attribute.getValue().toString()).longValue();
                 relaventAttributes++;
                 break;
             case KEY_ORDER:
@@ -179,6 +181,12 @@ public class InspectionHook implements InspectionHookElement {
         return relaventAttributes >= 7 ? inspectionHook : null;
     }
 
+    private static boolean isAttributeEmpty(Object attribute) {
+        return attribute == null ||
+                (attribute instanceof Map<?,?> && ((Map<?,?>)attribute).isEmpty()) ||
+                StringUtils.isBlank(attribute.toString());
+    }
+
     /**
      * Adds the inspection hook attributes to a binding profile map and returns the updated map
      *
@@ -187,12 +195,12 @@ public class InspectionHook implements InspectionHookElement {
             ImmutableMap<String, Object> existingPortProfile) {
         Map<String, Object> updatedPortProfile = new HashMap<>(existingPortProfile);
 
-        updatedPortProfile.put(KEY_ENC_TYPE, inspectionHook.encType);
+        updatedPortProfile.put(KEY_ENC_TYPE, Optional.fromNullable(inspectionHook.encType));
         updatedPortProfile.put(KEY_INSPECTIONHOOK_ID, inspectionHook.id);
         updatedPortProfile.put(KEY_INSPECTION_INGRESS_PORT_ID, inspectionHook.inspectionPort.getIngressPort().getPortId());
         updatedPortProfile.put(KEY_INSPECTION_EGRESS_PORT_ID, inspectionHook.inspectionPort.getEgressPort().getPortId());
         updatedPortProfile.put(KEY_INSPECTED_PORT_ID, inspectionHook.inspectedPortId);
-        updatedPortProfile.put(KEY_TAG, inspectionHook.tag);
+        updatedPortProfile.put(KEY_TAG, Optional.fromNullable(inspectionHook.tag));
         updatedPortProfile.put(KEY_ORDER, inspectionHook.order);
         updatedPortProfile.put(KEY_FAILURE_POLICY_TYPE, inspectionHook.failurePolicyType);
 
