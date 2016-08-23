@@ -7,7 +7,6 @@ import java.util.Map.Entry;
 import org.apache.commons.lang.StringUtils;
 import org.jclouds.openstack.neutron.v2.domain.Port;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.intelsecurity.isc.plugin.controller.DefaultInspectionPort;
 import com.intelsecurity.isc.plugin.controller.DefaultNetworkPort;
@@ -195,12 +194,12 @@ public class InspectionHook implements InspectionHookElement {
             ImmutableMap<String, Object> existingPortProfile) {
         Map<String, Object> updatedPortProfile = new HashMap<>(existingPortProfile);
 
-        updatedPortProfile.put(KEY_ENC_TYPE, Optional.fromNullable(inspectionHook.encType));
+        updatedPortProfile.put(KEY_ENC_TYPE, inspectionHook.encType == null ? "" : inspectionHook.encType);
         updatedPortProfile.put(KEY_INSPECTIONHOOK_ID, inspectionHook.id);
         updatedPortProfile.put(KEY_INSPECTION_INGRESS_PORT_ID, inspectionHook.inspectionPort.getIngressPort().getPortId());
         updatedPortProfile.put(KEY_INSPECTION_EGRESS_PORT_ID, inspectionHook.inspectionPort.getEgressPort().getPortId());
         updatedPortProfile.put(KEY_INSPECTED_PORT_ID, inspectionHook.inspectedPortId);
-        updatedPortProfile.put(KEY_TAG, Optional.fromNullable(inspectionHook.tag));
+        updatedPortProfile.put(KEY_TAG, inspectionHook.tag == null ? "" : inspectionHook.tag);
         updatedPortProfile.put(KEY_ORDER, inspectionHook.order);
         updatedPortProfile.put(KEY_FAILURE_POLICY_TYPE, inspectionHook.failurePolicyType);
 
