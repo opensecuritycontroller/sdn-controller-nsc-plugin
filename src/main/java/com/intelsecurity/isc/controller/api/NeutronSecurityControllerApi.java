@@ -96,11 +96,11 @@ public class NeutronSecurityControllerApi extends BaseJCloudApi {
         PortApi neutronPortApi = this.neutronApi.getPortApi(region);
 
         Port ingressPort = getPortOrThrow(neutronPortApi, inspectionIngressPortId, PortType.INSPECTION);
-        updateInspectionPortProfile(ingressPort, neutronPortApi);
+        updateInspectionPortProfile(ingressPort, inspectionIngressPortId, inspectionEgressPortId, neutronPortApi);
 
         if (!inspectionIngressPortId.equals(inspectionEgressPortId)) {
             Port egressPort = getPortOrThrow(neutronPortApi, inspectionEgressPortId, PortType.INSPECTION);
-            updateInspectionPortProfile(egressPort, neutronPortApi);
+            updateInspectionPortProfile(egressPort, inspectionIngressPortId, inspectionEgressPortId, neutronPortApi);
         }
     }
 
@@ -204,14 +204,16 @@ public class NeutronSecurityControllerApi extends BaseJCloudApi {
         return port != null && portId.equals(port.getPortId());
     }
 
-    private void updateInspectionPortProfile(Port port, PortApi neutronPortApi) {
-        if (InspectionPort.isRegistered(port)) {
-            this.log.info("Inspection port '" + port.getId() + "' already registered");
+    private void updateInspectionPortProfile(Port portProfileToUpdate, String portId, String egressPortId, PortApi neutronPortApi) {
+        if (InspectionPort.isRegistered(portProfileToUpdate)) {
+            this.log.info("Inspection port '" + portProfileToUpdate.getId() + "' already registered");
             return;
         } else {
             UpdatePort updatedPort = Port.updateBuilder()
-                    .profile(InspectionPort.updateBindingProfile(port.getId(), port.getProfile())).build();
-            neutronPortApi.update(port.getId(), updatedPort);
+                    .profile(
+                            InspectionPort.updateBindingProfile(portId, egressPortId, portProfileToUpdate.getProfile()))
+                    .build();
+            neutronPortApi.update(portProfileToUpdate.getId(), updatedPort);
         }
     }
 
