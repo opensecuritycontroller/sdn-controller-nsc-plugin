@@ -1,24 +1,23 @@
-package com.intelsecurity.isc.controller.api;
+package org.osc.controller.nsc.api;
 
 import java.util.HashMap;
 import java.util.List;
 
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.log4j.Logger;
-
-import com.intelsecurity.isc.controller.api.jcloud.Endpoint;
-import com.intelsecurity.isc.controller.model.InspectionHook;
-import com.intelsecurity.isc.plugin.controller.FailurePolicyType;
-import com.intelsecurity.isc.plugin.controller.FlowInfo;
-import com.intelsecurity.isc.plugin.controller.FlowPortInfo;
-import com.intelsecurity.isc.plugin.controller.Status;
-import com.intelsecurity.isc.plugin.controller.TagEncapsulationType;
-import com.intelsecurity.isc.plugin.controller.api.SdnControllerApi;
-import com.intelsecurity.isc.plugin.controller.element.InspectionHookElement;
-import com.intelsecurity.isc.plugin.controller.element.InspectionPortElement;
-import com.intelsecurity.isc.plugin.controller.element.NetworkPortElement;
-import com.intelsecurity.isc.plugin.controller.element.VirtualizationConnectorElement;
-import com.intelsecurity.isc.plugin.controller.exception.NetworkPortNotFoundException;
+import org.osc.controller.nsc.api.jcloud.Endpoint;
+import org.osc.controller.nsc.model.InspectionHook;
+import org.osc.sdk.controller.FailurePolicyType;
+import org.osc.sdk.controller.FlowInfo;
+import org.osc.sdk.controller.FlowPortInfo;
+import org.osc.sdk.controller.Status;
+import org.osc.sdk.controller.TagEncapsulationType;
+import org.osc.sdk.controller.api.SdnControllerApi;
+import org.osc.sdk.controller.element.InspectionHookElement;
+import org.osc.sdk.controller.element.InspectionPortElement;
+import org.osc.sdk.controller.element.NetworkPortElement;
+import org.osc.sdk.controller.element.VirtualizationConnectorElement;
+import org.osc.sdk.controller.exception.NetworkPortNotFoundException;
 
 public class NeutronSdnControllerApi implements SdnControllerApi {
 

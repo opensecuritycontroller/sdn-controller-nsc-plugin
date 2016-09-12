@@ -1,4 +1,4 @@
-package com.intelsecurity.isc.controller.api.jcloud;
+package org.osc.controller.nsc.api.jcloud;
 
 import java.io.Closeable;
 import java.io.IOException;

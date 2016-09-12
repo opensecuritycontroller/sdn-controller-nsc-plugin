@@ -1,6 +1,6 @@
-package com.intelsecurity.isc.controller.api.jcloud;
+package org.osc.controller.nsc.api.jcloud;
 
-import com.intelsecurity.isc.plugin.controller.element.VirtualizationConnectorElement;
+import org.osc.sdk.controller.element.VirtualizationConnectorElement;
 
 public class Endpoint {
 

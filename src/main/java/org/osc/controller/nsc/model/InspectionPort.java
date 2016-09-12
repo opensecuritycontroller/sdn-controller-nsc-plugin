@@ -1,14 +1,14 @@
-package com.intelsecurity.isc.controller.model;
+package org.osc.controller.nsc.model;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import org.jclouds.openstack.neutron.v2.domain.Port;
+import org.osc.sdk.controller.DefaultInspectionPort;
+import org.osc.sdk.controller.element.NetworkPortElement;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.intelsecurity.isc.plugin.controller.DefaultInspectionPort;
-import com.intelsecurity.isc.plugin.controller.element.NetworkPortElement;
 
 public class InspectionPort extends DefaultInspectionPort {
 

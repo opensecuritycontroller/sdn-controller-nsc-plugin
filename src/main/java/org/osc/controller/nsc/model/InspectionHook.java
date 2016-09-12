@@ -1,4 +1,4 @@
-package com.intelsecurity.isc.controller.model;
+package org.osc.controller.nsc.model;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -6,15 +6,15 @@ import java.util.Map.Entry;
 
 import org.apache.commons.lang.StringUtils;
 import org.jclouds.openstack.neutron.v2.domain.Port;
+import org.osc.sdk.controller.DefaultInspectionPort;
+import org.osc.sdk.controller.DefaultNetworkPort;
+import org.osc.sdk.controller.FailurePolicyType;
+import org.osc.sdk.controller.TagEncapsulationType;
+import org.osc.sdk.controller.element.InspectionHookElement;
+import org.osc.sdk.controller.element.InspectionPortElement;
+import org.osc.sdk.controller.element.NetworkPortElement;
 
 import com.google.common.collect.ImmutableMap;
-import com.intelsecurity.isc.plugin.controller.DefaultInspectionPort;
-import com.intelsecurity.isc.plugin.controller.DefaultNetworkPort;
-import com.intelsecurity.isc.plugin.controller.FailurePolicyType;
-import com.intelsecurity.isc.plugin.controller.TagEncapsulationType;
-import com.intelsecurity.isc.plugin.controller.element.InspectionHookElement;
-import com.intelsecurity.isc.plugin.controller.element.InspectionPortElement;
-import com.intelsecurity.isc.plugin.controller.element.NetworkPortElement;
 
 public class InspectionHook implements InspectionHookElement {
 

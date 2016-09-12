@@ -1,4 +1,4 @@
-package com.intelsecurity.isc.controller.api;
+package org.osc.controller.nsc.api;
 
 import java.io.Closeable;
 import java.util.Arrays;
@@ -10,16 +10,15 @@ import org.jclouds.openstack.neutron.v2.NeutronApi;
 import org.jclouds.openstack.neutron.v2.domain.Port;
 import org.jclouds.openstack.neutron.v2.domain.Port.UpdatePort;
 import org.jclouds.openstack.neutron.v2.features.PortApi;
-
-import com.intelsecurity.isc.controller.api.jcloud.BaseJCloudApi;
-import com.intelsecurity.isc.controller.api.jcloud.Endpoint;
-import com.intelsecurity.isc.controller.api.jcloud.JCloudUtil;
-import com.intelsecurity.isc.controller.model.InspectionHook;
-import com.intelsecurity.isc.controller.model.InspectionPort;
-import com.intelsecurity.isc.plugin.controller.DefaultNetworkPort;
-import com.intelsecurity.isc.plugin.controller.element.InspectionPortElement;
-import com.intelsecurity.isc.plugin.controller.element.NetworkPortElement;
-import com.intelsecurity.isc.plugin.controller.exception.NetworkPortNotFoundException;
+import org.osc.controller.nsc.api.jcloud.BaseJCloudApi;
+import org.osc.controller.nsc.api.jcloud.Endpoint;
+import org.osc.controller.nsc.api.jcloud.JCloudUtil;
+import org.osc.controller.nsc.model.InspectionHook;
+import org.osc.controller.nsc.model.InspectionPort;
+import org.osc.sdk.controller.DefaultNetworkPort;
+import org.osc.sdk.controller.element.InspectionPortElement;
+import org.osc.sdk.controller.element.NetworkPortElement;
+import org.osc.sdk.controller.exception.NetworkPortNotFoundException;
 
 public class NeutronSecurityControllerApi extends BaseJCloudApi {
 
