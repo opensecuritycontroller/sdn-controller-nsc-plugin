@@ -18,6 +18,8 @@ public class JCloudUtil {
         OVERRIDES.setProperty(Constants.PROPERTY_REQUEST_TIMEOUT, DEFAULT_READ_TIMEOUT + "");
         OVERRIDES.setProperty(Constants.PROPERTY_CONNECTION_TIMEOUT, DEFAULT_CONNECTION_TIMEOUT + "");
         OVERRIDES.setProperty(Constants.PROPERTY_LOGGER_WIRE_LOG_SENSITIVE_INFO, false + "");
+        OVERRIDES.setProperty(Constants.PROPERTY_TRUST_ALL_CERTS, true + "");
+        OVERRIDES.setProperty(Constants.PROPERTY_RELAX_HOSTNAME, true + "");
         OVERRIDES.setProperty(Constants.PROPERTY_USER_THREADS, 10 + "");
     }
 
