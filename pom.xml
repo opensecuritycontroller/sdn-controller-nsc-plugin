@@ -10,7 +10,31 @@
 
 	<artifactId>NscSdnControllerPlugin</artifactId>
 	<name>NscSdnControllerPlugin</name>
-	
+	<profiles>
+        <profile>
+            <id>default</id>
+            <dependencies>
+                <dependency>
+                    <groupId>org.osc.core</groupId>
+                    <artifactId>IscSdnControllerPlugin</artifactId>
+                    <version>1.0</version>
+                </dependency>
+            </dependencies>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+        </profile>
+        <profile>
+            <id>useGitPlugins</id>
+            <dependencies>
+                <dependency>
+                    <groupId>org.osc.sdk</groupId>
+                    <artifactId>OscSdnControllerPlugin</artifactId>
+                    <version>1.0</version>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
 	<repositories>
 		<repository>
 			<!-- TODO:2.5 Remove this before release -->
@@ -27,12 +51,6 @@
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
 			<version>1.2.17</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.osc.core</groupId>
-			<artifactId>IscSdnControllerPlugin</artifactId>
-			<version>1.0</version>
 		</dependency>
 
 		<!-- jclouds OpenStack dependencies -->
