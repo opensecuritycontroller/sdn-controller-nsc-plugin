@@ -1,10 +1,5 @@
 package org.osc.controller.nsc.api;
 
-import java.io.Closeable;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-
 import org.apache.log4j.Logger;
 import org.jclouds.openstack.neutron.v2.NeutronApi;
 import org.jclouds.openstack.neutron.v2.domain.Port;
@@ -20,14 +15,19 @@ import org.osc.sdk.controller.element.InspectionPortElement;
 import org.osc.sdk.controller.element.NetworkPortElement;
 import org.osc.sdk.controller.exception.NetworkPortNotFoundException;
 
+import java.io.Closeable;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+
 public class NeutronSecurityControllerApi extends BaseJCloudApi {
 
-    private static enum PortType {
+    private enum PortType {
         INSPECTION("Inspection"), INSPECTED("Inspected");
 
         private String name;
 
-        private PortType(String name) {
+        PortType(String name) {
             this.name = name;
         }
 
@@ -57,8 +57,7 @@ public class NeutronSecurityControllerApi extends BaseJCloudApi {
         String inspectionIngressPortId = inspectionPort.getIngressPort().getPortId();
         String inspectionEgressPortId = inspectionPort.getEgressPort().getPortId();
 
-        this.log.info("Retriving inspection port ingress: '" + inspectionIngressPortId + "' , egress: '"
-                + inspectionEgressPortId + "'");
+        this.log.info("Retrieving inspection port ingress: '" + inspectionIngressPortId + "' , egress: '" + inspectionEgressPortId + "'");
         PortApi neutronPortApi = this.neutronApi.getPortApi(region);
 
         Port ingressPort = getPortOrThrow(neutronPortApi, inspectionIngressPortId, PortType.INSPECTION);
@@ -78,11 +77,9 @@ public class NeutronSecurityControllerApi extends BaseJCloudApi {
             return null;
         }
 
-        InspectionPort validatedInspectionPort = new InspectionPort(
+        return new InspectionPort(
                 new DefaultNetworkPort(inspectionIngressPortId, ingressPort.getMacAddress()),
                 new DefaultNetworkPort(inspectionEgressPortId, egressPort.getMacAddress()));
-
-        return validatedInspectionPort;
     }
 
     public void addInspectionPort(String region, InspectionPortElement inspectionPort)
@@ -206,7 +203,6 @@ public class NeutronSecurityControllerApi extends BaseJCloudApi {
     private void updateInspectionPortProfile(Port portProfileToUpdate, String portId, String egressPortId, PortApi neutronPortApi) {
         if (InspectionPort.isRegistered(portProfileToUpdate)) {
             this.log.info("Inspection port '" + portProfileToUpdate.getId() + "' already registered");
-            return;
         } else {
             UpdatePort updatedPort = Port.updateBuilder()
                     .profile(
@@ -222,10 +218,11 @@ public class NeutronSecurityControllerApi extends BaseJCloudApi {
 
         String inspectionIngressPortId = inspectionHook.getInspectionPort().getIngressPort().getPortId();
         String inspectionEgressPortId = inspectionHook.getInspectionPort().getEgressPort().getPortId();
-        Port inspectionEgressPort = null;
 
         Port inspectedPort = getPortOrThrow(neutronPortApi, inspectionHook.getInspectedPortId(), PortType.INSPECTED);
         Port inspectionIngressPort = getPortOrThrow(neutronPortApi, inspectionIngressPortId, PortType.INSPECTION);
+
+        Port inspectionEgressPort;
         if (inspectionIngressPortId.equals(inspectionEgressPortId)) {
             inspectionEgressPort = inspectionIngressPort;
         } else {
