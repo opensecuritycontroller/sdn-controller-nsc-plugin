@@ -12,7 +12,7 @@ import org.osc.sdk.controller.FailurePolicyType;
 import org.osc.sdk.controller.TagEncapsulationType;
 import org.osc.sdk.controller.element.InspectionHookElement;
 import org.osc.sdk.controller.element.InspectionPortElement;
-import org.osc.sdk.controller.element.NetworkPortElement;
+import org.osc.sdk.controller.element.NetworkElement;
 
 import com.google.common.collect.ImmutableMap;
 
@@ -47,7 +47,7 @@ public class InspectionHook implements InspectionHookElement {
                 .getFailurePolicyType().toString();
         this.id = inspectionHookElement.getHookId();
         this.inspectedPortId = inspectionHookElement.getInspectedPort() == null ? null : inspectionHookElement
-                .getInspectedPort().getPortId();
+                .getInspectedPort().getElementId();
         this.inspectionPort = inspectionHookElement.getInspectionPort() == null ? null : inspectionHookElement
                 .getInspectionPort();
     }
@@ -125,7 +125,7 @@ public class InspectionHook implements InspectionHookElement {
     }
 
     @Override
-    public NetworkPortElement getInspectedPort() {
+    public NetworkElement getInspectedPort() {
         return new DefaultNetworkPort(this.inspectedPortId, null);
     }
 
@@ -152,11 +152,11 @@ public class InspectionHook implements InspectionHookElement {
                 relaventAttributes++;
                 break;
             case KEY_INSPECTION_INGRESS_PORT_ID:
-                ingressPort.setPortId(attribute.getValue().toString());
+                ingressPort.setElementId(attribute.getValue().toString());
                 relaventAttributes++;
                 break;
             case KEY_INSPECTION_EGRESS_PORT_ID:
-                egressPort.setPortId(attribute.getValue().toString());
+                egressPort.setElementId(attribute.getValue().toString());
                 relaventAttributes++;
                 break;
             case KEY_INSPECTED_PORT_ID:
@@ -196,8 +196,8 @@ public class InspectionHook implements InspectionHookElement {
 
         updatedPortProfile.put(KEY_ENC_TYPE, inspectionHook.encType == null ? "" : inspectionHook.encType);
         updatedPortProfile.put(KEY_INSPECTIONHOOK_ID, inspectionHook.id);
-        updatedPortProfile.put(KEY_INSPECTION_INGRESS_PORT_ID, inspectionHook.inspectionPort.getIngressPort().getPortId());
-        updatedPortProfile.put(KEY_INSPECTION_EGRESS_PORT_ID, inspectionHook.inspectionPort.getEgressPort().getPortId());
+        updatedPortProfile.put(KEY_INSPECTION_INGRESS_PORT_ID, inspectionHook.inspectionPort.getIngressPort().getElementId());
+        updatedPortProfile.put(KEY_INSPECTION_EGRESS_PORT_ID, inspectionHook.inspectionPort.getEgressPort().getElementId());
         updatedPortProfile.put(KEY_INSPECTED_PORT_ID, inspectionHook.inspectedPortId);
         updatedPortProfile.put(KEY_TAG, inspectionHook.tag == null ? "" : inspectionHook.tag);
         updatedPortProfile.put(KEY_ORDER, inspectionHook.order);

@@ -5,7 +5,7 @@ import java.util.Map;
 
 import org.jclouds.openstack.neutron.v2.domain.Port;
 import org.osc.sdk.controller.DefaultInspectionPort;
-import org.osc.sdk.controller.element.NetworkPortElement;
+import org.osc.sdk.controller.element.NetworkElement;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -15,7 +15,7 @@ public class InspectionPort extends DefaultInspectionPort {
     private static final String KEY_INSPECTIONPORT_ID = "inspectionport_id";
     private static final String KEY_INSPECTIONPORT_EGRESS_ID = "inspectionport_egress_id";
 
-    public InspectionPort(NetworkPortElement ingressPort, NetworkPortElement egressPort) {
+    public InspectionPort(NetworkElement ingressPort, NetworkElement egressPort) {
         super(ingressPort, egressPort);
     }
 

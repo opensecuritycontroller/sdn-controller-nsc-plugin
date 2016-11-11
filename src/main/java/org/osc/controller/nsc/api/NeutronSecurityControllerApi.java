@@ -12,7 +12,7 @@ import org.osc.controller.nsc.model.InspectionHook;
 import org.osc.controller.nsc.model.InspectionPort;
 import org.osc.sdk.controller.DefaultNetworkPort;
 import org.osc.sdk.controller.element.InspectionPortElement;
-import org.osc.sdk.controller.element.NetworkPortElement;
+import org.osc.sdk.controller.element.NetworkElement;
 import org.osc.sdk.controller.exception.NetworkPortNotFoundException;
 
 import java.io.Closeable;
@@ -54,8 +54,8 @@ public class NeutronSecurityControllerApi extends BaseJCloudApi {
     // Inspection port
     public InspectionPort getInspectionPort(String region, InspectionPortElement inspectionPort)
             throws NetworkPortNotFoundException, Exception {
-        String inspectionIngressPortId = inspectionPort.getIngressPort().getPortId();
-        String inspectionEgressPortId = inspectionPort.getEgressPort().getPortId();
+        String inspectionIngressPortId = inspectionPort.getIngressPort().getElementId();
+        String inspectionEgressPortId = inspectionPort.getEgressPort().getElementId();
 
         this.log.info("Retrieving inspection port ingress: '" + inspectionIngressPortId + "' , egress: '" + inspectionEgressPortId + "'");
         PortApi neutronPortApi = this.neutronApi.getPortApi(region);
@@ -84,8 +84,8 @@ public class NeutronSecurityControllerApi extends BaseJCloudApi {
 
     public void addInspectionPort(String region, InspectionPortElement inspectionPort)
             throws NetworkPortNotFoundException, Exception {
-        String inspectionIngressPortId = inspectionPort.getIngressPort().getPortId();
-        String inspectionEgressPortId = inspectionPort.getEgressPort().getPortId();
+        String inspectionIngressPortId = inspectionPort.getIngressPort().getElementId();
+        String inspectionEgressPortId = inspectionPort.getEgressPort().getElementId();
 
         this.log.info("Adding inspection port ingress: '" + inspectionIngressPortId + "' , egress: '"
                 + inspectionEgressPortId + "'");
@@ -103,8 +103,8 @@ public class NeutronSecurityControllerApi extends BaseJCloudApi {
     // Inspection Hooks
     public InspectionHook getInspectionHookByPorts(String region, String inspectedPortId,
             InspectionPortElement inspectionPort) throws NetworkPortNotFoundException, Exception {
-        String inspectionIngressPortId = inspectionPort.getIngressPort().getPortId();
-        String inspectionEgressPortId = inspectionPort.getEgressPort().getPortId();
+        String inspectionIngressPortId = inspectionPort.getIngressPort().getElementId();
+        String inspectionEgressPortId = inspectionPort.getEgressPort().getElementId();
         List<InspectionHook> hooks = getInspectionHooksByPort(region, inspectedPortId);
         if (hooks != null) {
             for (InspectionHook hook : hooks) {
@@ -196,8 +196,8 @@ public class NeutronSecurityControllerApi extends BaseJCloudApi {
     /**
      * return true if port id in the port matches the port id provided
      */
-    private boolean isPortIdMatch(NetworkPortElement port, String portId) {
-        return port != null && portId.equals(port.getPortId());
+    private boolean isPortIdMatch(NetworkElement port, String portId) {
+        return port != null && portId.equals(port.getElementId());
     }
 
     private void updateInspectionPortProfile(Port portProfileToUpdate, String portId, String egressPortId, PortApi neutronPortApi) {
@@ -216,8 +216,8 @@ public class NeutronSecurityControllerApi extends BaseJCloudApi {
             throws NetworkPortNotFoundException, Exception {
         PortApi neutronPortApi = this.neutronApi.getPortApi(region);
 
-        String inspectionIngressPortId = inspectionHook.getInspectionPort().getIngressPort().getPortId();
-        String inspectionEgressPortId = inspectionHook.getInspectionPort().getEgressPort().getPortId();
+        String inspectionIngressPortId = inspectionHook.getInspectionPort().getIngressPort().getElementId();
+        String inspectionEgressPortId = inspectionHook.getInspectionPort().getEgressPort().getElementId();
 
         Port inspectedPort = getPortOrThrow(neutronPortApi, inspectionHook.getInspectedPortId(), PortType.INSPECTED);
         Port inspectionIngressPort = getPortOrThrow(neutronPortApi, inspectionIngressPortId, PortType.INSPECTION);
