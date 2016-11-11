@@ -246,17 +246,22 @@ public class NeutronSdnControllerApi implements SdnControllerApi {
 
     @Override
     public NetworkElement registerNetworkElement(List<NetworkElement> inspectedPorts) throws Exception {
-        throw new UnsupportedOperationException();
+        return null;
     }
 
     @Override
     public void updateNetworkElement(NetworkElement portGroup, List<NetworkElement> inspectedPorts) throws Exception {
-        throw new UnsupportedOperationException();
+        //no-op
     }
 
     @Override
-    public void deleteNetworkElement(String portGroupId) throws Exception {
-        throw new UnsupportedOperationException();
+    public void deleteNetworkElement(NetworkElement portGroupId) throws Exception {
+      //no-op
+    }
+
+    @Override
+    public List<NetworkElement> getNetworkElements(NetworkElement element) throws Exception {
+        return null;
     }
 
 }
