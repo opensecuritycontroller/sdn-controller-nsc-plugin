@@ -18,7 +18,11 @@ import org.osc.sdk.controller.element.InspectionPortElement;
 import org.osc.sdk.controller.element.NetworkElement;
 import org.osc.sdk.controller.element.VirtualizationConnectorElement;
 import org.osc.sdk.controller.exception.NetworkPortNotFoundException;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ServiceScope;
 
+/* This must be of scope prototype as the Virtualization connector and region are stateful */
+@Component(scope=ServiceScope.PROTOTYPE, property="osc.plugin.name=NSC")
 public class NeutronSdnControllerApi implements SdnControllerApi {
 
     Logger log = Logger.getLogger(NeutronSdnControllerApi.class);
