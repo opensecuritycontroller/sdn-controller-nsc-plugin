@@ -30,17 +30,6 @@
 			</dependencies>
 		</profile>
 	</profiles>
-	<repositories>
-		<repository>
-			<!-- TODO:2.5 Remove this before release -->
-			<id>jclouds-snapshots</id>
-			<url>https://repository.apache.org/content/repositories/snapshots</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
-	</repositories>
-
 	<properties>
 		<jclouds.version>2.0.0</jclouds.version>
 	</properties>
