@@ -226,6 +226,7 @@
 									<fileset dir="${project.build.directory}/plugin" />
 									<manifest>
 										<attribute name="Deployment-Name" value="NSC" />
+										<attribute name="Deployment-Type" value="SDN"/>
 										<attribute name="Deployment-SymbolicName" value="NscSdnControllerPlugin" />
 										<attribute name="Deployment-Version" value="1.0.0" />
 										<attribute name="Require-Bundle" value="NscSdnControllerPlugin" />
