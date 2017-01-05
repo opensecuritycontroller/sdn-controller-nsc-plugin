@@ -142,12 +142,11 @@ public class NeutronSdnControllerApi implements SdnControllerApi {
     }
 
     @Override
-    public String registerInspectionPort(InspectionPortElement inspectionPort)
+    public void registerInspectionPort(InspectionPortElement inspectionPort)
             throws NetworkPortNotFoundException, Exception {
         try (NeutronSecurityControllerApi neutronApi = new NeutronSecurityControllerApi(new Endpoint(this.vc))){
             neutronApi.addInspectionPort(this.region, inspectionPort);
         }
-        return EMPTY_STRING;
     }
 
     @Override
@@ -254,8 +253,9 @@ public class NeutronSdnControllerApi implements SdnControllerApi {
     }
 
     @Override
-    public void updateNetworkElement(NetworkElement portGroup, List<NetworkElement> inspectedPorts) throws Exception {
+    public NetworkElement updateNetworkElement(NetworkElement portGroup, List<NetworkElement> inspectedPorts) throws Exception {
         //no-op
+    	return null;
     }
 
     @Override
@@ -266,6 +266,11 @@ public class NeutronSdnControllerApi implements SdnControllerApi {
     @Override
     public List<NetworkElement> getNetworkElements(NetworkElement element) throws Exception {
         return null;
+    }
+    
+    @Override
+    public boolean isPortGroupSupported() {
+        return false;
     }
 
 }
