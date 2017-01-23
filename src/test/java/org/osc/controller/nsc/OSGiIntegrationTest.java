@@ -7,10 +7,13 @@ import static org.ops4j.pax.exam.CoreOptions.junitBundles;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.inject.Inject;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -156,6 +159,21 @@ public class OSGiIntegrationTest {
             @Override
             public String getControllerIpAddress() {
                 return "127.0.0.1";
+            }
+
+            @Override
+            public SSLContext getSslContext() {
+                try {
+                    return SSLContext.getDefault();
+                } catch (NoSuchAlgorithmException e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+
+            @Override
+            public TrustManager[] getTruststoreManager() throws Exception {
+                return new TrustManager[0];
             }
         });
         

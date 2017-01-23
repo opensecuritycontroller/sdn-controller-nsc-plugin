@@ -2,6 +2,8 @@ package org.osc.controller.nsc.api.jcloud;
 
 import org.osc.sdk.controller.element.VirtualizationConnectorElement;
 
+import javax.net.ssl.SSLContext;
+
 public class Endpoint {
 
     private String endPointIP;
@@ -9,13 +11,15 @@ public class Endpoint {
     private String user;
     private String password;
     private boolean isHttps;
+    private SSLContext sslContext;
 
-    public Endpoint(String endPointIP, String tenant, String user, String password, boolean isHttps) {
+    public Endpoint(String endPointIP, String tenant, String user, String password, boolean isHttps, SSLContext sslContext) {
         this.endPointIP = endPointIP;
         this.tenant = tenant;
         this.user = user;
         this.password = password;
         this.isHttps = isHttps;
+        this.sslContext = sslContext;
     }
 
     public Endpoint(VirtualizationConnectorElement vc) {
@@ -24,6 +28,7 @@ public class Endpoint {
         this.user = vc.getProviderUsername();
         this.password = vc.getProviderPassword();
         this.isHttps = vc.isProviderHttps();
+        this.sslContext = vc.getSslContext();
     }
 
     public Endpoint(VirtualizationConnectorElement vc, String tenant) {
@@ -67,4 +72,7 @@ public class Endpoint {
         return this.isHttps;
     }
 
+    public SSLContext getSslContext() {
+        return sslContext;
+    }
 }
