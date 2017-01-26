@@ -2,10 +2,7 @@ package org.osc.controller.nsc;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
-import static org.ops4j.pax.exam.CoreOptions.bundle;
-import static org.ops4j.pax.exam.CoreOptions.junitBundles;
-import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.CoreOptions.options;
+import static org.ops4j.pax.exam.CoreOptions.*;
 
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
@@ -32,23 +29,23 @@ import org.osgi.util.tracker.ServiceTracker;
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerMethod.class)
 public class OSGiIntegrationTest {
- 
+
     @Inject
     BundleContext context;
 
     private ServiceTracker<SdnControllerApi, SdnControllerApi> tracker;
-    
+
     @org.ops4j.pax.exam.Configuration
     public Option[] config() {
- 
+
         return options(
                 // Load the current module from its built classes so we get the latest from Eclipse
                 bundle("reference:file:" + PathUtils.getBaseDir() + "/target/classes/"),
-                
+
                 // And some dependencies
                 mavenBundle("org.apache.felix", "org.apache.felix.scr").versionAsInProject(),
 
-                mavenBundle("org.osc.core", "IscSdnControllerPlugin").versionAsInProject(),
+                mavenBundle("org.osc.api", "sdn-controller-api").versionAsInProject(),
                 mavenBundle("org.apache.jclouds", "jclouds-core").versionAsInProject(),
                 mavenBundle("org.apache.jclouds.labs", "openstack-neutron").versionAsInProject(),
                 mavenBundle("org.apache.jclouds.api", "openstack-keystone").versionAsInProject(),
@@ -61,30 +58,30 @@ public class OSGiIntegrationTest {
                 mavenBundle("log4j", "log4j").versionAsInProject(),
                 mavenBundle("org.apache.directory.studio", "org.apache.commons.lang").versionAsInProject(),
                 mavenBundle("javax.ws.rs", "jsr311-api").versionAsInProject(),
-                
+
                 // Uncomment this line to allow remote debugging
                 // CoreOptions.vmOption("-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=1044"),
-                
+
                 junitBundles()
-            );
+                );
     }
-    
+
     @Before
     public void setup() {
-        tracker = new ServiceTracker<>(context, SdnControllerApi.class, null);
-        tracker.open();
+        this.tracker = new ServiceTracker<>(this.context, SdnControllerApi.class, null);
+        this.tracker.open();
     }
-    
+
     @Test
     public void testRegistered() throws InterruptedException {
-        SdnControllerApi service = tracker.waitForService(5000);
+        SdnControllerApi service = this.tracker.waitForService(5000);
         assertNotNull(service);
-        
-        ServiceObjects<SdnControllerApi> so = context.getServiceObjects(tracker.getServiceReference());
-        
+
+        ServiceObjects<SdnControllerApi> so = this.context.getServiceObjects(this.tracker.getServiceReference());
+
         SdnControllerApi objectA = so.getService();
         SdnControllerApi objectB = so.getService();
-        
+
         assertNotSame(objectA, objectB);
     }
 
@@ -95,67 +92,67 @@ public class OSGiIntegrationTest {
      */
     @Test(expected=org.jclouds.http.HttpResponseException.class)
     public void testConnect() throws Exception {
-        SdnControllerApi service = tracker.waitForService(5000);
+        SdnControllerApi service = this.tracker.waitForService(5000);
         assertNotNull(service);
-        
-        ServiceObjects<SdnControllerApi> so = context.getServiceObjects(tracker.getServiceReference());
-        
+
+        ServiceObjects<SdnControllerApi> so = this.context.getServiceObjects(this.tracker.getServiceReference());
+
         SdnControllerApi object = so.getService();
-        
+
         object.setRegion("foo");
-        
+
         object.setVirtualizationConnector(new VirtualizationConnectorElement() {
-            
+
             @Override
             public boolean isProviderHttps() {
                 return false;
             }
-            
+
             @Override
             public boolean isControllerHttps() {
                 return false;
             }
-            
+
             @Override
             public String getProviderUsername() {
                 return "user";
             }
-            
+
             @Override
             public String getProviderPassword() {
                 return "password";
             }
-            
+
             @Override
             public String getProviderIpAddress() {
                 return "127.0.0.1";
             }
-            
+
             @Override
             public Map<String, String> getProviderAttributes() {
                 return new HashMap<>();
             }
-            
+
             @Override
             public String getProviderAdminTenantName() {
                 return "bar";
             }
-            
+
             @Override
             public String getName() {
                 return "baz";
             }
-            
+
             @Override
             public String getControllerUsername() {
                 return "fizz";
             }
-            
+
             @Override
             public String getControllerPassword() {
                 return "buzz";
             }
-            
+
             @Override
             public String getControllerIpAddress() {
                 return "127.0.0.1";
@@ -176,7 +173,7 @@ public class OSGiIntegrationTest {
                 return new TrustManager[0];
             }
         });
-        
+
         object.getStatus();
     }
 }

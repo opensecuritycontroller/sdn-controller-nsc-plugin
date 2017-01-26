@@ -1,35 +1,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.osc.core</groupId>
-	<artifactId>NscSdnControllerPlugin</artifactId>
+	<groupId>org.osc.plugin</groupId>
+	<artifactId>sdn-controller-nsc-plugin</artifactId>
 	<version>1.0</version>
-	<name>NscSdnControllerPlugin</name>
-	<profiles>
-		<profile>
-			<id>default</id>
-			<dependencies>
-				<dependency>
-					<groupId>org.osc.core</groupId>
-					<artifactId>IscSdnControllerPlugin</artifactId>
-					<version>1.0</version>
-				</dependency>
-			</dependencies>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-		</profile>
-		<profile>
-			<id>useGitPlugins</id>
-			<dependencies>
-				<dependency>
-					<groupId>org.osc.sdk</groupId>
-					<artifactId>OscSdnControllerPlugin</artifactId>
-					<version>1.0</version>
-				</dependency>
-			</dependencies>
-		</profile>
-	</profiles>
+	<name>org.osc.plugin:sdn-controller-nsc-plugin</name>
+
 	<properties>
 		<jclouds.version>2.0.0</jclouds.version>
 	</properties>
@@ -49,9 +25,9 @@
 			<scope>provided</scope>
 		</dependency>
 
-		<dependency>
-			<groupId>org.osc.core</groupId>
-			<artifactId>IscSdnControllerPlugin</artifactId>
+        <dependency>
+			<groupId>org.osc.api</groupId>
+			<artifactId>sdn-controller-api</artifactId>
 			<version>1.0</version>
 		</dependency>
 
@@ -229,7 +205,7 @@
 										<attribute name="Deployment-Type" value="SDN"/>
 										<attribute name="Deployment-SymbolicName" value="NscSdnControllerPlugin" />
 										<attribute name="Deployment-Version" value="1.0.0" />
-										<attribute name="Require-Bundle" value="NscSdnControllerPlugin" />
+										<attribute name="Require-Bundle" value="sdn-controller-nsc-plugin" />
 									</manifest>
 								</jar>
 							</tasks>
@@ -264,7 +240,7 @@
 				<artifactId>maven-source-plugin</artifactId>
 				<version>3.0.0</version>
 				<configuration>
-					<finalName>NscSdnControllerPlugin</finalName>
+					<finalName>sdn-controller-nsc-plugin</finalName>
 				</configuration>
 				<executions>
 					<execution>
