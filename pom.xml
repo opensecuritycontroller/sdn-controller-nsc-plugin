@@ -10,6 +10,17 @@
 		<jclouds.version>2.0.0</jclouds.version>
 	</properties>
 
+    <repositories>
+        <repository>
+            <id>osc-nexus</id>
+            <name>OSC Nexus</name>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <url>http://10.3.240.132:8082/nexus/content/repositories/releases/</url>
+        </repository>
+    </repositories>
+    
 	<dependencies>
 		<dependency>
 			<groupId>log4j</groupId>
@@ -157,7 +168,7 @@
 				<version>2.5</version>
 				<configuration>
 					<outputDirectory>${project.build.directory}/plugin</outputDirectory>
-					<finalName>NscSdnControllerPlugin</finalName>
+                    <finalName>${project.artifactId}</finalName>
 					<archive>
 						<manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
 						<manifestEntries>
