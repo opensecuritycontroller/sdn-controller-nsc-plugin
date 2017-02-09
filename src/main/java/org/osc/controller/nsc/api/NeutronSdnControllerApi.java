@@ -26,7 +26,6 @@ import org.osgi.service.component.annotations.ServiceScope;
 public class NeutronSdnControllerApi implements SdnControllerApi {
 
     Logger log = Logger.getLogger(NeutronSdnControllerApi.class);
-    private static final String EMPTY_STRING = "";
 
     private VirtualizationConnectorElement vc;
     private String region;
@@ -267,7 +266,7 @@ public class NeutronSdnControllerApi implements SdnControllerApi {
     public List<NetworkElement> getNetworkElements(NetworkElement element) throws Exception {
         return null;
     }
-    
+
     @Override
     public boolean isPortGroupSupported() {
         return false;
