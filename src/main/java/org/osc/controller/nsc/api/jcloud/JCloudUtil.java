@@ -23,6 +23,8 @@ import com.google.inject.Module;
 import com.google.inject.TypeLiteral;
 import org.jclouds.Constants;
 import org.jclouds.ContextBuilder;
+import org.jclouds.openstack.keystone.v2_0.KeystoneApiMetadata;
+import org.jclouds.openstack.neutron.v2.NeutronApiMetadata;
 
 import javax.net.ssl.SSLContext;
 import java.io.Closeable;
@@ -56,10 +58,19 @@ public class JCloudUtil {
             throw new RuntimeException(e.getMessage(), e);
         }
 
-        ContextBuilder contextBuilder = ContextBuilder.newBuilder(serviceName)
-                .endpoint(endpointURL)
-                .credentials(endPoint.getTenant() + ":" + endPoint.getUser(), endPoint.getPassword())
-                .overrides(OVERRIDES);
+        ContextBuilder contextBuilder = null;
+        if("openstack-neutron".equals(serviceName)) {
+            contextBuilder = ContextBuilder.newBuilder(new NeutronApiMetadata())
+                    .endpoint(endpointURL)
+                    .credentials(endPoint.getTenant() + ":" + endPoint.getUser(), endPoint.getPassword())
+                    .overrides(OVERRIDES);
+        }
+        if("openstack-keystone".equals(serviceName)) {
+            contextBuilder = ContextBuilder.newBuilder(new KeystoneApiMetadata())
+                    .endpoint(endpointURL)
+                    .credentials(endPoint.getTenant() + ":" + endPoint.getUser(), endPoint.getPassword())
+                    .overrides(OVERRIDES);
+        }
 
         if (endPoint.isHttps()) {
             contextBuilder = configureSSLContext(contextBuilder, endPoint.getSslContext());
