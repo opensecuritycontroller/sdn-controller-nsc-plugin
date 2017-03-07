@@ -16,6 +16,8 @@
  *******************************************************************************/
 package org.osc.controller.nsc.api;
 
+import static org.osc.sdk.controller.Constants.*;
+
 import java.util.HashMap;
 import java.util.List;
 
@@ -38,7 +40,15 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ServiceScope;
 
 /* This must be of scope prototype as the Virtualization connector and region are stateful */
-@Component(scope=ServiceScope.PROTOTYPE, property="osc.plugin.name=NSC")
+@Component(scope=ServiceScope.PROTOTYPE,
+property={
+        PLUGIN_NAME + "=NSC",
+        SUPPORT_OFFBOX_REDIRECTION + ":Boolean=false",
+        SUPPORT_SFC + ":Boolean=false",
+        SUPPORT_FAILURE_POLICY + ":Boolean=false",
+        USE_PROVIDER_CREDS + ":Boolean=true",
+        QUERY_PORT_INFO + ":Boolean=false",
+        SUPPORT_PORT_GROUP + ":Boolean=false"})
 public class NeutronSdnControllerApi implements SdnControllerApi {
 
     Logger log = Logger.getLogger(NeutronSdnControllerApi.class);
@@ -270,12 +280,12 @@ public class NeutronSdnControllerApi implements SdnControllerApi {
     @Override
     public NetworkElement updateNetworkElement(NetworkElement portGroup, List<NetworkElement> inspectedPorts) throws Exception {
         //no-op
-    	return null;
+        return null;
     }
 
     @Override
     public void deleteNetworkElement(NetworkElement portGroupId) throws Exception {
-      //no-op
+        //no-op
     }
 
     @Override
