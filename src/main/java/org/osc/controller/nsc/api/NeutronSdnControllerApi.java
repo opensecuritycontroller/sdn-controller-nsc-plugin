@@ -55,6 +55,8 @@ public class NeutronSdnControllerApi implements SdnControllerApi {
 
     private VirtualizationConnectorElement vc;
     private String region;
+    private final static String VERSION = "0.1";
+    private final static String NAME = "NSC";
 
     public NeutronSdnControllerApi() {
     }
@@ -175,16 +177,6 @@ public class NeutronSdnControllerApi implements SdnControllerApi {
     }
 
     @Override
-    public String getName() {
-        return "NSC";
-    }
-
-    @Override
-    public String getVersion() {
-        return "0.1";
-    }
-
-    @Override
     public void setVirtualizationConnector(VirtualizationConnectorElement vc) {
         this.vc = vc;
     }
@@ -196,7 +188,7 @@ public class NeutronSdnControllerApi implements SdnControllerApi {
         try (NeutronSecurityControllerApi neutronApi = new NeutronSecurityControllerApi(new Endpoint(this.vc))){
             neutronApi.test();
         }
-        return new Status(getName(), getVersion(), true);
+        return new Status(NAME, VERSION, true);
     }
 
     @Override
@@ -233,21 +225,6 @@ public class NeutronSdnControllerApi implements SdnControllerApi {
     }
 
     @Override
-    public boolean isOffboxRedirectionSupported() {
-        return false;
-    }
-
-    @Override
-    public boolean isServiceFunctionChainingSupported() {
-        return false;
-    }
-
-    @Override
-    public boolean isFailurePolicySupported() {
-        return false;
-    }
-
-    @Override
     public void setRegion(String region) {
         this.region = region;
     }
@@ -258,18 +235,8 @@ public class NeutronSdnControllerApi implements SdnControllerApi {
     }
 
     @Override
-    public boolean isUsingProviderCreds() {
-        return true;
-    }
-
-    @Override
     public HashMap<String, FlowPortInfo> queryPortInfo(HashMap<String, FlowInfo> portsQuery) throws Exception {
         throw new NotImplementedException("NSC SDN Controller does not support flow based query");
-    }
-
-    @Override
-    public boolean isSupportQueryPortInfo() {
-        return false;
     }
 
     @Override
@@ -292,10 +259,4 @@ public class NeutronSdnControllerApi implements SdnControllerApi {
     public List<NetworkElement> getNetworkElements(NetworkElement element) throws Exception {
         return null;
     }
-
-    @Override
-    public boolean isPortGroupSupported() {
-        return false;
-    }
-
 }
