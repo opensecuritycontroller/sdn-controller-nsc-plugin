@@ -81,7 +81,7 @@ public class NeutronSdnControllerApi implements SdnControllerApi {
     }
 
     @Override
-    public InspectionHookElement installInspectionHook(NetworkElement inspectedPort, InspectionPortElement inspectionPort, Long tag,
+    public String installInspectionHook(NetworkElement inspectedPort, InspectionPortElement inspectionPort, Long tag,
             TagEncapsulationType encType, Long order, FailurePolicyType failurePolicyType)
                     throws NetworkPortNotFoundException, Exception {
 
