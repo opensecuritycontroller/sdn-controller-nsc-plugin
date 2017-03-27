@@ -16,7 +16,13 @@
  *******************************************************************************/
 package org.osc.controller.nsc.api;
 
-import static org.osc.sdk.controller.Constants.*;
+import static org.osc.sdk.controller.Constants.PLUGIN_NAME;
+import static org.osc.sdk.controller.Constants.QUERY_PORT_INFO;
+import static org.osc.sdk.controller.Constants.SUPPORT_FAILURE_POLICY;
+import static org.osc.sdk.controller.Constants.SUPPORT_OFFBOX_REDIRECTION;
+import static org.osc.sdk.controller.Constants.SUPPORT_PORT_GROUP;
+import static org.osc.sdk.controller.Constants.SUPPORT_SFC;
+import static org.osc.sdk.controller.Constants.USE_PROVIDER_CREDS;
 
 import java.util.HashMap;
 import java.util.List;
@@ -75,7 +81,7 @@ public class NeutronSdnControllerApi implements SdnControllerApi {
     }
 
     @Override
-    public void installInspectionHook(NetworkElement inspectedPort, InspectionPortElement inspectionPort, Long tag,
+    public InspectionHookElement installInspectionHook(NetworkElement inspectedPort, InspectionPortElement inspectionPort, Long tag,
             TagEncapsulationType encType, Long order, FailurePolicyType failurePolicyType)
                     throws NetworkPortNotFoundException, Exception {
 
@@ -90,6 +96,7 @@ public class NeutronSdnControllerApi implements SdnControllerApi {
         try (NeutronSecurityControllerApi neutronApi = new NeutronSecurityControllerApi(new Endpoint(this.vc))){
             neutronApi.addInspectionHook(this.region, inspectionHook);
         }
+        return null;
     }
 
     @Override
