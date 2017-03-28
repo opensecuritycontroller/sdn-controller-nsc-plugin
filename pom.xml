@@ -24,19 +24,23 @@
 
 	<properties>
 		<jclouds.version>2.0.0</jclouds.version>
+		<repoVersionCmd>
+			git describe | grep init | cut -d '-' -f 2-3
+		</repoVersionCmd>
+
 	</properties>
 
-    <repositories>
-        <repository>
-            <id>osc-nexus</id>
-            <name>OSC Nexus</name>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-            <url>http://10.3.240.132:8082/nexus/content/repositories/releases/</url>
-        </repository>
-    </repositories>
-    
+	<repositories>
+		<repository>
+			<id>osc-nexus</id>
+			<name>OSC Nexus</name>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+			<url>http://10.3.240.132:8082/nexus/content/repositories/releases/</url>
+		</repository>
+	</repositories>
+
 	<dependencies>
 		<dependency>
 			<groupId>log4j</groupId>
@@ -52,7 +56,7 @@
 			<scope>provided</scope>
 		</dependency>
 
-        <dependency>
+		<dependency>
 			<groupId>org.osc.api</groupId>
 			<artifactId>sdn-controller-api</artifactId>
 			<version>1.0</version>
@@ -184,13 +188,12 @@
 				<version>2.5</version>
 				<configuration>
 					<outputDirectory>${project.build.directory}/plugin</outputDirectory>
-                    <finalName>${project.artifactId}</finalName>
+					<finalName>${project.artifactId}</finalName>
 					<archive>
 						<manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
 						<manifestEntries>
 							<Build-Time>${maven.build.timestamp}</Build-Time>
-							<Implementation-Build>${buildNumber}</Implementation-Build>
-							<Implementation-Version>${productVersion}</Implementation-Version>
+                            <Build-Version>${buildVersion}</Build-Version>
 						</manifestEntries>
 					</archive>
 				</configuration>
@@ -217,6 +220,24 @@
 				<artifactId>maven-antrun-plugin</artifactId>
 				<version>1.7</version>
 				<executions>
+                    <execution>
+                        <id>generate-version</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <exec outputproperty="buildFragment" dir="." executable="sh">
+                                    <arg value="-c" />
+                                    <arg value="${repoVersionCmd}" />
+                                </exec>
+                                <property name="buildVersion" value="${project.version}-${buildFragment}" />
+                                <echo>Version: ${buildVersion}</echo>
+                            </target>
+                            <exportAntProperties>true</exportAntProperties>
+                        </configuration>
+                    </execution>
 					<execution>
 						<phase>package</phase>
 						<goals>
@@ -229,9 +250,9 @@
 									<fileset dir="${project.build.directory}/plugin" />
 									<manifest>
 										<attribute name="Deployment-Name" value="NSC" />
-										<attribute name="Deployment-Type" value="SDN"/>
+										<attribute name="Deployment-Type" value="SDN" />
 										<attribute name="Deployment-SymbolicName" value="NscSdnControllerPlugin" />
-										<attribute name="Deployment-Version" value="1.0.0" />
+                                        <attribute name="Deployment-Version" value="${buildVersion}" />
 										<attribute name="Require-Bundle" value="sdn-controller-nsc-plugin" />
 									</manifest>
 								</jar>
