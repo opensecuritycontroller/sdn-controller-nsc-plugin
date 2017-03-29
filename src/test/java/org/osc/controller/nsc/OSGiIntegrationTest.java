@@ -17,6 +17,7 @@
 package org.osc.controller.nsc;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 import static org.ops4j.pax.exam.CoreOptions.*;
 
 import java.security.NoSuchAlgorithmException;
@@ -91,6 +92,11 @@ public class OSGiIntegrationTest {
     public void testRegistered() throws InterruptedException {
         SdnControllerApi service = this.tracker.waitForService(5000);
         assertNotNull(service);
+
+        ServiceObjects<SdnControllerApi> so = this.context.getServiceObjects(this.tracker.getServiceReference());
+        SdnControllerApi objectA = so.getService();
+        SdnControllerApi objectB = so.getService();
+        assertSame(objectA, objectB);
     }
 
     /**
