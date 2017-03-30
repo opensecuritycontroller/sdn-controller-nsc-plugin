@@ -17,7 +17,7 @@
 package org.osc.controller.nsc;
 
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
 import static org.ops4j.pax.exam.CoreOptions.*;
 
 import java.security.NoSuchAlgorithmException;
@@ -94,11 +94,9 @@ public class OSGiIntegrationTest {
         assertNotNull(service);
 
         ServiceObjects<SdnControllerApi> so = this.context.getServiceObjects(this.tracker.getServiceReference());
-
         SdnControllerApi objectA = so.getService();
         SdnControllerApi objectB = so.getService();
-
-        assertNotSame(objectA, objectB);
+        assertSame(objectA, objectB);
     }
 
     /**
@@ -115,9 +113,7 @@ public class OSGiIntegrationTest {
 
         SdnControllerApi object = so.getService();
 
-        object.setRegion("foo");
-
-        object.setVirtualizationConnector(new VirtualizationConnectorElement() {
+        object.getStatus(new VirtualizationConnectorElement() {
 
             @Override
             public boolean isProviderHttps() {
@@ -188,8 +184,6 @@ public class OSGiIntegrationTest {
             public TrustManager[] getTruststoreManager() throws Exception {
                 return new TrustManager[0];
             }
-        });
-
-        object.getStatus();
+        }, "foo");
     }
 }
