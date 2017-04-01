@@ -37,7 +37,7 @@
 			<snapshots>
 				<enabled>true</enabled>
 			</snapshots>
-			<url>https://ci.opensecuritycontroller.org:8081/nexus/content/repositories/osc-snapshot/</url>
+			<url>http://ci.opensecuritycontroller.org:8082/nexus/content/repositories/osc-snapshot/</url>
 		</repository>
 	</repositories>
 
