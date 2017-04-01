@@ -37,7 +37,7 @@
 			<snapshots>
 				<enabled>true</enabled>
 			</snapshots>
-			<url>http://10.3.240.132:8082/nexus/content/repositories/releases/</url>
+			<url>https://ci.opensecuritycontroller.org:8081/nexus/content/repositories/osc-snapshot/</url>
 		</repository>
 	</repositories>
 
@@ -59,7 +59,7 @@
 		<dependency>
 			<groupId>org.osc.api</groupId>
 			<artifactId>sdn-controller-api</artifactId>
-			<version>1.0</version>
+			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
 
 		<!-- jclouds OpenStack dependencies -->
