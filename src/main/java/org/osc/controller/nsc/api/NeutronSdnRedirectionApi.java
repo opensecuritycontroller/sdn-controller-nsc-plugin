@@ -18,6 +18,7 @@ package org.osc.controller.nsc.api;
 
 import java.util.List;
 
+import org.apache.commons.lang.NotImplementedException;
 import org.apache.log4j.Logger;
 import org.osc.controller.nsc.api.jcloud.Endpoint;
 import org.osc.controller.nsc.model.InspectionHook;
@@ -70,15 +71,6 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
             neutronApi.addInspectionHook(this.region, inspectionHook);
         }
         return inspectionHook.getHookId();
-    }
-
-    @Override
-    public void updateInspectionHook(InspectionHookElement inspectionHookElement)
-            throws NetworkPortNotFoundException, Exception {
-        try (NeutronSecurityControllerApi neutronApi = new NeutronSecurityControllerApi(new Endpoint(this.vc))) {
-            InspectionHook inspectionHook = new InspectionHook(inspectionHookElement);
-            neutronApi.updateInspectionHook(this.region, inspectionHook);
-        }
     }
 
     @Override
@@ -174,7 +166,7 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
     }
 
     @Override
-    public void updateInspectionHook(NetworkElement inspectedPort, InspectionPortElement inspectionPort, Long tag,
+    public void updateInspectionHook(String inspectionHookId, NetworkElement inspectedPort, InspectionPortElement inspectionPort, Long tag,
             TagEncapsulationType encType, Long order, FailurePolicyType failurePolicyType)
                     throws NetworkPortNotFoundException, Exception {
         try (NeutronSecurityControllerApi neutronApi = new NeutronSecurityControllerApi(new Endpoint(this.vc))) {
@@ -220,5 +212,19 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
             throws NetworkPortNotFoundException, Exception {
         // no-op
 
+    }
+
+    @Override
+    public void removeInspectionHook(String inspectionHookId) throws Exception {
+        // TODO emanoel: Currently not needed but should be implemented also for NSC.
+        throw new NotImplementedException("Not expected to be called for NSC. "
+                + "Currently only called for SDN controllers that support port group.");
+    }
+
+    @Override
+    public InspectionHookElement getInspectionHook(String inspectionHookId) throws Exception {
+        // TODO emanoel: Currently not needed but should be implemented also for NSC.
+        throw new NotImplementedException("Not expected to be called for NSC. "
+                + "Currently only called for SDN controllers that support port group.");
     }
 }
