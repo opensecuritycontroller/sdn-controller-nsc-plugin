@@ -214,4 +214,11 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
     public List<NetworkElement> getNetworkElements(NetworkElement element) throws Exception {
         return null;
     }
+
+    @Override
+    public void removeInspectionPort(InspectionPortElement inspectionPort)
+            throws NetworkPortNotFoundException, Exception {
+        // no-op
+
+    }
 }
