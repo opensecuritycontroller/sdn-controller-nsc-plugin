@@ -166,17 +166,19 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
     }
 
     @Override
-    public void updateInspectionHook(String inspectionHookId, NetworkElement inspectedPort, InspectionPortElement inspectionPort, Long tag,
-            TagEncapsulationType encType, Long order, FailurePolicyType failurePolicyType)
-                    throws NetworkPortNotFoundException, Exception {
+    public void updateInspectionHook(InspectionHookElement existingInspectionHook)
+            throws NetworkPortNotFoundException, Exception {
+        NetworkElement inspectedPort = existingInspectionHook.getInspectedPort();
+        InspectionPortElement inspectionPort = existingInspectionHook.getInspectionPort();
+
         try (NeutronSecurityControllerApi neutronApi = new NeutronSecurityControllerApi(new Endpoint(this.vc))) {
             InspectionHook inspectionHook = neutronApi.getInspectionHookByPorts(this.region, inspectedPort.getElementId(), inspectionPort);
             inspectionHook.setInspectedPortId(inspectedPort.getElementId());
-            inspectionHook.setInspectionPort(inspectionPort);
-            inspectionHook.setOrder(order);
-            inspectionHook.setTag(tag);
-            inspectionHook.setEncType(encType.toString());
-            inspectionHook.setFailurePolicyType(failurePolicyType.toString());
+            inspectionHook.setInspectionPort(existingInspectionHook.getInspectionPort());
+            inspectionHook.setOrder(existingInspectionHook.getOrder());
+            inspectionHook.setTag(existingInspectionHook.getTag());
+            inspectionHook.setEncType(existingInspectionHook.getEncType().toString());
+            inspectionHook.setFailurePolicyType(existingInspectionHook.getFailurePolicyType().toString());
             neutronApi.updateInspectionHook(this.region, inspectionHook);
         }
     }
