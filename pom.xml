@@ -52,7 +52,7 @@
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.service.component.annotations</artifactId>
 			<version>1.3.0</version>
-			<!-- These annotations are build-time only and not needed at runtime -->
+			<!-- These annotations are build-time only and not needed at runtime. -->
 			<scope>provided</scope>
 		</dependency>
 
