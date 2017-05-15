@@ -19,7 +19,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.osc.plugin</groupId>
 	<artifactId>sdn-controller-nsc-plugin</artifactId>
-	<version>0.6.0</version>
+	<version>1.0.0</version>
 	<name>org.osc.plugin:sdn-controller-nsc-plugin</name>
 
 	<properties>
