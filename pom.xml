@@ -19,26 +19,27 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.osc.plugin</groupId>
 	<artifactId>sdn-controller-nsc-plugin</artifactId>
-	<version>1.0</version>
+	<version>1.0.0</version>
 	<name>org.osc.plugin:sdn-controller-nsc-plugin</name>
 
 	<properties>
 		<jclouds.version>2.0.0</jclouds.version>
-		<repoVersionCmd>
-			git describe | grep init | cut -d '-' -f 2-3
-		</repoVersionCmd>
-
 	</properties>
 
 	<repositories>
 		<repository>
 			<id>osc-nexus</id>
 			<name>OSC Nexus</name>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<url>http://ci.opensecuritycontroller.org:8082/nexus/content/repositories/osc-snapshot/</url>
+			<url>http://ci.opensecuritycontroller.org:8082/nexus/content/repositories/releases</url>
 		</repository>
+        <repository>
+            <id>osc-nexus-snapshot</id>
+            <name>OSC Nexus</name>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+			<url>http://ci.opensecuritycontroller.org:8082/nexus/content/repositories/osc-snapshot</url>
+        </repository>
 	</repositories>
 
 	<dependencies>
@@ -59,7 +60,7 @@
 		<dependency>
 			<groupId>org.osc.api</groupId>
 			<artifactId>sdn-controller-api</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
+			<version>1.0.0</version>
 		</dependency>
 
 		<!-- jclouds OpenStack dependencies -->
@@ -221,23 +222,29 @@
 				<version>1.7</version>
 				<executions>
                     <execution>
-                        <id>generate-version</id>
-                        <phase>initialize</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <target>
-                                <exec outputproperty="buildFragment" dir="." executable="sh">
-                                    <arg value="-c" />
-                                    <arg value="${repoVersionCmd}" />
-                                </exec>
-                                <property name="buildVersion" value="${project.version}-${buildFragment}" />
-                                <echo>Version: ${buildVersion}</echo>
-                            </target>
-                            <exportAntProperties>true</exportAntProperties>
-                        </configuration>
-                    </execution>
+						<id>extract-release-version</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<!-- Full version examples: 1.0.0-SNAPSHOT-0-HASH, 1.0.0-0-HASH, 1.0.0-1-HASH, etc -->
+                                <exec outputproperty="fullVersion" dir="." executable="sh">
+									<arg value="-c" />
+									<arg value="git describe --long | tr -d v" />
+								</exec>
+                                <!-- Version examples: 1.0.0-SNAPSHOT, 1.0.0, etc -->
+                                <exec outputproperty="releaseVersion" dir="." executable="sh">
+									<arg value="-c" />
+									<arg value="git describe --abbrev=0 | tr -d v" />
+								</exec>
+								<echo>Full Version: ${fullVersion}</echo>
+                                <echo>Version: ${releaseVersion}</echo>
+							</target>
+							<exportAntProperties>true</exportAntProperties>
+						</configuration>
+					</execution>
 					<execution>
 						<phase>package</phase>
 						<goals>
@@ -252,7 +259,7 @@
 										<attribute name="Deployment-Name" value="NSC" />
 										<attribute name="Deployment-Type" value="SDN" />
 										<attribute name="Deployment-SymbolicName" value="NscSdnControllerPlugin" />
-                                        <attribute name="Deployment-Version" value="${buildVersion}" />
+                                        <attribute name="Deployment-Version" value="${fullVersion}" />
 										<attribute name="Require-Bundle" value="sdn-controller-nsc-plugin" />
 									</manifest>
 								</jar>
@@ -261,6 +268,30 @@
 					</execution>
 				</executions>
 			</plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>1.4.1</version>
+                <executions>
+                    <execution>
+                        <id>enforce-property</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireProperty>
+                                    <property>project.version</property>
+                                    <message>The project version must be set.</message>
+                                    <regex>${releaseVersion}</regex>
+                                    <regexMessage>The project version is ${project.version} but it must be ${releaseVersion}.</regexMessage>
+                                </requireProperty>
+                            </rules>
+                            <fail>true</fail>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
