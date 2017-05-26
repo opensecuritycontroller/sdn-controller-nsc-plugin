@@ -1,0 +1,2 @@
+# sdn-controller-nsc-plugin
+[![Build Status](https://travis-ci.com/opensecuritycontroller/sdn-controller-nsc-plugin.svg?token=FzxT1Qx9H6sqEHPcKhqW&branch=master)](https://travis-ci.com/opensecuritycontroller/sdn-controller-nsc-plugin)
