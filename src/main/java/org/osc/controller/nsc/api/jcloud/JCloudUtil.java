@@ -41,12 +41,15 @@ public class JCloudUtil {
     private static final int DEFAULT_READ_TIMEOUT = 60 * 1000;
     private static final int DEFAULT_CONNECTION_TIMEOUT = 5 * 1000;
 
+    private static Module customSSLModule = null;
+
     static {
         OVERRIDES.setProperty(Constants.PROPERTY_REQUEST_TIMEOUT, String.valueOf(DEFAULT_READ_TIMEOUT));
         OVERRIDES.setProperty(Constants.PROPERTY_CONNECTION_TIMEOUT, String.valueOf(DEFAULT_CONNECTION_TIMEOUT));
         OVERRIDES.setProperty(Constants.PROPERTY_LOGGER_WIRE_LOG_SENSITIVE_INFO, String.valueOf(false));
         OVERRIDES.setProperty(Constants.PROPERTY_RELAX_HOSTNAME, String.valueOf(true));
         OVERRIDES.setProperty(Constants.PROPERTY_USER_THREADS, String.valueOf(10));
+        OVERRIDES.setProperty(Constants.PROPERTY_TRUST_ALL_CERTS, String.valueOf(false));
     }
 
     public static <A extends Closeable> A buildApi(Class<A> api, String serviceName, Endpoint endPoint) {
@@ -85,15 +88,16 @@ public class JCloudUtil {
         return uri.toURL().toString();
     }
 
-    private static ContextBuilder configureSSLContext(ContextBuilder contextBuilder,final SSLContext sslContext) {
-        Module customSSLModule = new AbstractModule() {
-            @Override
-            protected void configure() {
-                bind(new TypeLiteral<Supplier<SSLContext>>() {
-                }).toInstance(() -> sslContext);
-            }
-        };
-        contextBuilder.modules(ImmutableSet.of(customSSLModule));
+    private static ContextBuilder configureSSLContext(ContextBuilder contextBuilder, final SSLContext sslContext) {
+        if(JCloudUtil.customSSLModule == null) {
+            JCloudUtil.customSSLModule = new AbstractModule() {
+                @Override
+                protected void configure() {
+                    bind(new TypeLiteral<Supplier<SSLContext>>() {}).toInstance(() -> sslContext);
+                }
+            };
+        }
+        contextBuilder.modules(ImmutableSet.of(JCloudUtil.customSSLModule));
         return contextBuilder;
     }
 }
