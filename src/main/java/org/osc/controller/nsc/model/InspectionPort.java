@@ -18,13 +18,13 @@ package org.osc.controller.nsc.model;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
-import org.jclouds.openstack.neutron.v2.domain.Port;
+import org.openstack4j.model.network.Port;
 import org.osc.sdk.controller.DefaultInspectionPort;
 import org.osc.sdk.controller.element.NetworkElement;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 
 public class InspectionPort extends DefaultInspectionPort {
 
@@ -36,7 +36,7 @@ public class InspectionPort extends DefaultInspectionPort {
     }
 
     public static ImmutableMap<String, Object> updateBindingProfile(String ingressPortId, String egressPortId,
-            ImmutableMap<String, Object> existingPortProfile) {
+                                                                    Map<String, Object> existingPortProfile) {
         Map<String, Object> updatedPortProfile = new HashMap<>(existingPortProfile);
         updatedPortProfile.put(KEY_INSPECTIONPORT_ID, ingressPortId);
         updatedPortProfile.put(KEY_INSPECTIONPORT_EGRESS_ID, egressPortId);
@@ -53,7 +53,7 @@ public class InspectionPort extends DefaultInspectionPort {
     }
 
     public static boolean isRegistered(Port port) {
-        ImmutableSet<String> keySet = port.getProfile().keySet();
+        Set<String> keySet = port.getProfile().keySet();
         return keySet.contains(KEY_INSPECTIONPORT_ID) && keySet.contains(KEY_INSPECTIONPORT_EGRESS_ID);
     }
 

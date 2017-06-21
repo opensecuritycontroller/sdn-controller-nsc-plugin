@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang.StringUtils;
-import org.jclouds.openstack.neutron.v2.domain.Port;
+import org.openstack4j.model.network.Port;
 import org.osc.sdk.controller.DefaultInspectionPort;
 import org.osc.sdk.controller.DefaultNetworkPort;
 import org.osc.sdk.controller.FailurePolicyType;
@@ -150,7 +150,7 @@ public class InspectionHook implements InspectionHookElement {
      *
      */
     public static InspectionHook generateInspectionHookFromPort(Port port) {
-        ImmutableMap<String, Object> portProfile = port.getProfile();
+        Map<String, Object> portProfile = port.getProfile();
         InspectionHook inspectionHook = new InspectionHook();
         DefaultNetworkPort ingressPort = new DefaultNetworkPort();
         DefaultNetworkPort egressPort = new DefaultNetworkPort();
@@ -207,7 +207,7 @@ public class InspectionHook implements InspectionHookElement {
      *
      */
     public static ImmutableMap<String, Object> updateBindingProfile(InspectionHook inspectionHook,
-            ImmutableMap<String, Object> existingPortProfile) {
+                                                                    Map<String, Object> existingPortProfile) {
         Map<String, Object> updatedPortProfile = new HashMap<>(existingPortProfile);
 
         updatedPortProfile.put(KEY_ENC_TYPE, inspectionHook.encType == null ? "" : inspectionHook.encType);
@@ -222,7 +222,7 @@ public class InspectionHook implements InspectionHookElement {
         return ImmutableMap.copyOf(updatedPortProfile);
     }
 
-    public static ImmutableMap<String, Object> removeBindingProfile(ImmutableMap<String, Object> existingPortProfile) {
+    public static ImmutableMap<String, Object> removeBindingProfile(Map<String, Object> existingPortProfile) {
         Map<String, Object> updatedPortProfile = new HashMap<>(existingPortProfile);
 
         updatedPortProfile.remove(KEY_ENC_TYPE);
