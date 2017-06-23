@@ -26,7 +26,7 @@ public abstract class BaseOpenstack4jApi {
     protected Endpoint endPoint;
     private KeystoneProvider keystoneProvider;
 
-    BaseOpenstack4jApi(Endpoint endPoint) {
+    protected BaseOpenstack4jApi(Endpoint endPoint) {
         this.endPoint = endPoint;
         this.keystoneProvider = KeystoneProvider.getInstance(endPoint);
     }
