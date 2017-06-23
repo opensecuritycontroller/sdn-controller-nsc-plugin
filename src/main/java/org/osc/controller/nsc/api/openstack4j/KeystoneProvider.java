@@ -61,7 +61,7 @@ public class KeystoneProvider {
             // LOGGER
             OSFactory.enableHttpLoggingFilter(true);
 
-            Identifier domainIdentifier = Identifier.byId(this.endpoint.getDomain());
+            Identifier domainIdentifier = Identifier.byId(this.endpoint.getDomainId());
 
             IOSClientBuilder.V3 keystoneV3Builder = OSFactory.builderV3().perspective(Facing.ADMIN)
                     .endpoint(endpointURL)
@@ -84,4 +84,5 @@ public class KeystoneProvider {
         URI uri = new URI(schema, null, endPoint.getEndPointIP(), 5000, "/v3", null, null);
         return uri.toURL().toString();
     }
+
 }
