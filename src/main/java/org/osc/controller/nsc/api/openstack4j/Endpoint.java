@@ -24,7 +24,7 @@ import javax.net.ssl.SSLContext;
 public class Endpoint {
 
     private String endPointIP;
-    private String domain;
+    private String domainId;
     private String tenant;
     private String user;
     private String password;
@@ -32,10 +32,10 @@ public class Endpoint {
     private SSLContext sslContext;
     private Token token;
 
-    public Endpoint(String endPointIP, String domain, String tenant, String user, String password, boolean isHttps, SSLContext sslContext) {
+    public Endpoint(String endPointIP, String domainId, String tenant, String user, String password, boolean isHttps, SSLContext sslContext) {
         this.endPointIP = endPointIP;
         this.tenant = tenant;
-        this.domain = domain;
+        this.domainId = domainId;
         this.user = user;
         this.password = password;
         this.isHttps = isHttps;
@@ -44,7 +44,7 @@ public class Endpoint {
 
     public Endpoint(VirtualizationConnectorElement vc) {
         this.endPointIP = vc.getProviderIpAddress();
-        this.domain = vc.getProviderAdminDomainId();
+        this.domainId = vc.getProviderAdminDomainId();
         this.tenant = vc.getProviderAdminTenantName();
         this.user = vc.getProviderUsername();
         this.password = vc.getProviderPassword();
@@ -97,12 +97,12 @@ public class Endpoint {
         return sslContext;
     }
 
-    public String getDomain() {
-        return this.domain;
+    public String getDomainId() {
+        return this.domainId;
     }
 
-    public void setDomain(String domain) {
-        this.domain = domain;
+    public void setDomainId(String domainId) {
+        this.domainId = domainId;
     }
 
     public Token getToken() {

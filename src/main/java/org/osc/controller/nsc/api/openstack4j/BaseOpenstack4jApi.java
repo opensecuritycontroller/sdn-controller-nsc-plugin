@@ -23,13 +23,15 @@ import org.openstack4j.api.OSClient;
  */
 public abstract class BaseOpenstack4jApi {
 
+    protected Endpoint endPoint;
     private KeystoneProvider keystoneProvider;
 
-    protected BaseOpenstack4jApi(Endpoint endPoint) {
+    BaseOpenstack4jApi(Endpoint endPoint) {
+        this.endPoint = endPoint;
         this.keystoneProvider = KeystoneProvider.getInstance(endPoint);
     }
 
-    protected OSClient.OSClientV3 getOs() {
+    public OSClient.OSClientV3 getOs() {
         return this.keystoneProvider.getAvailableSession();
     }
 }
