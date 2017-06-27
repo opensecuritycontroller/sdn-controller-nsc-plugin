@@ -106,7 +106,7 @@ public class NeutronSecurityControllerApi extends BaseOpenstack4jApi {
 
     // Inspection Hooks
     public InspectionHook getInspectionHookByPorts(String region, String inspectedPortId,
-            InspectionPortElement inspectionPort) throws Exception {
+                                                   InspectionPortElement inspectionPort) throws Exception {
         String inspectionIngressPortId = inspectionPort.getIngressPort().getElementId();
         String inspectionEgressPortId = inspectionPort.getEgressPort().getElementId();
         List<InspectionHook> hooks = getInspectionHooksByPort(region, inspectedPortId);
@@ -182,10 +182,13 @@ public class NeutronSecurityControllerApi extends BaseOpenstack4jApi {
             return;
         }
 
-        getOs().useRegion(region);
-        ImmutableMap<String, Object> bindingProfile = InspectionHook.removeBindingProfile(inspectedPort.getProfile());
-        getOs().networking().port().update(inspectedPort.toBuilder().profile(bindingProfile).build());
-        getOs().removeRegion();
+        try {
+            getOs().useRegion(region);
+            ImmutableMap<String, Object> bindingProfile = InspectionHook.removeBindingProfile(inspectedPort.getProfile());
+            getOs().networking().port().update(inspectedPort.toBuilder().profile(bindingProfile).build());
+        } finally {
+            getOs().removeRegion();
+        }
     }
 
     /**
@@ -199,11 +202,14 @@ public class NeutronSecurityControllerApi extends BaseOpenstack4jApi {
         if (InspectionPort.isRegistered(portProfileToUpdate)) {
             this.log.info("Inspection port '" + portProfileToUpdate.getId() + "' already registered");
         } else {
-            getOs().useRegion(region);
-            ImmutableMap<String, Object> bindingProfile = InspectionPort.updateBindingProfile(portId, egressPortId,
-                    portProfileToUpdate.getProfile());
-            getOs().networking().port().update(portProfileToUpdate.toBuilder().profile(bindingProfile).build());
-            getOs().removeRegion();
+            try {
+                getOs().useRegion(region);
+                ImmutableMap<String, Object> bindingProfile = InspectionPort.updateBindingProfile(portId, egressPortId,
+                        portProfileToUpdate.getProfile());
+                getOs().networking().port().update(portProfileToUpdate.toBuilder().profile(bindingProfile).build());
+            } finally {
+                getOs().removeRegion();
+            }
         }
     }
 
@@ -232,16 +238,24 @@ public class NeutronSecurityControllerApi extends BaseOpenstack4jApi {
             inspectionHook.setHookId(UUID.randomUUID().toString());
         }
 
-        getOs().useRegion(region);
-        ImmutableMap<String, Object> bindingProfile = InspectionHook.updateBindingProfile(inspectionHook, inspectedPort.getProfile());
-        getOs().networking().port().update(inspectedPort.toBuilder().profile(bindingProfile).build());
-        getOs().removeRegion();
+        try {
+            getOs().useRegion(region);
+            ImmutableMap<String, Object> bindingProfile = InspectionHook.updateBindingProfile(inspectionHook, inspectedPort.getProfile());
+            getOs().networking().port().update(inspectedPort.toBuilder().profile(bindingProfile).build());
+        } finally {
+            getOs().removeRegion();
+        }
+
     }
 
     private Port getPortOrThrow(String region, String portId, PortType type) throws NetworkPortNotFoundException {
         getOs().useRegion(region);
-        Port port = getOs().networking().port().get(portId);
-        getOs().removeRegion();
+        Port port;
+        try {
+            port = getOs().networking().port().get(portId);
+        } finally {
+            getOs().removeRegion();
+        }
         if (port == null) {
             throw new NetworkPortNotFoundException(portId, String.format("%s Port with Id: '%s' not found", type, portId));
         }
