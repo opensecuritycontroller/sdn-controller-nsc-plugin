@@ -16,14 +16,11 @@
  *******************************************************************************/
 package org.osc.controller.nsc.api;
 
+import com.google.common.collect.ImmutableMap;
 import org.apache.log4j.Logger;
-import org.jclouds.openstack.neutron.v2.NeutronApi;
-import org.jclouds.openstack.neutron.v2.domain.Port;
-import org.jclouds.openstack.neutron.v2.domain.Port.UpdatePort;
-import org.jclouds.openstack.neutron.v2.features.PortApi;
-import org.osc.controller.nsc.api.jcloud.BaseJCloudApi;
-import org.osc.controller.nsc.api.jcloud.Endpoint;
-import org.osc.controller.nsc.api.jcloud.JCloudUtil;
+import org.openstack4j.model.network.Port;
+import org.osc.controller.nsc.api.openstack4j.BaseOpenstack4jApi;
+import org.osc.controller.nsc.api.openstack4j.Endpoint;
 import org.osc.controller.nsc.model.InspectionHook;
 import org.osc.controller.nsc.model.InspectionPort;
 import org.osc.sdk.controller.DefaultNetworkPort;
@@ -31,12 +28,11 @@ import org.osc.sdk.controller.element.InspectionPortElement;
 import org.osc.sdk.controller.element.NetworkElement;
 import org.osc.sdk.controller.exception.NetworkPortNotFoundException;
 
-import java.io.Closeable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-public class NeutronSecurityControllerApi extends BaseJCloudApi {
+public class NeutronSecurityControllerApi extends BaseOpenstack4jApi {
 
     private enum PortType {
         INSPECTION("Inspection"), INSPECTED("Inspected");
@@ -55,32 +51,25 @@ public class NeutronSecurityControllerApi extends BaseJCloudApi {
 
     Logger log = Logger.getLogger(NeutronSecurityControllerApi.class);
 
-    static final String OPENSTACK_SERVICE_NEUTRON = "openstack-neutron";
-    private NeutronApi neutronApi;
-
     public NeutronSecurityControllerApi(Endpoint endPoint) {
         super(endPoint);
-        this.neutronApi = JCloudUtil.buildApi(NeutronApi.class, OPENSTACK_SERVICE_NEUTRON, endPoint);
     }
 
     public void test() throws Exception {
-        this.neutronApi.getConfiguredRegions();
     }
 
     // Inspection port
-    public InspectionPort getInspectionPort(String region, InspectionPortElement inspectionPort)
-            throws NetworkPortNotFoundException, Exception {
+    public InspectionPort getInspectionPort(String region, InspectionPortElement inspectionPort) throws Exception {
         String inspectionIngressPortId = inspectionPort.getIngressPort().getElementId();
         String inspectionEgressPortId = inspectionPort.getEgressPort().getElementId();
 
         this.log.info("Retrieving inspection port ingress: '" + inspectionIngressPortId + "' , egress: '" + inspectionEgressPortId + "'");
-        PortApi neutronPortApi = this.neutronApi.getPortApi(region);
 
-        Port ingressPort = getPortOrThrow(neutronPortApi, inspectionIngressPortId, PortType.INSPECTION);
+        Port ingressPort = getPortOrThrow(region, inspectionIngressPortId, PortType.INSPECTION);
         Port egressPort = ingressPort;
 
         if (!inspectionIngressPortId.equals(inspectionEgressPortId)) {
-            egressPort = getPortOrThrow(neutronPortApi, inspectionEgressPortId, PortType.INSPECTION);
+            egressPort = getPortOrThrow(region, inspectionEgressPortId, PortType.INSPECTION);
         }
 
         if (!InspectionPort.isRegistered(ingressPort)) {
@@ -99,26 +88,25 @@ public class NeutronSecurityControllerApi extends BaseJCloudApi {
     }
 
     public void addInspectionPort(String region, InspectionPortElement inspectionPort)
-            throws NetworkPortNotFoundException, Exception {
+            throws Exception {
         String inspectionIngressPortId = inspectionPort.getIngressPort().getElementId();
         String inspectionEgressPortId = inspectionPort.getEgressPort().getElementId();
 
         this.log.info("Adding inspection port ingress: '" + inspectionIngressPortId + "' , egress: '"
                 + inspectionEgressPortId + "'");
-        PortApi neutronPortApi = this.neutronApi.getPortApi(region);
 
-        Port ingressPort = getPortOrThrow(neutronPortApi, inspectionIngressPortId, PortType.INSPECTION);
-        updateInspectionPortProfile(ingressPort, inspectionIngressPortId, inspectionEgressPortId, neutronPortApi);
+        Port ingressPort = getPortOrThrow(region, inspectionIngressPortId, PortType.INSPECTION);
+        updateInspectionPortProfile(region, ingressPort, inspectionIngressPortId, inspectionEgressPortId);
 
         if (!inspectionIngressPortId.equals(inspectionEgressPortId)) {
-            Port egressPort = getPortOrThrow(neutronPortApi, inspectionEgressPortId, PortType.INSPECTION);
-            updateInspectionPortProfile(egressPort, inspectionIngressPortId, inspectionEgressPortId, neutronPortApi);
+            Port egressPort = getPortOrThrow(region, inspectionEgressPortId, PortType.INSPECTION);
+            updateInspectionPortProfile(region, egressPort, inspectionIngressPortId, inspectionEgressPortId);
         }
     }
 
     // Inspection Hooks
     public InspectionHook getInspectionHookByPorts(String region, String inspectedPortId,
-            InspectionPortElement inspectionPort) throws NetworkPortNotFoundException, Exception {
+                                                   InspectionPortElement inspectionPort) throws Exception {
         String inspectionIngressPortId = inspectionPort.getIngressPort().getElementId();
         String inspectionEgressPortId = inspectionPort.getEgressPort().getElementId();
         List<InspectionHook> hooks = getInspectionHooksByPort(region, inspectedPortId);
@@ -134,19 +122,17 @@ public class NeutronSecurityControllerApi extends BaseJCloudApi {
     }
 
     public void deleteInspectionHookByPorts(String region, String inspectedPortId, InspectionPortElement inspectionPort)
-            throws NetworkPortNotFoundException, Exception {
+            throws Exception {
         InspectionHook inspectionHook = getInspectionHookByPorts(region, inspectedPortId, inspectionPort);
         if (inspectionHook != null) {
             deleteInspectionHook(region, inspectionHook.getInspectedPortId());
         }
     }
 
-    public List<InspectionHook> getInspectionHooksByPort(String region, String inspectedPortId)
-            throws NetworkPortNotFoundException, Exception {
+    public List<InspectionHook> getInspectionHooksByPort(String region, String inspectedPortId) throws Exception {
         this.log.info("Retriving inspection hook for port '" + inspectedPortId + "'");
 
-        PortApi neutronPortApi = this.neutronApi.getPortApi(region);
-        Port inspectedPort = getPortOrThrow(neutronPortApi, inspectedPortId, PortType.INSPECTED);
+        Port inspectedPort = getPortOrThrow(region, inspectedPortId, PortType.INSPECTED);
 
         InspectionHook inspectionHook = InspectionHook.generateInspectionHookFromPort(inspectedPort);
 
@@ -158,12 +144,10 @@ public class NeutronSecurityControllerApi extends BaseJCloudApi {
         return Arrays.asList(inspectionHook);
     }
 
-    public InspectionHook getInspectionHook(String region, String inspectedPortId)
-            throws NetworkPortNotFoundException, Exception {
+    public InspectionHook getInspectionHook(String region, String inspectedPortId) throws Exception {
         this.log.info("Retriving inspection hook '" + inspectedPortId + "'");
 
-        PortApi neutronPortApi = this.neutronApi.getPortApi(region);
-        Port port = getPortOrThrow(neutronPortApi, inspectedPortId, PortType.INSPECTED);
+        Port port = getPortOrThrow(region, inspectedPortId, PortType.INSPECTED);
 
         InspectionHook inspectionHook = InspectionHook.generateInspectionHookFromPort(port);
         if (inspectionHook == null) {
@@ -190,8 +174,7 @@ public class NeutronSecurityControllerApi extends BaseJCloudApi {
     public void deleteInspectionHook(String region, String inspectedPortId) throws Exception {
         this.log.info("Deleting inspection hook for port '" + inspectedPortId + "'");
 
-        PortApi neutronPortApi = this.neutronApi.getPortApi(region);
-        Port inspectedPort = getPortOrThrow(neutronPortApi, inspectedPortId, PortType.INSPECTED);
+        Port inspectedPort = getPortOrThrow(region, inspectedPortId, PortType.INSPECTED);
 
         if (!InspectionHook.isInspectionHookRegistered(inspectedPort)) {
             this.log.info(
@@ -199,14 +182,13 @@ public class NeutronSecurityControllerApi extends BaseJCloudApi {
             return;
         }
 
-        UpdatePort updatedPort = Port.updateBuilder()
-                .profile(InspectionHook.removeBindingProfile(inspectedPort.getProfile())).build();
-        neutronPortApi.update(inspectedPortId, updatedPort);
-    }
-
-    @Override
-    protected List<? extends Closeable> getApis() {
-        return Arrays.asList(this.neutronApi);
+        try {
+            getOs().useRegion(region);
+            ImmutableMap<String, Object> bindingProfile = InspectionHook.removeBindingProfile(inspectedPort.getProfile());
+            getOs().networking().port().update(inspectedPort.toBuilder().profile(bindingProfile).build());
+        } finally {
+            getOs().removeRegion();
+        }
     }
 
     /**
@@ -216,33 +198,35 @@ public class NeutronSecurityControllerApi extends BaseJCloudApi {
         return port != null && portId.equals(port.getElementId());
     }
 
-    private void updateInspectionPortProfile(Port portProfileToUpdate, String portId, String egressPortId, PortApi neutronPortApi) {
+    private void updateInspectionPortProfile(String region, Port portProfileToUpdate, String portId, String egressPortId) {
         if (InspectionPort.isRegistered(portProfileToUpdate)) {
             this.log.info("Inspection port '" + portProfileToUpdate.getId() + "' already registered");
         } else {
-            UpdatePort updatedPort = Port.updateBuilder()
-                    .profile(
-                            InspectionPort.updateBindingProfile(portId, egressPortId, portProfileToUpdate.getProfile()))
-                    .build();
-            neutronPortApi.update(portProfileToUpdate.getId(), updatedPort);
+            try {
+                getOs().useRegion(region);
+                ImmutableMap<String, Object> bindingProfile = InspectionPort.updateBindingProfile(portId, egressPortId,
+                        portProfileToUpdate.getProfile());
+                getOs().networking().port().update(portProfileToUpdate.toBuilder().profile(bindingProfile).build());
+            } finally {
+                getOs().removeRegion();
+            }
         }
     }
 
     private void updateInspectionHookProfile(String region, InspectionHook inspectionHook, boolean generateId)
-            throws NetworkPortNotFoundException, Exception {
-        PortApi neutronPortApi = this.neutronApi.getPortApi(region);
+            throws Exception {
 
         String inspectionIngressPortId = inspectionHook.getInspectionPort().getIngressPort().getElementId();
         String inspectionEgressPortId = inspectionHook.getInspectionPort().getEgressPort().getElementId();
 
-        Port inspectedPort = getPortOrThrow(neutronPortApi, inspectionHook.getInspectedPortId(), PortType.INSPECTED);
-        Port inspectionIngressPort = getPortOrThrow(neutronPortApi, inspectionIngressPortId, PortType.INSPECTION);
+        Port inspectedPort = getPortOrThrow(region, inspectionHook.getInspectedPortId(), PortType.INSPECTED);
+        Port inspectionIngressPort = getPortOrThrow(region, inspectionIngressPortId, PortType.INSPECTION);
 
         Port inspectionEgressPort;
         if (inspectionIngressPortId.equals(inspectionEgressPortId)) {
             inspectionEgressPort = inspectionIngressPort;
         } else {
-            inspectionEgressPort = getPortOrThrow(neutronPortApi, inspectionEgressPortId, PortType.INSPECTION);
+            inspectionEgressPort = getPortOrThrow(region, inspectionEgressPortId, PortType.INSPECTION);
         }
 
         if (!InspectionPort.isRegistered(inspectionIngressPort) && !InspectionPort.isRegistered(inspectionEgressPort)) {
@@ -254,17 +238,26 @@ public class NeutronSecurityControllerApi extends BaseJCloudApi {
             inspectionHook.setHookId(UUID.randomUUID().toString());
         }
 
-        UpdatePort updatedPort = Port.updateBuilder()
-                .profile(InspectionHook.updateBindingProfile(inspectionHook, inspectedPort.getProfile())).build();
-        neutronPortApi.update(inspectionHook.getInspectedPortId(), updatedPort);
+        try {
+            getOs().useRegion(region);
+            ImmutableMap<String, Object> bindingProfile = InspectionHook.updateBindingProfile(inspectionHook, inspectedPort.getProfile());
+            getOs().networking().port().update(inspectedPort.toBuilder().profile(bindingProfile).build());
+        } finally {
+            getOs().removeRegion();
+        }
+
     }
 
-    private Port getPortOrThrow(PortApi neutronPortApi, String portId, PortType type)
-            throws NetworkPortNotFoundException {
-        Port port = neutronPortApi.get(portId);
+    private Port getPortOrThrow(String region, String portId, PortType type) throws NetworkPortNotFoundException {
+        getOs().useRegion(region);
+        Port port;
+        try {
+            port = getOs().networking().port().get(portId);
+        } finally {
+            getOs().removeRegion();
+        }
         if (port == null) {
-            throw new NetworkPortNotFoundException(portId,
-                    String.format("%s Port with Id: '%s' not found", type, portId));
+            throw new NetworkPortNotFoundException(portId, String.format("%s Port with Id: '%s' not found", type, portId));
         }
         return port;
     }

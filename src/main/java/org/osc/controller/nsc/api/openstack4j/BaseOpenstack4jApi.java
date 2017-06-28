@@ -14,37 +14,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.osc.controller.nsc.api.jcloud;
+package org.osc.controller.nsc.api.openstack4j;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.util.List;
-
-import com.google.common.io.Closeables;
+import org.openstack4j.api.OSClient;
 
 /**
- * Desgined to be a base class for all jcloud API wrappers in the code.
+ * Designed to be a base class for all openstack4j API wrappers in the code.
  */
-public abstract class BaseJCloudApi implements Closeable {
+public abstract class BaseOpenstack4jApi {
 
     protected Endpoint endPoint;
+    private KeystoneProvider keystoneProvider;
 
-    public BaseJCloudApi(Endpoint endPoint) {
+    protected BaseOpenstack4jApi(Endpoint endPoint) {
         this.endPoint = endPoint;
+        this.keystoneProvider = KeystoneProvider.getInstance(endPoint);
     }
 
-    @Override
-    public void close() throws IOException {
-        for (Closeable api : getApis()) {
-            Closeables.close(api, true);
-        }
+    public OSClient.OSClientV3 getOs() {
+        return this.keystoneProvider.getAvailableSession();
     }
-
-    /**
-     * List of API's the subclass uses.
-     *
-     * @return the API's used by the subclass.
-     */
-    protected abstract List<? extends Closeable> getApis();
-
 }

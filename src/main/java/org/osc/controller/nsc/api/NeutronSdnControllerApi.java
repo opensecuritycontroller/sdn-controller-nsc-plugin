@@ -22,7 +22,7 @@ import java.util.HashMap;
 
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.log4j.Logger;
-import org.osc.controller.nsc.api.jcloud.Endpoint;
+import org.osc.controller.nsc.api.openstack4j.Endpoint;
 import org.osc.sdk.controller.FlowInfo;
 import org.osc.sdk.controller.FlowPortInfo;
 import org.osc.sdk.controller.Status;
@@ -54,9 +54,8 @@ public class NeutronSdnControllerApi implements SdnControllerApi {
     public Status getStatus(VirtualizationConnectorElement vc, String region) throws Exception {
         // TODO: Future. We should not rely on list ports instead we should send a valid status
         // based on is SDN controller ready to serve
-        try (NeutronSecurityControllerApi neutronApi = new NeutronSecurityControllerApi(new Endpoint(vc))) {
-            neutronApi.test();
-        }
+        NeutronSecurityControllerApi neutronApi = new NeutronSecurityControllerApi(new Endpoint(vc));
+        neutronApi.test();
         return new Status(NAME, VERSION, true);
     }
 
