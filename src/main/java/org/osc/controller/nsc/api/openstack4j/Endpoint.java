@@ -16,7 +16,8 @@
  *******************************************************************************/
 package org.osc.controller.nsc.api.openstack4j;
 
-import org.openstack4j.model.identity.v3.Token;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.osc.sdk.controller.element.VirtualizationConnectorElement;
 
 import javax.net.ssl.SSLContext;
@@ -30,7 +31,6 @@ public class Endpoint {
     private String password;
     private boolean isHttps;
     private SSLContext sslContext;
-    private Token token;
 
     public Endpoint(String endPointIP, String domainId, String tenant, String user, String password, boolean isHttps, SSLContext sslContext) {
         this.endPointIP = endPointIP;
@@ -105,11 +105,37 @@ public class Endpoint {
         this.domainId = domainId;
     }
 
-    public Token getToken() {
-        return this.token;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        Endpoint endpoint = (Endpoint) o;
+
+        return new EqualsBuilder()
+                .append(this.isHttps, endpoint.isHttps)
+                .append(this.endPointIP, endpoint.endPointIP)
+                .append(this.domainId, endpoint.domainId)
+                .append(this.tenant, endpoint.tenant)
+                .append(this.user, endpoint.user)
+                .append(this.password, endpoint.password)
+                .isEquals();
     }
 
-    public void setToken(Token token) {
-        this.token = token;
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+                .append(this.endPointIP)
+                .append(this.domainId)
+                .append(this.tenant)
+                .append(this.user)
+                .append(this.password)
+                .append(this.isHttps)
+                .toHashCode();
     }
 }
