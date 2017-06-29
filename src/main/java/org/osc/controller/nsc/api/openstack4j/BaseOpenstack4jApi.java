@@ -18,20 +18,22 @@ package org.osc.controller.nsc.api.openstack4j;
 
 import org.openstack4j.api.OSClient;
 
+import java.io.Closeable;
+
 /**
  * Designed to be a base class for all openstack4j API wrappers in the code.
  */
-public abstract class BaseOpenstack4jApi {
+public abstract class BaseOpenstack4jApi implements Closeable {
 
-    protected Endpoint endPoint;
+    private Endpoint endPoint;
     private KeystoneProvider keystoneProvider;
 
     protected BaseOpenstack4jApi(Endpoint endPoint) {
         this.endPoint = endPoint;
-        this.keystoneProvider = KeystoneProvider.getInstance(endPoint);
+        this.keystoneProvider = KeystoneProvider.getInstance();
     }
 
-    public OSClient.OSClientV3 getOs() {
-        return this.keystoneProvider.getAvailableSession();
+    protected OSClient.OSClientV3 getOs() {
+        return this.keystoneProvider.getAvailableSession(this.endPoint);
     }
 }
