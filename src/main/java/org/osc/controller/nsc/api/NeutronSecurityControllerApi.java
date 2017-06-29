@@ -18,6 +18,7 @@ package org.osc.controller.nsc.api;
 
 import com.google.common.collect.ImmutableMap;
 import org.apache.log4j.Logger;
+import org.openstack4j.api.exceptions.ServerResponseException;
 import org.openstack4j.model.network.Port;
 import org.osc.controller.nsc.api.openstack4j.BaseOpenstack4jApi;
 import org.osc.controller.nsc.api.openstack4j.Endpoint;
@@ -28,6 +29,7 @@ import org.osc.sdk.controller.element.InspectionPortElement;
 import org.osc.sdk.controller.element.NetworkElement;
 import org.osc.sdk.controller.exception.NetworkPortNotFoundException;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -182,13 +184,9 @@ public class NeutronSecurityControllerApi extends BaseOpenstack4jApi {
             return;
         }
 
-        try {
-            getOs().useRegion(region);
-            ImmutableMap<String, Object> bindingProfile = InspectionHook.removeBindingProfile(inspectedPort.getProfile());
-            getOs().networking().port().update(inspectedPort.toBuilder().profile(bindingProfile).build());
-        } finally {
-            getOs().removeRegion();
-        }
+        getOs().useRegion(region);
+        ImmutableMap<String, Object> bindingProfile = InspectionHook.removeBindingProfile(inspectedPort.getProfile());
+        getOs().networking().port().update(inspectedPort.toBuilder().profile(bindingProfile).build());
     }
 
     /**
@@ -202,14 +200,11 @@ public class NeutronSecurityControllerApi extends BaseOpenstack4jApi {
         if (InspectionPort.isRegistered(portProfileToUpdate)) {
             this.log.info("Inspection port '" + portProfileToUpdate.getId() + "' already registered");
         } else {
-            try {
-                getOs().useRegion(region);
-                ImmutableMap<String, Object> bindingProfile = InspectionPort.updateBindingProfile(portId, egressPortId,
-                        portProfileToUpdate.getProfile());
-                getOs().networking().port().update(portProfileToUpdate.toBuilder().profile(bindingProfile).build());
-            } finally {
-                getOs().removeRegion();
-            }
+            getOs().useRegion(region);
+            ImmutableMap<String, Object> bindingProfile = InspectionPort.updateBindingProfile(portId, egressPortId,
+                    portProfileToUpdate.getProfile());
+            getOs().networking().port().update(portProfileToUpdate.toBuilder().profile(bindingProfile).build());
+
         }
     }
 
@@ -238,28 +233,35 @@ public class NeutronSecurityControllerApi extends BaseOpenstack4jApi {
             inspectionHook.setHookId(UUID.randomUUID().toString());
         }
 
-        try {
-            getOs().useRegion(region);
-            ImmutableMap<String, Object> bindingProfile = InspectionHook.updateBindingProfile(inspectionHook, inspectedPort.getProfile());
-            getOs().networking().port().update(inspectedPort.toBuilder().profile(bindingProfile).build());
-        } finally {
-            getOs().removeRegion();
-        }
-
+        getOs().useRegion(region);
+        ImmutableMap<String, Object> bindingProfile = InspectionHook.updateBindingProfile(inspectionHook, inspectedPort.getProfile());
+        getOs().networking().port().update(inspectedPort.toBuilder().profile(bindingProfile).build());
     }
 
     private Port getPortOrThrow(String region, String portId, PortType type) throws NetworkPortNotFoundException {
         getOs().useRegion(region);
+
         Port port;
         try {
             port = getOs().networking().port().get(portId);
-        } finally {
-            getOs().removeRegion();
+        } catch (ServerResponseException e) {
+            this.log.warn(String.format("Cannot find %s port with Id: '%s'. Failed with server response: '%s'", type, portId,
+                    e.getMessage()));
+            throw new NetworkPortNotFoundException(portId, String.format("%s Port with Id: '%s' not found", type, portId));
         }
+
         if (port == null) {
             throw new NetworkPortNotFoundException(portId, String.format("%s Port with Id: '%s' not found", type, portId));
         }
+
         return port;
+    }
+
+    @Override
+    public void close() throws IOException {
+        if (getOs() != null) {
+            getOs().removeRegion();
+        }
     }
 
 }
