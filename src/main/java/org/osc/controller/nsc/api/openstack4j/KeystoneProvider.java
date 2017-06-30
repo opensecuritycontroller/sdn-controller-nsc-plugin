@@ -87,4 +87,8 @@ public final class KeystoneProvider {
         return uri.toURL().toString();
     }
 
+    void clearConnectionMap(Endpoint endpoint) {
+        connectionsMap.remove(endpoint);
+    }
+
 }
