@@ -16,7 +16,6 @@
  *******************************************************************************/
 package org.osc.controller.nsc;
 
-import static aQute.bnd.annotation.headers.Category.osgi;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.ops4j.pax.exam.CoreOptions.*;
@@ -50,8 +49,8 @@ org.osgi.framework.BundleException: Unable to resolve openstack4j-jersey2 [17](R
 [openstack4j-core [16](R 16.0)] osgi.extender; (osgi.extender=osgi.serviceloader.processor)]
 Unresolved requirements: [[openstack4j-jersey2 [17](R 17.0)] osgi.wiring.package; (&(osgi.wiring.package=org.openstack4j.core.transport.internal)(version>=3.0.0)(!(version>=4.0.0)))]
 */
-//@RunWith(PaxExam.class)
-//@ExamReactorStrategy(PerMethod.class)
+@RunWith(PaxExam.class)
+@ExamReactorStrategy(PerMethod.class)
 public class OSGiIntegrationTest {
 
     @Inject
@@ -67,6 +66,12 @@ public class OSGiIntegrationTest {
                 bundle("reference:file:" + PathUtils.getBaseDir() + "/target/classes/"),
                 // And some dependencies
                 mavenBundle("org.apache.felix", "org.apache.felix.scr").versionAsInProject(),
+
+                mavenBundle("org.ow2.asm", "asm").versionAsInProject(),
+                mavenBundle("org.ow2.asm", "asm-commons").versionAsInProject(),
+                mavenBundle("org.ow2.asm", "asm-tree").versionAsInProject(),
+                mavenBundle("org.apache.aries", "org.apache.aries.util").versionAsInProject(),
+                mavenBundle("org.apache.aries.spifly", "org.apache.aries.spifly.dynamic.bundle").versionAsInProject(),
 
                 mavenBundle("org.osc.api", "sdn-controller-api").versionAsInProject(),
 
@@ -122,7 +127,8 @@ public class OSGiIntegrationTest {
         this.tracker.open();
     }
 
-//    @Test
+
+    @Test
     public void testRegistered() throws InterruptedException {
         SdnControllerApi service = this.tracker.waitForService(5000);
         assertNotNull(service);
