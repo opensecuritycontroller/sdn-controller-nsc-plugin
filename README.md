@@ -1,5 +1,5 @@
 # SDN Controller NSC Plugin
-[![Build Status](https://travis-ci.com/opensecuritycontroller/sdn-controller-nsc-plugin.svg?token=FzxT1Qx9H6sqEHPcKhqW&branch=master)](https://travis-ci.com/opensecuritycontroller/sdn-controller-nsc-plugin)
+[![Build Status](https://travis-ci.org/opensecuritycontroller/sdn-controller-nsc-plugin.svg?branch=master)](https://travis-ci.org/opensecuritycontroller/sdn-controller-nsc-plugin)
 
 This project implements the [SDN Controller API](https://github.com/opensecuritycontroller/sdn-controller-api). It is intendend for limited testing purposes, such as security group testing, and to serve as a sample plugin for SDN controllers.
 
