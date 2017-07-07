@@ -31,15 +31,25 @@ import javax.net.ssl.TrustManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.ops4j.pax.exam.CoreOptions;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerMethod;
 import org.ops4j.pax.exam.util.PathUtils;
+import org.osc.controller.nsc.entities.MacAddressNSCEntity;
+import org.osc.controller.nsc.entities.NetworkElementNSCEntity;
+import org.osc.controller.nsc.entities.PortIpNSCEntity;
+import org.osc.controller.nsc.model.InspectionHook;
 import org.osc.sdk.controller.api.SdnControllerApi;
 import org.osc.sdk.controller.element.VirtualizationConnectorElement;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceObjects;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.jdbc.DataSourceFactory;
+import org.osgi.service.jpa.EntityManagerFactoryBuilder;
+import org.osgi.service.transaction.control.TransactionControl;
+import org.osgi.service.transaction.control.jpa.JPAEntityManagerProviderFactory;
 import org.osgi.util.tracker.ServiceTracker;
 
 /*TODO: test is commented, because there is a problem with openstack4j dependecies injected directly into osgi (whicch is build during that test)
@@ -55,8 +65,24 @@ public class OSGiIntegrationTest {
 
     @Inject
     BundleContext context;
+    
+    @Inject
+    SdnControllerApi api;
 
-    private ServiceTracker<SdnControllerApi, SdnControllerApi> tracker;
+//    @Reference(target="(osgi.local.enabled=true)")
+//    TransactionControl txControl;
+
+//    @Reference(target="(osgi.unit.name=nsc-mgr)")
+//    EntityManagerFactoryBuilder builder;
+
+//    @Reference(target="(osgi.jdbc.driver.class=org.h2.Driver)")
+//    DataSourceFactory jdbcFactory;
+
+//    @Reference(target="(osgi.local.enabled=true)")
+//    JPAEntityManagerProviderFactory resourceFactory;
+    
+
+//    private ServiceTracker<SdnControllerApi, SdnControllerApi> tracker;
 
     @org.ops4j.pax.exam.Configuration
     public Option[] config() {
@@ -64,79 +90,67 @@ public class OSGiIntegrationTest {
         return options(
                 // Load the current module from its built classes so we get the latest from Eclipse
                 bundle("reference:file:" + PathUtils.getBaseDir() + "/target/classes/"),
+
                 // And some dependencies
                 mavenBundle("org.apache.felix", "org.apache.felix.scr").versionAsInProject(),
 
-                mavenBundle("org.ow2.asm", "asm").versionAsInProject(),
-                mavenBundle("org.ow2.asm", "asm-commons").versionAsInProject(),
-                mavenBundle("org.ow2.asm", "asm-tree").versionAsInProject(),
-                mavenBundle("org.apache.aries", "org.apache.aries.util").versionAsInProject(),
-                mavenBundle("org.apache.aries.spifly", "org.apache.aries.spifly.dynamic.bundle").versionAsInProject(),
-
-                mavenBundle("org.osc.api", "sdn-controller-api").versionAsInProject(),
-
-                mavenBundle("org.pacesys", "openstack4j-core").versionAsInProject(),
-                mavenBundle("org.pacesys.openstack4j.connectors", "openstack4j-jersey2").versionAsInProject(),
-
-                mavenBundle("javax.ws.rs", "javax.ws.rs-api").versionAsInProject(),
-                mavenBundle("javax.annotation", "javax.annotation-api").versionAsInProject(),
-                mavenBundle("com.fasterxml.jackson.core", "jackson-core").version("2.8.5"),
-                mavenBundle("com.fasterxml.jackson.core", "jackson-annotations").version("2.8.5"),
-                mavenBundle("com.fasterxml.jackson.core", "jackson-databind").version("2.8.5"),
-                mavenBundle("com.fasterxml.jackson.core", "jackson-core").version("2.3.2"),
-                mavenBundle("com.fasterxml.jackson.core", "jackson-annotations").version("2.3.2"),
-                mavenBundle("com.fasterxml.jackson.core", "jackson-databind").version("2.3.2"),
-                mavenBundle("com.fasterxml.jackson.jaxrs", "jackson-jaxrs-base").versionAsInProject(),
-                mavenBundle("com.fasterxml.jackson.jaxrs", "jackson-jaxrs-json-provider").versionAsInProject(),
-                mavenBundle("com.fasterxml.jackson.module", "jackson-module-jaxb-annotations").versionAsInProject(),
-
-                mavenBundle("com.github.fge", "btf").versionAsInProject(),
-                mavenBundle("com.github.fge", "jackson-coreutils").versionAsInProject(),
-                mavenBundle("com.github.fge", "json-patch").versionAsInProject(),
-                mavenBundle("com.github.fge", "msg-simple").versionAsInProject(),
-                mavenBundle("com.google.guava", "guava").version("16.0.1"),
-
-                mavenBundle("org.glassfish.jersey.core", "jersey-client").versionAsInProject(),
-                mavenBundle("org.glassfish.jersey.core", "jersey-common").versionAsInProject(),
-                mavenBundle("org.glassfish.jersey.media", "jersey-media-json-jackson").versionAsInProject(),
-
-
-                mavenBundle("org.glassfish.jersey.bundles.repackaged", "jersey-guava").versionAsInProject(),
-                mavenBundle("org.glassfish.hk2", "hk2-api").versionAsInProject(),
-                mavenBundle("org.glassfish.hk2", "hk2-locator").versionAsInProject(),
-                mavenBundle("org.glassfish.hk2", "hk2-utils").versionAsInProject(),
-                mavenBundle("org.glassfish.hk2", "osgi-resource-locator").versionAsInProject(),
-                mavenBundle("org.javassist", "javassist").versionAsInProject(),
-
-
-                mavenBundle("com.google.guava", "guava").versionAsInProject(),
-                mavenBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.aopalliance").versionAsInProject(),
+                mavenBundle("org.osc.api", "security-mgr-api").versionAsInProject(),
+                mavenBundle("javax.websocket", "javax.websocket-api").versionAsInProject(),
                 mavenBundle("log4j", "log4j").versionAsInProject(),
-                mavenBundle("org.apache.directory.studio", "org.apache.commons.lang").versionAsInProject(),
+                mavenBundle("org.apache.aries.jpa", "org.apache.aries.jpa.container").versionAsInProject(),
+                mavenBundle("org.apache.aries.tx-control", "tx-control-service-local").versionAsInProject(),
+                mavenBundle("org.apache.aries.tx-control", "tx-control-provider-jpa-local").versionAsInProject(),
+                mavenBundle("com.h2database", "h2").versionAsInProject(),
+
+                // Hibernate
+
+                systemPackage("javax.xml.stream;version=1.0"),
+                systemPackage("javax.xml.stream.events;version=1.0"),
+                systemPackage("javax.xml.stream.util;version=1.0"),
+                systemPackage("javax.transaction;version=1.1"),
+                systemPackage("javax.transaction.xa;version=1.1"),
+                bootClasspathLibrary(mavenBundle("org.apache.geronimo.specs", "geronimo-jta_1.1_spec", "1.1.1")).beforeFramework(),
+
+                // Hibernate bundles and their dependencies (JPA API is available from the tx-control)
+                mavenBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.antlr", "2.7.7_5"),
+                mavenBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.dom4j", "1.6.1_5"),
+                mavenBundle("org.javassist", "javassist", "3.18.1-GA"),
+                mavenBundle("org.jboss.logging", "jboss-logging", "3.3.0.Final"),
+                mavenBundle("org.jboss", "jandex", "2.0.0.Final"),
+                mavenBundle("org.hibernate.common", "hibernate-commons-annotations", "5.0.1.Final"),
+                mavenBundle("org.hibernate", "hibernate-core", "5.0.9.Final"),
+                mavenBundle("org.hibernate", "hibernate-osgi", "5.0.9.Final"),
+                mavenBundle("org.hibernate", "hibernate-entitymanager", "5.0.9.Final"),
+
+                // Just needed for the test so we can configure the client to point at the local test server
+                //                mavenBundle("org.apache.felix", "org.apache.felix.configadmin", "1.8.10"),
 
                 // Uncomment this line to allow remote debugging
                 // CoreOptions.vmOption("-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=1044"),
 
+                systemTimeout(5000),
                 junitBundles()
+
                 );
     }
 
     @Before
     public void setup() {
-        this.tracker = new ServiceTracker<>(this.context, SdnControllerApi.class, null);
-        this.tracker.open();
+//        this.tracker = new ServiceTracker<>(this.context, SdnControllerApi.class, null);
+//        this.tracker.open();
     }
 
 
-    @Test
+//    @Test
     public void testRegistered() throws InterruptedException {
-        SdnControllerApi service = this.tracker.waitForService(5000);
+//        SdnControllerApi service = this.tracker.waitForService(5000);
+    	SdnControllerApi service = api;
         assertNotNull(service);
 
-        ServiceObjects<SdnControllerApi> so = this.context.getServiceObjects(this.tracker.getServiceReference());
-        SdnControllerApi objectA = so.getService();
-        SdnControllerApi objectB = so.getService();
-        assertSame(objectA, objectB);
+//        ServiceObjects<SdnControllerApi> so = this.context.getServiceObjects(this.tracker.getServiceReference());
+//        SdnControllerApi objectA = so.getService();
+//        SdnControllerApi objectB = so.getService();
+//        assertSame(objectA, objectB);
     }
 
     /**
@@ -146,12 +160,14 @@ public class OSGiIntegrationTest {
      */
 //    @Test
     public void testConnect() throws Exception {
-        SdnControllerApi service = this.tracker.waitForService(5000);
+//        SdnControllerApi service = this.tracker.waitForService(5000);
+    	SdnControllerApi service = api;
         assertNotNull(service);
 
-        ServiceObjects<SdnControllerApi> so = this.context.getServiceObjects(this.tracker.getServiceReference());
+//        ServiceObjects<SdnControllerApi> so = this.context.getServiceObjects(this.tracker.getServiceReference());
 
-        SdnControllerApi object = so.getService();
+//        SdnControllerApi object = so.getService();
+        SdnControllerApi object = api;
 
         object.getStatus(new VirtualizationConnectorElement() {
 
@@ -235,5 +251,103 @@ public class OSGiIntegrationTest {
 				return "default";
 			}
         }, "foo");
+    }
+    
+    @Test
+    public void testNetworkElementWithTwoPortsAndMacAddresses() throws Exception {
+    	SdnControllerApi service = api;
+//        assertNotNull(service);
+//        assertNotNull(jdbcFactory);
+        
+//        ServiceObjects<SdnControllerApi> so = this.context.getServiceObjects(this.tracker.getServiceReference());
+
+//        new InspectionHook();
+//        NetworkElementNSCEntity nscEntity = new NetworkElementNSCEntity();
+//        MacAddrNSCEntity ma1 = new MacAddrNSCEntity();
+//        ma1.setMacAddress("aaa8434878ffae834989");
+//        MacAddrNSCEntity ma2 = new MacAddrNSCEntity();
+//        ma1.setMacAddress("bbb8434878ffae834989");
+//        PortIpNSCEntity pip1 = new PortIpNSCEntity();
+//        pip1.setPortIp("10.2.3.4");
+//        PortIpNSCEntity pip2 = new PortIpNSCEntity();
+//        pip1.setPortIp("10.5.4.3");
+        
+        VirtualizationConnectorElement vce = new VirtualizationConnectorElement() {
+
+            @Override
+            public boolean isProviderHttps() {
+                return false;
+            }
+
+            @Override
+            public boolean isControllerHttps() {
+                return false;
+            }
+
+            @Override
+            public String getProviderUsername() {
+                return "user";
+            }
+
+            @Override
+            public String getProviderPassword() {
+                return "password";
+            }
+
+            @Override
+            public String getProviderIpAddress() {
+                return "127.0.0.1";
+            }
+
+            @Override
+            public Map<String, String> getProviderAttributes() {
+                return new HashMap<>();
+            }
+
+            @Override
+            public String getProviderAdminTenantName() {
+                return "bar";
+            }
+
+            @Override
+            public String getProviderAdminDomainId() {
+                return "default";
+            }
+
+            @Override
+            public String getName() {
+                return "baz";
+            }
+
+            @Override
+            public String getControllerUsername() {
+                return "fizz";
+            }
+
+            @Override
+            public String getControllerPassword() {
+                return "buzz";
+            }
+
+            @Override
+            public String getControllerIpAddress() {
+                return "127.0.0.1";
+            }
+
+            @Override
+            public SSLContext getSslContext() {
+                try {
+                    return SSLContext.getDefault();
+                } catch (NoSuchAlgorithmException e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+
+            @Override
+            public TrustManager[] getTruststoreManager() throws Exception {
+                return new TrustManager[0];
+            }
+        };
     }
 }

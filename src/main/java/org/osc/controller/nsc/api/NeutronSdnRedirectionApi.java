@@ -28,20 +28,31 @@ import org.osc.sdk.controller.element.InspectionPortElement;
 import org.osc.sdk.controller.element.NetworkElement;
 import org.osc.sdk.controller.element.VirtualizationConnectorElement;
 import org.osc.sdk.controller.exception.NetworkPortNotFoundException;
+import org.osgi.service.transaction.control.TransactionControl;
 
 import java.util.List;
+
+import javax.persistence.EntityManager;
 
 public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
 
     private VirtualizationConnectorElement vc;
     private String region;
+    
+    private TransactionControl txControl;
+    private EntityManager em;
 
     public NeutronSdnRedirectionApi() {
     }
 
-    public NeutronSdnRedirectionApi(VirtualizationConnectorElement vc, String region) {
+    public NeutronSdnRedirectionApi(VirtualizationConnectorElement vc, 
+    								String region, 
+    								TransactionControl txControl, 
+    								EntityManager em) {
         this.vc = vc;
         this.region = region;
+        this.txControl = txControl;
+        this.em = em;
     }
 
     @Override
