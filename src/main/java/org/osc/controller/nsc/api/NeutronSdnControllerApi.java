@@ -16,13 +16,9 @@
  *******************************************************************************/
 package org.osc.controller.nsc.api;
 
-import static org.osc.sdk.controller.Constants.*;
-
-import java.util.HashMap;
-
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.log4j.Logger;
-import org.osc.controller.nsc.api.jcloud.Endpoint;
+import org.osc.controller.nsc.api.openstack4j.Endpoint;
 import org.osc.sdk.controller.FlowInfo;
 import org.osc.sdk.controller.FlowPortInfo;
 import org.osc.sdk.controller.Status;
@@ -30,6 +26,16 @@ import org.osc.sdk.controller.api.SdnControllerApi;
 import org.osc.sdk.controller.api.SdnRedirectionApi;
 import org.osc.sdk.controller.element.VirtualizationConnectorElement;
 import org.osgi.service.component.annotations.Component;
+
+import java.util.HashMap;
+
+import static org.osc.sdk.controller.Constants.PLUGIN_NAME;
+import static org.osc.sdk.controller.Constants.QUERY_PORT_INFO;
+import static org.osc.sdk.controller.Constants.SUPPORT_FAILURE_POLICY;
+import static org.osc.sdk.controller.Constants.SUPPORT_OFFBOX_REDIRECTION;
+import static org.osc.sdk.controller.Constants.SUPPORT_PORT_GROUP;
+import static org.osc.sdk.controller.Constants.SUPPORT_SFC;
+import static org.osc.sdk.controller.Constants.USE_PROVIDER_CREDS;
 
 @Component(configurationPid = "com.intel.nsc.SdnController",
         property = {
@@ -39,7 +45,7 @@ import org.osgi.service.component.annotations.Component;
                 SUPPORT_FAILURE_POLICY + ":Boolean=false",
                 USE_PROVIDER_CREDS + ":Boolean=true",
                 QUERY_PORT_INFO + ":Boolean=false",
-                SUPPORT_PORT_GROUP + ":Boolean=false" })
+                SUPPORT_PORT_GROUP + ":Boolean=false"})
 public class NeutronSdnControllerApi implements SdnControllerApi {
 
     Logger log = Logger.getLogger(NeutronSdnControllerApi.class);
@@ -67,7 +73,7 @@ public class NeutronSdnControllerApi implements SdnControllerApi {
 
     @Override
     public HashMap<String, FlowPortInfo> queryPortInfo(VirtualizationConnectorElement vc, String region,
-            HashMap<String, FlowInfo> portsQuery) throws Exception {
+                                                       HashMap<String, FlowInfo> portsQuery) throws Exception {
         throw new NotImplementedException("NSC SDN Controller does not support flow based query");
     }
 
