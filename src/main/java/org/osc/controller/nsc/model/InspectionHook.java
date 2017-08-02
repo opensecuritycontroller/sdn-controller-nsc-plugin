@@ -155,7 +155,7 @@ public class InspectionHook implements InspectionHookElement {
         DefaultNetworkPort ingressPort = new DefaultNetworkPort();
         DefaultNetworkPort egressPort = new DefaultNetworkPort();
 
-        inspectionHook.inspectionPort = new DefaultInspectionPort(ingressPort, egressPort);
+        inspectionHook.inspectionPort = new DefaultInspectionPort(ingressPort, egressPort, null);
         int relaventAttributes = 0;
         for (Entry<String, Object> attribute : portProfile.entrySet()) {
             switch (attribute.getKey()) {

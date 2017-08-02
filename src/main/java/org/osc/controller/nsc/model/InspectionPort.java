@@ -32,7 +32,7 @@ public class InspectionPort extends DefaultInspectionPort {
     private static final String KEY_INSPECTIONPORT_EGRESS_ID = "inspectionport_egress_id";
 
     public InspectionPort(NetworkElement ingressPort, NetworkElement egressPort) {
-        super(ingressPort, egressPort);
+        super(ingressPort, egressPort, null);
     }
 
     public static ImmutableMap<String, Object> updateBindingProfile(String ingressPortId, String egressPortId,
