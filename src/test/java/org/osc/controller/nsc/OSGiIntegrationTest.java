@@ -184,6 +184,11 @@ public class OSGiIntegrationTest {
             public TrustManager[] getTruststoreManager() throws Exception {
                 return new TrustManager[0];
             }
+
+			@Override
+			public String getProviderAdminDomainId() {
+				return "default";
+			}
         }, "foo");
     }
 }
