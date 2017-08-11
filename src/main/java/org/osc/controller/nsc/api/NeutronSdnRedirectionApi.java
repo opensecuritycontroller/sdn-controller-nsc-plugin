@@ -17,8 +17,15 @@
 package org.osc.controller.nsc.api;
 
 import org.apache.commons.lang.NotImplementedException;
+import org.apache.log4j.Logger;
 import org.osc.controller.nsc.api.openstack4j.Endpoint;
+import org.osc.controller.nsc.entities.InspectionHookNSCEntity;
+import org.osc.controller.nsc.entities.InspectionPortNSCEntity;
+import org.osc.controller.nsc.entities.MacAddressNSCEntity;
+import org.osc.controller.nsc.entities.NetworkElementNSCEntity;
+import org.osc.controller.nsc.entities.PortIpNSCEntity;
 import org.osc.controller.nsc.model.InspectionHook;
+import org.osc.controller.nsc.utils.NSCUtils;
 import org.osc.sdk.controller.FailurePolicyType;
 import org.osc.sdk.controller.TagEncapsulationType;
 import org.osc.sdk.controller.api.SdnRedirectionApi;
@@ -30,12 +37,21 @@ import org.osc.sdk.controller.element.VirtualizationConnectorElement;
 import org.osc.sdk.controller.exception.NetworkPortNotFoundException;
 import org.osgi.service.transaction.control.TransactionControl;
 
+import static org.osc.controller.nsc.utils.NSCUtils.makeInspectionHookEntity;
+
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 
 public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
 
+	private static final Logger LOGGER = Logger.getLogger(NeutronSdnRedirectionApi.class);
+	
     private VirtualizationConnectorElement vc;
     private String region;
     
@@ -58,8 +74,22 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
     @Override
     public InspectionHookElement getInspectionHook(NetworkElement inspectedPort, InspectionPortElement inspectionPort)
             throws Exception {
-        try (NeutronSecurityControllerApi neutronApi = new NeutronSecurityControllerApi(new Endpoint(this.vc))) {
-            return neutronApi.getInspectionHookByPorts(this.region, inspectedPort.getElementId(), inspectionPort);
+//        try (NeutronSecurityControllerApi neutronApi = new NeutronSecurityControllerApi(new Endpoint(this.vc))) {
+//            return neutronApi.getInspectionHookByPorts(this.region, inspectedPort.getElementId(), inspectionPort);
+//        }
+    	CriteriaBuilder cb = this.em.getCriteriaBuilder();
+    	String inspectedPortId = (inspectedPort != null? inspectedPort.getElementId() : null);
+        CriteriaQuery<InspectionHookNSCEntity> q = cb.createQuery(InspectionHookNSCEntity.class);
+        Root<InspectionHookNSCEntity> r = q.from(InspectionHookNSCEntity.class);
+        q.where(cb.equal(r.get("inspectedPortId"), inspectedPortId));
+        			   
+
+        try {
+        	InspectionHookNSCEntity entity = this.em.createQuery(q).getSingleResult();
+        	return NSCUtils.makeInspectionHookElement(entity);
+        } catch (Exception e) {
+            LOGGER.error(String.format("Finding Network Element %d :", inspectedPortId), e); // TODO
+            return null;
         }
     }
 
@@ -170,20 +200,25 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
 
     @Override
     public void updateInspectionHook(InspectionHookElement existingInspectionHook) throws Exception {
-        NetworkElement inspectedPort = existingInspectionHook.getInspectedPort();
-        InspectionPortElement inspectionPort = existingInspectionHook.getInspectionPort();
+//    	InspectionHookNSCEntity inspHookEntity = makeInspectionHookEntity(inspectedPort, inspectionPort, 
+//				tag, encType, order, failurePolicyType);    	
+//
+//    		txControl.required(() -> { em.persist(inspHookEntity); em.flush(); return null; });
+//        NetworkElement inspectedPort = existingInspectionHook.getInspectedPort();
+//        InspectionPortElement inspectionPort = existingInspectionHook.getInspectionPort();
 
-        try (NeutronSecurityControllerApi neutronApi = new NeutronSecurityControllerApi(new Endpoint(this.vc))) {
-            InspectionHook inspectionHook = neutronApi.getInspectionHookByPorts(this.region, inspectedPort.getElementId(),
-                    inspectionPort);
-            inspectionHook.setInspectedPortId(inspectedPort.getElementId());
-            inspectionHook.setInspectionPort(existingInspectionHook.getInspectionPort());
-            inspectionHook.setOrder(existingInspectionHook.getOrder());
-            inspectionHook.setTag(existingInspectionHook.getTag());
-            inspectionHook.setEncType(existingInspectionHook.getEncType().toString());
-            inspectionHook.setFailurePolicyType(existingInspectionHook.getFailurePolicyType().toString());
-            neutronApi.updateInspectionHook(this.region, inspectionHook);
-        }
+//        try (NeutronSecurityControllerApi neutronApi = new NeutronSecurityControllerApi(new Endpoint(this.vc))) {
+//            InspectionHookNSCEntity inspectionHook = new InspectionHookNSCEntity();
+            // neutronApi.getInspectionHookByPorts(this.region, inspectedPort.getElementId(),
+//                    inspectionPort);
+//            inspectionHook.setInspectedPortId(inspectedPort.getElementId());
+//            inspectionHook.setInspectionPort(existingInspectionHook.getInspectionPort());
+//            inspectionHook.setOrder(existingInspectionHook.getOrder());
+//            inspectionHook.setTag(existingInspectionHook.getTag());
+//            inspectionHook.setEncType(existingInspectionHook.getEncType().toString());
+//            inspectionHook.setFailurePolicyType(existingInspectionHook.getFailurePolicyType().toString());
+//            neutronApi.updateInspectionHook(this.region, inspectionHook);
+//        }
     }
 
     @Override
@@ -232,4 +267,8 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
         throw new NotImplementedException("Not expected to be called for NSC. "
                 + "Currently only called for SDN controllers that support port group.");
     }
+    
+    
+
+    
 }

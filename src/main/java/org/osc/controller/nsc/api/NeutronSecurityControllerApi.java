@@ -98,12 +98,12 @@ public class NeutronSecurityControllerApi extends BaseOpenstack4jApi {
                 + inspectionEgressPortId + "'");
 
         Port ingressPort = getPortOrThrow(region, inspectionIngressPortId, PortType.INSPECTION);
-        updateInspectionPortProfile(region, ingressPort, inspectionIngressPortId, inspectionEgressPortId);
+//        updateInspectionPortProfile(region, ingressPort, inspectionIngressPortId, inspectionEgressPortId);
 
-        if (!inspectionIngressPortId.equals(inspectionEgressPortId)) {
-            Port egressPort = getPortOrThrow(region, inspectionEgressPortId, PortType.INSPECTION);
-            updateInspectionPortProfile(region, egressPort, inspectionIngressPortId, inspectionEgressPortId);
-        }
+//        if (!inspectionIngressPortId.equals(inspectionEgressPortId)) {
+//            Port egressPort = getPortOrThrow(region, inspectionEgressPortId, PortType.INSPECTION);
+//            updateInspectionPortProfile(region, egressPort, inspectionIngressPortId, inspectionEgressPortId);
+//        }
     }
 
     // Inspection Hooks

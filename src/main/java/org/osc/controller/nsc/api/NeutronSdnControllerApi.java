@@ -98,8 +98,6 @@ public class NeutronSdnControllerApi implements SdnControllerApi {
     
     @Activate
     public void activate(BundleContext context) {
-    	// TODO
-    	System.err.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>> >>>>>>>>>>>>>>>>>>>>>>>>>>>> Activating " + getClass().getSimpleName());
     }
 
     @Override
@@ -148,8 +146,8 @@ public class NeutronSdnControllerApi implements SdnControllerApi {
     }
 
     @Override
-    public void close() throws Exception {
-        // Nothing to do
+    public void close() throws Exception {    	
+    	// this.em.close();    	
     }
 
 }

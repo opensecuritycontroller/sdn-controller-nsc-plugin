@@ -1,8 +1,15 @@
 package org.osc.controller.nsc.entities;
 
+import static javax.persistence.FetchType.EAGER;
+import static javax.persistence.FetchType.LAZY;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import org.osc.controller.nsc.model.InspectionHook;
@@ -16,7 +23,7 @@ public class InspectionHookNSCEntity {
 	private Long id;
 	private String hookId;
 	private String inspectedPortId;
-//    private InspectionPortElement inspectionPort; // TODOS
+    private InspectionPortNSCEntity inspectionPort; 
     private Long tag;
     private Long hookOrder;
     private String encType;
@@ -55,15 +62,21 @@ public class InspectionHookNSCEntity {
 	public void setInspectedPortId(String inspectedPortId) {
 		this.inspectedPortId = inspectedPortId;
 	}
-//	public InspectionPortElement getInspectionPort() {
-//		return inspectionPort;
-//	}
-//	public void setInspectionPort(InspectionPortElement inspectionPort) {
-//		this.inspectionPort = inspectionPort;
-//	}
+
+	@OneToOne(cascade=CascadeType.ALL, orphanRemoval=true, fetch=LAZY, optional=true, targetEntity=InspectionPortNSCEntity.class)
+	@JoinColumn(name="inspectionPortId", nullable=true, unique=true, updatable=true)
+	public InspectionPortNSCEntity getInspectionPort() {
+		return inspectionPort;
+	}
+	public void setInspectionPort(InspectionPortNSCEntity inspectionPort) {
+		this.inspectionPort = inspectionPort;
+	}
 	public Long getTag() {
 		return tag;
 	}
+	
+	
+	
 	public void setTag(Long tag) {
 		this.tag = tag;
 	}

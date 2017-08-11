@@ -1,0 +1,11 @@
+Meta-Persistence: META-INF/persistence.xml
+
+#These are needed due to a bug in Hibernate
+
+Import-Package: org.hibernate.proxy,javassist.util.proxy,*
+
+Export-Package: \
+	org.osc.controller.nsc.api, \
+	org.osc.controller.nsc.api.openstack4j, \
+	org.osc.controller.nsc.entities, \
+	org.osc.controller.nsc.model

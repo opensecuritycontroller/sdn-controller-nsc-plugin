@@ -1,10 +1,13 @@
 package org.osc.controller.nsc.entities;
 
 
+import static javax.persistence.FetchType.EAGER;
 import static javax.persistence.FetchType.LAZY;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -20,7 +23,10 @@ public class InspectionPortNSCEntity {
 	private NetworkElementNSCEntity ingress;
 	private NetworkElementNSCEntity egress;
 	
-    @Id
+	@Column(name="inspectionHookId")
+	private InspectionHookNSCEntity inspectionHook;
+	
+	@Id
     @GeneratedValue
 	public Long getId() {
 		return id;
@@ -31,23 +37,29 @@ public class InspectionPortNSCEntity {
 
 	@OneToOne(cascade=CascadeType.ALL, orphanRemoval=true, fetch=LAZY, mappedBy="inspectionPort", optional=true, targetEntity=NetworkElementNSCEntity.class)
 	@JoinColumn(name="ingressId", nullable=true, unique=true, updatable=true)
-	public NetworkElementNSCEntity getIngressId() {
+	public NetworkElementNSCEntity getIngress() {
 		return ingress;
 	}
-	public void setIngressId(NetworkElementNSCEntity ingressId) { 	
-		this.ingress = ingressId;
+	public void setIngress(NetworkElementNSCEntity ingress) { 	
+		this.ingress = ingress;
 	}
 
 	@OneToOne(cascade=CascadeType.ALL, orphanRemoval=true, fetch=LAZY, mappedBy="inspectionPort", optional=true, targetEntity=NetworkElementNSCEntity.class)
 	@JoinColumn(name="egressId", nullable=true, unique=true, updatable=true)
-	public NetworkElementNSCEntity getEgressId() {
+	public NetworkElementNSCEntity getEgress() {
 		return egress;
 	}
-	public void setEgressId(NetworkElementNSCEntity egressId) {
-		this.egress = egressId;
+	public void setEgress(NetworkElementNSCEntity egress) {
+		this.egress = egress;
 	}
 	
-//	@OneToOne(cascade=CascadeType.ALL, orphanRemoval=true, fetch=LAZY, mappedBy="inspectionPort", optional=true)
-//	@JoinColumn(name="ingressId", nullable=true)
+	@OneToOne(mappedBy="inspectionPort")
+	@JoinColumn(name="inspectionHookId", nullable=true)
+    public InspectionHookNSCEntity getInspectionHook() {
+		return inspectionHook;
+	}
+	public void setInspectionHook(InspectionHookNSCEntity inspectionHook) {
+		this.inspectionHook = inspectionHook;
+	}
 
 }
