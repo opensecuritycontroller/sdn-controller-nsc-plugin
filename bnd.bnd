@@ -4,10 +4,10 @@ Meta-Persistence: META-INF/persistence.xml
 
 Import-Package: org.hibernate.proxy,javassist.util.proxy,*
 
-#TODO : utils for testing only! REMOVE!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 Export-Package: \
 	org.osc.controller.nsc.api, \
-	org.osc.controller.nsc.api.openstack4j, \
 	org.osc.controller.nsc.entities, \
-	org.osc.controller.nsc.model, \
-	org.osc.controller.nsc.utils	
+	org.osc.controller.nsc.utils
+		
+#TODO utils not exported

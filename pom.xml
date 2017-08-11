@@ -22,10 +22,6 @@
     <version>1.0.0-SNAPSHOT</version>
     <name>org.osc.plugin:sdn-controller-nsc-plugin</name>
 
-    <properties>
-        <openstack4j.version>3.0.4</openstack4j.version>
-    </properties>
-
     <repositories>
         <repository>
             <id>osc-nexus</id>
@@ -64,38 +60,6 @@
 		</dependency>
 
       
-        <!-- openstack4j OpenStack dependencies -->
-        <dependency>
-            <groupId>org.pacesys</groupId>
-            <artifactId>openstack4j</artifactId>
-            <version>3.0.4</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.pacesys.openstack4j.connectors</groupId>
-                    <artifactId>openstack4j-resteasy</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                    <artifactId>jackson-databind</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>2.8.5</version>
-        </dependency>
-        <dependency>
-            <groupId>org.pacesys.openstack4j.connectors</groupId>
-            <artifactId>openstack4j-jersey2</artifactId>
-            <version>3.0.4</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                    <artifactId>jackson-databind</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
 
         <!-- An OSGi bundle version of the AOP dependency -->
         <dependency>
