@@ -1,5 +1,7 @@
 package org.osc.controller.nsc.utils;
 
+import static java.util.stream.Collectors.toList;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -56,14 +58,14 @@ public class NSCUtils {
     	List<String> macAddrStrings = ne.getMacAddresses();
     	List<MacAddressNSCEntity> macAddrEntities = null;
     	if (macAddrStrings != null) {
-    		macAddrEntities = macAddrStrings.stream().map(s -> makeMacAddr(s)).collect(Collectors.toList());
+    		macAddrEntities = macAddrStrings.stream().map(s -> makeMacAddr(s)).collect(toList());
     		macAddrEntities.stream().forEach(p -> { p.setElement(retVal);});
     	} 		
     	
     	List<String> portIpStrings = ne.getPortIPs();
     	List<PortIpNSCEntity> portIpEntities = null;
     	if (portIpStrings != null) {
-    		portIpEntities = portIpStrings.stream().map(s -> makePortIp(s)).collect(Collectors.toList());
+    		portIpEntities = portIpStrings.stream().map(s -> makePortIp(s)).collect(toList());
     		portIpEntities.stream().forEach(p -> { p.setElement(retVal);});
     	} 
     	
@@ -80,13 +82,13 @@ public class NSCUtils {
     	NetworkElement ingress = ipe.getIngressPort();
     	if (ingress != null) {
     		NetworkElementNSCEntity ingressEntity = makeNetworkElementEntity(ingress);
-    		ingressEntity.setInspectionPort(retVal);
+    		ingressEntity.setIngressInspectionPort(retVal);
     		retVal.setIngress(ingressEntity);
     	}
     	NetworkElement egress = ipe.getEgressPort();
     	if (egress != null) {
     		NetworkElementNSCEntity egressEntity = makeNetworkElementEntity(egress);
-    		egressEntity.setInspectionPort(retVal);
+    		egressEntity.setEgressInspectionPort(retVal);
     		retVal.setIngress(egressEntity);
     	}
     	
@@ -121,12 +123,20 @@ public class NSCUtils {
     		return null;
     	}
     	
-    	final InspectionPortNSCEntity ipE = entity.getInspectionPort();
+    	InspectionPortNSCEntity iiPe = entity.getIngressInspectionPort();
+    	InspectionPortNSCEntity eiPe = entity.getEgressInspectionPort();
     	
+    	final String parent;
+    	if (iiPe != null) {
+    		parent = iiPe.getId() != null ? iiPe.getId().toString() : null;
+    	} else {
+    		parent = eiPe.getId() != null ? eiPe.getId().toString() : null;
+    	}
+    		
     	NetworkElement retVal = new NetworkElement() {
 			private List<String> macAddresses = entity.getMacAddresses();
 			private List<String> portIps = entity.getPortIps();
-    		private String parentId = ipE != null ? ipE.getId().toString() : null;
+    		private String parentId = parent; 
     		private String elementId = entity.getElementId();
     		
 			@Override
@@ -241,6 +251,42 @@ public class NSCUtils {
 
     public NetworkElementNSCEntity networkElementEntityById(Long id) {
     	return em.find(NetworkElementNSCEntity.class, id);
+    }
+
+    public static NetworkElement makeNetworkElement(List<MacAddressNSCEntity> mas, 
+    		List<PortIpNSCEntity> ips, 
+    		Long pid, Long eid) {
+
+    	final List<String> macAddresses = mas != null ? 
+    			mas.stream().map(s -> s.getMacAddress()).collect(Collectors.toList()) : null;
+		final List<String> portIps = ips != null ? 
+				ips.stream().map(s -> s.getPortIp()).collect(Collectors.toList()) : null;
+		final String parentId = pid != null ? pid.toString() : null;
+		final String elementId = eid != null ? eid.toString() : null;
+
+		NetworkElement retVal = new NetworkElement() {
+			@Override
+			public List<String> getPortIPs() {
+				return portIps;
+			}
+
+			@Override
+			public String getParentId() {
+				return parentId;
+			}
+
+			@Override
+			public List<String> getMacAddresses() {
+				return macAddresses;
+			}
+
+			@Override
+			public String getElementId() {
+				return elementId;
+			}
+		};
+
+		return retVal;
     }
     
 }

@@ -29,7 +29,8 @@ public class NetworkElementNSCEntity {
 	private List<MacAddressNSCEntity> macAddressEntities;
 	private List<PortIpNSCEntity> portIpEntities;
 	
-	private InspectionPortNSCEntity inspectionPort;
+	private InspectionPortNSCEntity ingressInspectionPort;
+	private InspectionPortNSCEntity egressInspectionPort;
 	
 	@Id
     @GeneratedValue
@@ -62,13 +63,22 @@ public class NetworkElementNSCEntity {
 		this.portIpEntities = portIpEntities;
 	}
 
-	@OneToOne(fetch=LAZY, optional=false)
-	@JoinColumn(name="inspectionPortId", nullable=true)
-	public InspectionPortNSCEntity getInspectionPort() {
-		return inspectionPort;
+	@OneToOne(fetch=LAZY, optional=true)
+	@JoinColumn(name="ingressPortId", nullable=true)
+	public InspectionPortNSCEntity getIngressInspectionPort() {
+		return ingressInspectionPort;
 	}
-	public void setInspectionPort(InspectionPortNSCEntity inspectionPort) {
-		this.inspectionPort = inspectionPort;
+	public void setIngressInspectionPort(InspectionPortNSCEntity inspectionPort) {
+		this.ingressInspectionPort = inspectionPort;
+	}
+
+	@OneToOne(fetch=LAZY, optional=true)
+	@JoinColumn(name="egressPortId", nullable=true)
+	public InspectionPortNSCEntity getEgressInspectionPort() {
+		return egressInspectionPort;
+	}
+	public void setEgressInspectionPort(InspectionPortNSCEntity inspectionPort) {
+		this.egressInspectionPort = inspectionPort;
 	}
 
 	@Transient

@@ -410,8 +410,8 @@ public class OSGiIntegrationTest {
     	egress.setMacAddressEntities(Arrays.asList(eMac1, eMac2));
     	egress.setPortIpEntities(Arrays.asList(ePort1, ePort2));
     	
-    	ingress.setInspectionPort(inspectionPort);
-    	egress.setInspectionPort(inspectionPort);
+    	ingress.setIngressInspectionPort(inspectionPort);
+    	egress.setEgressInspectionPort(inspectionPort);
     	
     	inspectionPort.setIngress(ingress);
     	inspectionPort.setEgress(egress);
@@ -420,6 +420,7 @@ public class OSGiIntegrationTest {
     	inspectionHook.setInspectionPort(inspectionPort);
     	
     	txControl.required(() -> { em.persist(inspectionHook); em.flush(); return null; });
+    	assertNotNull(inspectionPort.getId());
     	
     	List<MacAddressNSCEntity> ls;
     	
@@ -440,26 +441,24 @@ public class OSGiIntegrationTest {
 			assertTrue("EM is closed!", em.isOpen());
 			
 			InspectionHookNSCEntity ph = em.find(InspectionHookNSCEntity.class, 
-						   inspectionHook.getId());
+						   						 inspectionHook.getId());
 			InspectionPortNSCEntity iprt = em.find(InspectionPortNSCEntity.class, inspectionPort.getId());
-//						
-//			assertNotNull(inspectionPort.getInspectionHook());
-//			assertEquals(inspectionPort.getId(), iprt.getId());
+						
+			assertNotNull(inspectionPort.getInspectionHook());
+			assertEquals(inspectionPort.getId(), iprt.getId());
 			return ph;
 		});
-    	
-
     	
     	
     	assertNotNull(inspectionHook.getId());
     	assertEquals(inspectionHook.getId(), persistedHook.getId());
-    	assertNotNull(persistedHook.getInspectionPort());
-    	assertEquals(inspectionHook.getInspectionPort().getId(), persistedHook.getInspectionPort().getId());
-	 
     	
+    	InspectionPortNSCEntity persistedPort = persistedHook.getInspectionPort();
     	
+    	assertNotNull(persistedPort);
+    	assertEquals(inspectionHook.getInspectionPort().getId(), persistedPort.getId());
+
     	
-    	assertNotNull(inspectionPort.getId());
     	
         VirtualizationConnectorElement vce = new VirtualizationConnectorElement() {
 
