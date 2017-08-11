@@ -494,6 +494,55 @@
                             </tasks>
                         </configuration>
                     </execution>
+                       
+					 <execution>
+					  <id>h2-fragment</id>
+					  <phase>prepare-package</phase>
+					  <goals>
+					    <goal>run</goal>
+					  </goals>
+					  <configuration>
+					    <tasks>
+					      <jar destfile="C:\Users\dgerenrx\prog\osc\sdn-controller-nsc-plugin\target/plugin/h2ServiceExport.jar">
+					        <manifest>
+					          <attribute name="Bundle-ManifestVersion" value="2" />
+					          <attribute name="Bundle-SymbolicName" value="org.osc.manager.nsc.h2.fragment" />
+					          <attribute name="Bundle-Version" value="1.0.0" />
+					          <attribute name="Fragment-Host" value="org.h2;version=&quot;[1.3,2)&quot;" />
+					          <attribute name="Provide-Capability" value="osgi.service;objectClass=org.osgi.service.jdbc.DataSourceFactory" />
+					        </manifest>
+					      </jar>
+					      <jar destfile="C:\Users\dgerenrx\prog\osc\sdn-controller-nsc-plugin\target/plugin/ariesJpaServiceExport.jar">
+					        <manifest>
+					          <attribute name="Bundle-ManifestVersion" value="2" />
+					          <attribute name="Bundle-SymbolicName" value="org.osc.manager.nsc.aries.jpa.fragment" />
+					          <attribute name="Bundle-Version" value="1.0.0" />
+					          <attribute name="Fragment-Host" value="org.apache.aries.jpa.container;version=&quot;[2.5,2.6)&quot;" />
+					          <attribute name="Provide-Capability" value="osgi.service;objectClass=org.osgi.service.jpa.EntityManagerFactoryBuilder" />
+					        </manifest>
+					      </jar>
+					      <jar destfile="C:\Users\dgerenrx\prog\osc\sdn-controller-nsc-plugin\target/plugin/ariesTxControlServiceExport.jar">
+					        <manifest>
+					          <attribute name="Bundle-ManifestVersion" value="2" />
+					          <attribute name="Bundle-SymbolicName" value="org.osc.manager.nsc.aries.tx.control.fragment" />
+					          <attribute name="Bundle-Version" value="1.0.0" />
+					          <attribute name="Fragment-Host" value="tx-control-service-local;version=&quot;[0.0.2,0.0.3)&quot;" />
+					          <attribute name="Provide-Capability" value="osgi.service;objectClass=org.osgi.service.transaction.control.TransactionControl;osgi.local.enabled=true" />
+					        </manifest>
+					      </jar>
+					      <jar destfile="C:\Users\dgerenrx\prog\osc\sdn-controller-nsc-plugin\target/plugin/hibernateServiceExport.jar">
+					        <manifest>
+					          <attribute name="Bundle-ManifestVersion" value="2" />
+					          <attribute name="Bundle-SymbolicName" value="org.osc.manager.nsc.hibernate.fragment" />
+					          <attribute name="Bundle-Version" value="1.0.0" />
+					          <attribute name="Fragment-Host" value="org.hibernate.osgi;version=&quot;[5.2,5.3)&quot;" />
+					          <attribute name="Provide-Capability" value="osgi.service;objectClass=javax.persistence.spi.PersistenceProvider" />
+					        </manifest>
+					      </jar>
+					    </tasks>
+					  </configuration>
+					</execution>
+                    
                 </executions>
             </plugin>
 >>>>>>> Added autocloseable interface for openstack4j to solve reset region
