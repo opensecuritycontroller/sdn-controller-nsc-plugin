@@ -1,26 +1,20 @@
 package org.osc.controller.nsc.entities;
 
-import static javax.persistence.FetchType.EAGER;
 import static javax.persistence.FetchType.LAZY;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
-import org.osc.controller.nsc.model.InspectionHook;
-import org.osc.sdk.controller.element.InspectionPortElement;
-
 
 @Entity
 @Table(name="InspectionHook")
 public class InspectionHookNSCEntity {
 	
-	private Long id;
 	private String hookId;
 	private NetworkElementNSCEntity inspectedPort;
     private InspectionPortNSCEntity inspectionPort; 
@@ -31,17 +25,8 @@ public class InspectionHookNSCEntity {
 	
     public InspectionHookNSCEntity() {}
     
- 
-    
 	
-    @Id
-    @GeneratedValue
-    public Long getId() {
-		return id;
-	}
-	public void setId(Long id) {
-		this.id = id;
-	}
+	@Id
 	public String getHookId() {
 		return hookId;
 	}
@@ -49,7 +34,7 @@ public class InspectionHookNSCEntity {
 		this.hookId = hookId;
 	}
 	
-	@OneToOne(fetch=LAZY, optional=true)
+	@OneToOne(cascade=CascadeType.ALL, orphanRemoval=false, fetch=LAZY, optional=true, mappedBy="inspectionHook")
 	@JoinColumn(name="inspectedPortId", nullable=true, unique=true, updatable=true)
 	public NetworkElementNSCEntity getInspectedPort() {
 		return inspectedPort;

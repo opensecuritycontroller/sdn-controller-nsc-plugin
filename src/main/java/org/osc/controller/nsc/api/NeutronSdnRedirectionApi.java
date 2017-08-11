@@ -16,14 +16,17 @@
  *******************************************************************************/
 package org.osc.controller.nsc.api;
 
+import java.util.List;
+
+import javax.persistence.EntityManager;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.log4j.Logger;
 import org.osc.controller.nsc.api.openstack4j.Endpoint;
 import org.osc.controller.nsc.entities.InspectionHookNSCEntity;
-import org.osc.controller.nsc.entities.InspectionPortNSCEntity;
-import org.osc.controller.nsc.entities.MacAddressNSCEntity;
-import org.osc.controller.nsc.entities.NetworkElementNSCEntity;
-import org.osc.controller.nsc.entities.PortIpNSCEntity;
 import org.osc.controller.nsc.model.InspectionHook;
 import org.osc.controller.nsc.utils.NSCUtils;
 import org.osc.sdk.controller.FailurePolicyType;
@@ -36,15 +39,6 @@ import org.osc.sdk.controller.element.NetworkElement;
 import org.osc.sdk.controller.element.VirtualizationConnectorElement;
 import org.osc.sdk.controller.exception.NetworkPortNotFoundException;
 import org.osgi.service.transaction.control.TransactionControl;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 
 public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
 

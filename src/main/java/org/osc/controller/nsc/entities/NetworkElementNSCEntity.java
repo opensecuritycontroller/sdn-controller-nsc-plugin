@@ -29,7 +29,7 @@ public class NetworkElementNSCEntity {
 	
 	private InspectionPortNSCEntity ingressInspectionPort;
 	private InspectionPortNSCEntity egressInspectionPort;
-	
+	private InspectionHookNSCEntity inspectionHook;
 	
 	@Id
 	public String getElementId() {
@@ -74,6 +74,16 @@ public class NetworkElementNSCEntity {
 		this.egressInspectionPort = inspectionPort;
 	}
 
+	@OneToOne(fetch=LAZY, optional=true)
+	@JoinColumn(name="inspectionHookId", nullable=true)
+	public InspectionHookNSCEntity getInspectionHook() {
+		return inspectionHook;
+	}
+	public void setInspectionHook(InspectionHookNSCEntity inspectionHook) {
+		this.inspectionHook = inspectionHook;
+	}
+
+	
 	@Transient
 	public List<String> getPortIps() {
 		return portIpEntities != null ? portIpEntities.stream().map(PortIpNSCEntity::getPortIp).collect(toList())

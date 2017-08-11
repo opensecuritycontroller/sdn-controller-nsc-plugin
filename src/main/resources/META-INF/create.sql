@@ -7,10 +7,10 @@ drop table if exists NetworkElement;
 drop table if exists MacAddress;
 drop table if exists PortIp;
 
-create table if not exists InspectionHook (id bigint not null, hookId varchar(255), inspectedPortId varchar(255), inspectionPortId bigint, tag bigint, hookOrder bigint, encType varchar(255), failurePolicyType varchar(255), primary key (id) );
+create table if not exists InspectionHook (hookId varchar(255), inspectedPortId varchar(255), inspectionPortId bigint, tag bigint, hookOrder bigint, encType varchar(255), failurePolicyType varchar(255), primary key (hookId) );
 create table if not exists InspectionPort (id bigint not null, inspectionHookId bigint, ingressId varchar(255), egressId varchar(255), primary key (id) );
 
-create table if not exists NetworkElement (elementId varchar(255) not null, ingressPortId bigint, egressPortId bigint, primary key (elementId) );
+create table if not exists NetworkElement (elementId varchar(255) not null, inspectionHookId varchar(255), ingressPortId bigint, egressPortId bigint, primary key (elementId) );
 create table if not exists MacAddress (id bigint not null, elementId varchar(255), macAddress varchar(128), primary key (id) );
 create table if not exists PortIp (id bigint not null, elementId varchar(255), portIp varchar(128), primary key (id) );
 

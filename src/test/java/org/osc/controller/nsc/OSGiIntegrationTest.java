@@ -16,6 +16,7 @@
  *******************************************************************************/
 package org.osc.controller.nsc;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.singletonMap;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
@@ -97,10 +98,14 @@ public class OSGiIntegrationTest {
 	private static final String EMAC2_STR = "ee:ff:aa:bb:cc:02";
 
 	private static final String EMAC1_STR = "ee:ff:aa:bb:cc:01";
-
+	
+	private static final String IMAC1_STR = "ff:ff:aa:bb:cc:01";
+	
 	private static final String IMAC2_STR = "ff:ff:aa:bb:cc:02";
 
-	private static final String IMAC1_STR = "ff:ff:aa:bb:cc:01";
+	private static final String INSPMAC1_STR = "aa:aa:aa:bb:cc:01";
+	
+	private static final String HOOK_ID = "TEST_INSP_HOOK";
 
 	@Inject
     BundleContext context;
@@ -372,14 +377,19 @@ public class OSGiIntegrationTest {
     	
     	NetworkElementNSCEntity ingress = new NetworkElementNSCEntity();
     	NetworkElementNSCEntity egress = new NetworkElementNSCEntity();
+    	NetworkElementNSCEntity inspected = new NetworkElementNSCEntity();
     	
     	ingress.setElementId(IMAC1_STR + IMAC2_STR);
     	egress.setElementId(EMAC1_STR + EMAC2_STR);
+    	inspected.setElementId(IMAC2_STR + EMAC1_STR); 
+    	
     	
     	MacAddressNSCEntity iMac1 = new MacAddressNSCEntity();
     	MacAddressNSCEntity iMac2 = new MacAddressNSCEntity();
     	MacAddressNSCEntity eMac1 = new MacAddressNSCEntity();
     	MacAddressNSCEntity eMac2 = new MacAddressNSCEntity();
+    	MacAddressNSCEntity inspMac = new MacAddressNSCEntity();
+    	
     	
     	PortIpNSCEntity iPort1 = new PortIpNSCEntity();
     	PortIpNSCEntity iPort2 = new PortIpNSCEntity();
@@ -390,6 +400,8 @@ public class OSGiIntegrationTest {
     	iMac2.setMacAddress(IMAC2_STR);
     	eMac1.setMacAddress(EMAC1_STR);
     	eMac2.setMacAddress(EMAC2_STR);
+    	
+    	inspMac.setMacAddress(INSPMAC1_STR);
     	
     	iPort1.setPortIp(IADDR1_STR);
     	iPort2.setPortIp(IADDR2_STR);
@@ -407,11 +419,13 @@ public class OSGiIntegrationTest {
     	eMac2.setElement(egress);
 
     	
-    	ingress.setMacAddressEntities(Arrays.asList(iMac1, iMac2));
-    	ingress.setPortIpEntities(Arrays.asList(iPort1, iPort2));
+    	ingress.setMacAddressEntities(asList(iMac1, iMac2));
+    	ingress.setPortIpEntities(asList(iPort1, iPort2));
 
-    	egress.setMacAddressEntities(Arrays.asList(eMac1, eMac2));
-    	egress.setPortIpEntities(Arrays.asList(ePort1, ePort2));
+    	egress.setMacAddressEntities(asList(eMac1, eMac2));
+    	egress.setPortIpEntities(asList(ePort1, ePort2));
+    	
+    	inspected.setMacAddressEntities(asList(inspMac));
     	
     	ingress.setIngressInspectionPort(inspectionPort);
     	egress.setEgressInspectionPort(inspectionPort);
@@ -422,12 +436,17 @@ public class OSGiIntegrationTest {
     	inspectionPort.setInspectionHook(inspectionHook);
     	inspectionHook.setInspectionPort(inspectionPort);
     	
+    	inspected.setInspectionHook(inspectionHook);
+    	inspectionHook.setInspectedPort(inspected);
+    	
+    	inspectionHook.setHookId(HOOK_ID);
+    	
     	txControl.required(() -> { em.persist(inspectionHook); em.flush(); return null; });
     	assertNotNull(inspectionPort.getId());
     	
-    	List<MacAddressNSCEntity> ls;
+    	List<MacAddressNSCEntity> lsMacs;
     	
-    	ls = txControl.requiresNew(() -> { 
+    	lsMacs = txControl.requiresNew(() -> { 
         	CriteriaBuilder cb = this.em.getCriteriaBuilder();
         	
             CriteriaQuery<MacAddressNSCEntity> query = cb.createQuery(MacAddressNSCEntity.class);
@@ -437,14 +456,26 @@ public class OSGiIntegrationTest {
     		
 		});
 
-    	assertEquals(4, ls.size());
+    	assertEquals(5, lsMacs.size());
+
+    	List<PortIpNSCEntity> lsPorts;
     	
+    	lsPorts = txControl.requiresNew(() -> { 
+        	CriteriaBuilder cb = this.em.getCriteriaBuilder();
+        	
+            CriteriaQuery<PortIpNSCEntity> query = cb.createQuery(PortIpNSCEntity.class);
+            Root<PortIpNSCEntity> from = query.from(PortIpNSCEntity.class);
+            query = query.select(from).distinct(true);            
+            return this.em.createQuery(query).getResultList();
+    		
+		});
+    	assertEquals(4, lsPorts.size());
     	 
     	InspectionHookNSCEntity persistedHook = txControl.required(() -> { 
 			assertTrue("EM is closed!", em.isOpen());
 			
 			InspectionHookNSCEntity ph = em.find(InspectionHookNSCEntity.class, 
-						   						 inspectionHook.getId());
+						   						 inspectionHook.getHookId());
 			InspectionPortNSCEntity iprt = em.find(InspectionPortNSCEntity.class, inspectionPort.getId());
 						
 			assertNotNull(inspectionPort.getInspectionHook());
@@ -453,8 +484,8 @@ public class OSGiIntegrationTest {
 		});
     	
     	
-    	assertNotNull(inspectionHook.getId());
-    	assertEquals(inspectionHook.getId(), persistedHook.getId());
+    	assertNotNull(inspectionHook.getHookId());
+    	assertEquals(inspectionHook.getHookId(), persistedHook.getHookId());
     	
     	InspectionPortNSCEntity persistedPort = persistedHook.getInspectionPort();
     	
