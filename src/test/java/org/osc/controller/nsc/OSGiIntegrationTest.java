@@ -65,7 +65,9 @@ import org.osc.controller.nsc.entities.InspectionPortNSCEntity;
 import org.osc.controller.nsc.entities.MacAddressNSCEntity;
 import org.osc.controller.nsc.entities.NetworkElementNSCEntity;
 import org.osc.controller.nsc.entities.PortIpNSCEntity;
+import org.osc.controller.nsc.utils.NSCUtils;
 import org.osc.sdk.controller.api.SdnControllerApi;
+import org.osc.sdk.controller.element.NetworkElement;
 import org.osc.sdk.controller.element.VirtualizationConnectorElement;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -429,6 +431,7 @@ public class OSGiIntegrationTest {
     	
     	ingress.setIngressInspectionPort(inspectionPort);
     	egress.setEgressInspectionPort(inspectionPort);
+    	inspected.setInspectionHook(inspectionHook);
     	
     	inspectionPort.setIngress(ingress);
     	inspectionPort.setEgress(egress);
@@ -491,85 +494,16 @@ public class OSGiIntegrationTest {
     	
     	assertNotNull(persistedPort);
     	assertEquals(inspectionHook.getInspectionPort().getId(), persistedPort.getId());
-
     	
     	
-        VirtualizationConnectorElement vce = new VirtualizationConnectorElement() {
+    	// TODO : Separate!
+    	NSCUtils utils = new NSCUtils(em, txControl);
 
-            @Override
-            public boolean isProviderHttps() {
-                return false;
-            }
-
-            @Override
-            public boolean isControllerHttps() {
-                return false;
-            }
-
-            @Override
-            public String getProviderUsername() {
-                return "user";
-            }
-
-            @Override
-            public String getProviderPassword() {
-                return "password";
-            }
-
-            @Override
-            public String getProviderIpAddress() {
-                return "127.0.0.1";
-            }
-
-            @Override
-            public Map<String, String> getProviderAttributes() {
-                return new HashMap<>();
-            }
-
-            @Override
-            public String getProviderAdminTenantName() {
-                return "bar";
-            }
-
-            @Override
-            public String getProviderAdminDomainId() {
-                return "default";
-            }
-
-            @Override
-            public String getName() {
-                return "baz";
-            }
-
-            @Override
-            public String getControllerUsername() {
-                return "fizz";
-            }
-
-            @Override
-            public String getControllerPassword() {
-                return "buzz";
-            }
-
-            @Override
-            public String getControllerIpAddress() {
-                return "127.0.0.1";
-            }
-
-            @Override
-            public SSLContext getSslContext() {
-                try {
-                    return SSLContext.getDefault();
-                } catch (NoSuchAlgorithmException e) {
-                    e.printStackTrace();
-                }
-                return null;
-            }
-
-            @Override
-            public TrustManager[] getTruststoreManager() throws Exception {
-                return new TrustManager[0];
-            }
-        };
+    	NetworkElement ingressElement = NSCUtils.makeNetworkElement(ingress);
+    	NetworkElement egressElement = NSCUtils.makeNetworkElement(egress);
+    	InspectionPortNSCEntity foundPort = utils.inspPortByNetworkElements(ingressElement, egressElement);
+    	
+    	assertNotNull(foundPort);
+    	assertEquals(inspectionPort.getId(), foundPort.getId());
     }
 }

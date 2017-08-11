@@ -27,6 +27,7 @@ import org.apache.commons.lang.NotImplementedException;
 import org.apache.log4j.Logger;
 import org.osc.controller.nsc.api.openstack4j.Endpoint;
 import org.osc.controller.nsc.entities.InspectionHookNSCEntity;
+import org.osc.controller.nsc.entities.InspectionPortNSCEntity;
 import org.osc.controller.nsc.model.InspectionHook;
 import org.osc.controller.nsc.utils.NSCUtils;
 import org.osc.sdk.controller.FailurePolicyType;
@@ -151,14 +152,15 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
 
     @Override
     public void removeAllInspectionHooks(NetworkElement inspectedPort) throws Exception {
-//        NeutronSecurityControllerApi neutronApi = new NeutronSecurityControllerApi(new Endpoint(this.vc));
-//        List<InspectionHook> inspectionHooksByPort = neutronApi.getInspectionHooksByPort(this.region, inspectedPort.getElementId());
-//        if (inspectionHooksByPort != null) {
-//            for (InspectionHook hook : inspectionHooksByPort) {
-//                neutronApi.deleteInspectionHook(this.region, hook.getInspectedPortId());
+//        try (NeutronSecurityControllerApi neutronApi = new NeutronSecurityControllerApi(new Endpoint(this.vc))) {
+//            List<InspectionHook> inspectionHooksByPort = neutronApi.getInspectionHooksByPort(this.region,
+//                    inspectedPort.getElementId());
+//            if (inspectionHooksByPort != null) {
+//                for (InspectionHook hook : inspectionHooksByPort) {
+//                    neutronApi.deleteInspectionHook(this.region, hook.getInspectedPortId());
+//                }
 //            }
 //        }
-        //this.log.info(String.format("Inspected Port with Id: '%s' not found", nfe.getPortId()));
     }
 
     // Inspection port methods
@@ -169,12 +171,14 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
     }
 
     @Override
-    public Element registerInspectionPort(InspectionPortElement inspectionPort)
-            throws NetworkPortNotFoundException, Exception {
-//        try (NeutronSecurityControllerApi neutronApi = new NeutronSecurityControllerApi(new Endpoint(this.vc))){
+    public void registerInspectionPort(InspectionPortElement inspectionPort) throws Exception {
+    	
+    	InspectionPortNSCEntity entity = NSCUtils.makeInspectionPortEntity(inspectionPort);
+    	
+    	txControl.required(() -> { em.persist(inspectionPort); em.flush(); return null; });
+//        try (NeutronSecurityControllerApi neutronApi = new NeutronSecurityControllerApi(new Endpoint(this.vc))) {
 //            neutronApi.addInspectionPort(this.region, inspectionPort);
 //        }
-		return null;
     }
 
     @Override

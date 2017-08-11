@@ -6,13 +6,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
-import org.apache.aries.tx.control.jpa.local.impl.TxContextBindingEntityManager;
 import org.apache.log4j.Logger;
-
 import org.osc.controller.nsc.entities.InspectionHookNSCEntity;
 import org.osc.controller.nsc.entities.InspectionPortNSCEntity;
 import org.osc.controller.nsc.entities.MacAddressNSCEntity;
@@ -254,9 +254,92 @@ public class NSCUtils {
         try {
             return this.em.createQuery(q).getSingleResult();
         } catch (Exception e) {
-            LOGGER.error(String.format("Finding Network Element %d ", elementId), e); // TODO
+            LOGGER.error(String.format("Finding Network Element %s ", elementId), e); // TODO
             return null;
         }
+    }
+
+    public InspectionPortNSCEntity inspPortByNetworkElements(NetworkElement ingress, NetworkElement egress) {
+    	return txControl.requiresNew(() -> txInspPortByNetworkElements(ingress, egress));
+    }
+    
+    private InspectionPortNSCEntity txInspPortByNetworkElements(NetworkElement ingress, NetworkElement egress) {
+    	String ingressId = ingress != null ? ingress.getElementId() : null;
+    	String egressId = ingress != null ? egress.getElementId() : null;
+
+    	Query q = this.em.createQuery("FROM InspectionPortNSCEntity where ingressId = :ingId and egressId = :egId ");
+    	q.setParameter("ingId", ingressId);
+    	q.setParameter("egId", egressId);
+    	
+//    	CriteriaBuilder cb = this.em.getCriteriaBuilder();
+//        CriteriaQuery<InspectionPortNSCEntity> q = cb.createQuery(InspectionPortNSCEntity.class);
+//        Root<InspectionPortNSCEntity> r = q.from(InspectionPortNSCEntity.class);
+//        Predicate byIngress = cb.equal(r.get("ingress"), ingress);
+//        Predicate byEgress = cb.equal(r.get("egress"), egress);
+//        q.where(paramExpression)
+
+        try {
+            @SuppressWarnings("unchecked")
+			List<InspectionPortNSCEntity> ports = q.getResultList();
+            if (ports == null || ports.size() == 0) {
+            	LOGGER.warn(String.format("No Inspection ports by ingress %s and egress %s", 
+						ingress.getElementId(), egress.getElementId()));
+            	return null;
+            } else if (ports.size() < 0) {
+            	LOGGER.warn(String.format("Multiple results! Inspection ports by ingress %s and egress %s", 
+						ingress.getElementId(), egress.getElementId()));            	
+            }
+            return ports.get(0);
+            
+        } catch (Exception e) {
+            LOGGER.error(String.format("Finding Inspection ports by ingress %s and egress %s", 
+            							ingress.getElementId(), egress.getElementId()), e); // TODO
+            return null;
+        }
+    	
+    }
+
+    public InspectionHookNSCEntity inspHookByInspectedAndPort(NetworkElement inspected, InspectionPortElement  element) {
+    	return txControl.requiresNew(() -> txInspHookByInspectedAndPort(inspected, element));
+    }
+
+    private InspectionHookNSCEntity txInspHookByInspectedAndPort(NetworkElement inspected, InspectionPortElement element) {
+    	CriteriaBuilder cb = this.em.getCriteriaBuilder();
+    	
+    	// Paranoid
+    	NetworkElement ingress = element != null ? element.getIngressPort() : null;
+    	NetworkElement egress = element != null ? element.getEgressPort() : null;    	
+    	
+    	String inspectedId = inspected != null ? inspected.getElementId() : null;
+    	
+    	InspectionPortNSCEntity inspPort = inspPortByNetworkElements(ingress, egress);
+    	
+    	Long portId = inspPort != null ? inspPort.getId() : null;
+    	
+        CriteriaQuery<InspectionHookNSCEntity> q = cb.createQuery(InspectionHookNSCEntity.class);
+        Root<InspectionHookNSCEntity> r = q.from(InspectionHookNSCEntity.class);
+        Predicate byPort = cb.equal(r.get("inspectionPortId"), portId);        
+        Predicate byInspected = cb.equal(r.get("inspectedPortId"), egress.getElementId());
+        q.where(cb.and(byPort, byInspected));
+
+        try {
+            List<InspectionHookNSCEntity> ports = this.em.createQuery(q).getResultList();
+            if (ports == null || ports.size() == 0) {
+            	LOGGER.warn(String.format("No Inspection hooks by inspected %s and port %d", 
+						inspectedId, inspPort.getId()));
+            	return null;
+            } else if (ports.size() < 0) {
+            	LOGGER.warn(String.format("Multiple results! Inspection hooks by inspected %s and port %d", 
+											inspectedId, inspPort.getId()));            	
+            }
+            return ports.get(0);
+            
+        } catch (Exception e) {
+            LOGGER.error(String.format("Finding Inspection hooks by inspected %s and port %d", 
+										inspectedId, inspPort.getId()), e); // TODO
+            return null;
+        }
+
     }
     
     public InspectionPortNSCEntity inspectionPortEntityById(Long id) {
@@ -304,3 +387,4 @@ public class NSCUtils {
     }
     
 }
+
