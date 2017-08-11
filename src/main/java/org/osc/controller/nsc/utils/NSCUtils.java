@@ -10,6 +10,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
+import org.apache.aries.tx.control.jpa.local.impl.TxContextBindingEntityManager;
 import org.apache.log4j.Logger;
 
 import org.osc.controller.nsc.entities.InspectionHookNSCEntity;
@@ -22,15 +23,18 @@ import org.osc.sdk.controller.TagEncapsulationType;
 import org.osc.sdk.controller.element.InspectionHookElement;
 import org.osc.sdk.controller.element.InspectionPortElement;
 import org.osc.sdk.controller.element.NetworkElement;
+import org.osgi.service.transaction.control.TransactionControl;
 
 public class NSCUtils {
 
 	private static final Logger LOGGER = Logger.getLogger(NSCUtils.class);	
 	
+	private TransactionControl txControl;
 	private EntityManager em;
 
-	public NSCUtils(EntityManager em) {
+	public NSCUtils(EntityManager em, TransactionControl txControl) {
 		this.em = em;
+		this.txControl = txControl;
 	}
 
 	
@@ -96,16 +100,26 @@ public class NSCUtils {
     }
 
  
-    public static InspectionHookNSCEntity makeInspectionHookEntity(NetworkElement inspectedPort, 
+    public InspectionHookNSCEntity makeInspectionHookEntity(NetworkElement inspectedPort, 
     																  InspectionPortElement inspectionPort, 
     																  Long tag,
 															          TagEncapsulationType encType, 
 															          Long order, 
 															          FailurePolicyType failurePolicyType) {
     	InspectionPortNSCEntity inspPortEntity = makeInspectionPortEntity(inspectionPort);
+    	final String elementId = inspectedPort.getElementId();
+    	
+    	NetworkElementNSCEntity inspected = null;
+    	try {
+    		inspected = this.txControl.requiresNew(() ->  em.find(NetworkElementNSCEntity.class, elementId));
+    	} catch (Exception e) {
+    		LOGGER.error(e.getMessage());
+    		LOGGER.error(e);
+    	}
     	
     	InspectionHookNSCEntity retVal = new InspectionHookNSCEntity();
-    	retVal.setInspectedPortId(inspectedPort.getElementId());    	
+    	
+    	retVal.setInspectedPort(inspected);
     	retVal.setInspectionPort(inspPortEntity);
     	retVal.setHookOrder(order);
     	retVal.setTag(tag);

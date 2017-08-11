@@ -8,11 +8,11 @@ drop table if exists MacAddress;
 drop table if exists PortIp;
 
 create table if not exists InspectionHook (id bigint not null, hookId varchar(255), inspectedPortId varchar(255), inspectionPortId bigint, tag bigint, hookOrder bigint, encType varchar(255), failurePolicyType varchar(255), primary key (id) );
-create table if not exists InspectionPort (id bigint not null, inspectionHookId bigint, ingressId bigint, egressId bigint, primary key (id) );
+create table if not exists InspectionPort (id bigint not null, inspectionHookId bigint, ingressId varchar(255), egressId varchar(255), primary key (id) );
 
-create table if not exists NetworkElement (id bigint not null, elementId bigint, ingressPortId bigint, egressPortId bigint, primary key (id) );
-create table if not exists MacAddress (id bigint not null, elementId bigint, macAddress varchar(128), primary key (id) );
-create table if not exists PortIp (id bigint not null, elementId bigint, portIp varchar(128), primary key (id) );
+create table if not exists NetworkElement (elementId varchar(255) not null, ingressPortId bigint, egressPortId bigint, primary key (elementId) );
+create table if not exists MacAddress (id bigint not null, elementId varchar(255), macAddress varchar(128), primary key (id) );
+create table if not exists PortIp (id bigint not null, elementId varchar(255), portIp varchar(128), primary key (id) );
 
 alter table MacAddress add constraint if not exists FK_MAC_ADDRESS_NETWORK_ELEMENT foreign key (elementId) references NetworkElement;
 alter table PortIp add constraint if not exists FK_PORT_NETWORK_ELEMENT foreign key (elementId) references NetworkElement; 

@@ -373,6 +373,9 @@ public class OSGiIntegrationTest {
     	NetworkElementNSCEntity ingress = new NetworkElementNSCEntity();
     	NetworkElementNSCEntity egress = new NetworkElementNSCEntity();
     	
+    	ingress.setElementId(IMAC1_STR + IMAC2_STR);
+    	egress.setElementId(EMAC1_STR + EMAC2_STR);
+    	
     	MacAddressNSCEntity iMac1 = new MacAddressNSCEntity();
     	MacAddressNSCEntity iMac2 = new MacAddressNSCEntity();
     	MacAddressNSCEntity eMac1 = new MacAddressNSCEntity();

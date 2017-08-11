@@ -22,7 +22,7 @@ public class InspectionHookNSCEntity {
 	
 	private Long id;
 	private String hookId;
-	private String inspectedPortId;
+	private NetworkElementNSCEntity inspectedPort;
     private InspectionPortNSCEntity inspectionPort; 
     private Long tag;
     private Long hookOrder;
@@ -31,14 +31,7 @@ public class InspectionHookNSCEntity {
 	
     public InspectionHookNSCEntity() {}
     
-    public InspectionHookNSCEntity(InspectionHook hook) {
-    	this.hookId = hook.getHookId();
-    	this.inspectedPortId = hook.getInspectedPortId();
-    	this.tag = hook.getTag();
-    	this.hookOrder = hook.getOrder();
-    	this.encType = hook.getEncType().name();
-    	this.failurePolicyType = hook.getFailurePolicyType().name();    	
-    }
+ 
     
 	
     @Id
@@ -56,14 +49,16 @@ public class InspectionHookNSCEntity {
 		this.hookId = hookId;
 	}
 	
-	public String getInspectedPortId() {
-		return inspectedPortId;
+	@OneToOne(fetch=LAZY, optional=true)
+	@JoinColumn(name="inspectedPortId", nullable=true, unique=true, updatable=true)
+	public NetworkElementNSCEntity getInspectedPort() {
+		return inspectedPort;
 	}
-	public void setInspectedPortId(String inspectedPortId) {
-		this.inspectedPortId = inspectedPortId;
+	public void setInspectedPort(NetworkElementNSCEntity inspectedPort) {
+		this.inspectedPort = inspectedPort;
 	}
 
-	@OneToOne(cascade=CascadeType.ALL, orphanRemoval=true, fetch=LAZY, optional=true, targetEntity=InspectionPortNSCEntity.class)
+	@OneToOne(cascade=CascadeType.ALL, orphanRemoval=true, fetch=LAZY, optional=true)
 	@JoinColumn(name="inspectionPortId", nullable=true, unique=true, updatable=true)
 	public InspectionPortNSCEntity getInspectionPort() {
 		return inspectionPort;
@@ -74,9 +69,6 @@ public class InspectionHookNSCEntity {
 	public Long getTag() {
 		return tag;
 	}
-	
-	
-	
 	public void setTag(Long tag) {
 		this.tag = tag;
 	}

@@ -37,8 +37,6 @@ import org.osc.sdk.controller.element.VirtualizationConnectorElement;
 import org.osc.sdk.controller.exception.NetworkPortNotFoundException;
 import org.osgi.service.transaction.control.TransactionControl;
 
-import static org.osc.controller.nsc.utils.NSCUtils.makeInspectionHookEntity;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -57,6 +55,7 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
     
     private TransactionControl txControl;
     private EntityManager em;
+    private NSCUtils utils;
 
     public NeutronSdnRedirectionApi() {
     }
@@ -69,6 +68,7 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
         this.region = region;
         this.txControl = txControl;
         this.em = em;
+        this.utils = new NSCUtils(em, txControl);
     }
 
     @Override

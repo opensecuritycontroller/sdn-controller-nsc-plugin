@@ -35,7 +35,7 @@ public class InspectionPortNSCEntity {
 		this.id = id;
 	}
 
-	@OneToOne(cascade=CascadeType.ALL, orphanRemoval=true, fetch=LAZY, mappedBy="ingressInspectionPort", optional=true, targetEntity=NetworkElementNSCEntity.class)
+	@OneToOne(cascade=CascadeType.ALL, orphanRemoval=false, fetch=LAZY, mappedBy="ingressInspectionPort", optional=true)
 	@JoinColumn(name="ingressId", nullable=true, unique=true, updatable=true)
 	public NetworkElementNSCEntity getIngress() {
 		return ingress;
@@ -44,7 +44,7 @@ public class InspectionPortNSCEntity {
 		this.ingress = ingress;
 	}
 
-	@OneToOne(cascade=CascadeType.ALL, orphanRemoval=true, fetch=LAZY, mappedBy="egressInspectionPort", optional=true, targetEntity=NetworkElementNSCEntity.class)
+	@OneToOne(cascade=CascadeType.ALL, orphanRemoval=false, fetch=LAZY, mappedBy="egressInspectionPort", optional=true)
 	@JoinColumn(name="egressId", nullable=true, unique=true, updatable=true)
 	public NetworkElementNSCEntity getEgress() {
 		return egress;

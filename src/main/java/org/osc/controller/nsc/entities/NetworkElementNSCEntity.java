@@ -21,9 +21,7 @@ import javax.persistence.Transient;
 @Table(name="NetworkElement")
 public class NetworkElementNSCEntity {
 	
-	private Long id;
 	
-
 	private String elementId;
 	
 	private List<MacAddressNSCEntity> macAddressEntities;
@@ -32,17 +30,12 @@ public class NetworkElementNSCEntity {
 	private InspectionPortNSCEntity ingressInspectionPort;
 	private InspectionPortNSCEntity egressInspectionPort;
 	
+	
 	@Id
-    @GeneratedValue
-	public Long getId() {
-		return id;
-	}
-	public void setId(Long id) {
-		this.id = id;
-	}
 	public String getElementId() {
 		return elementId;
 	}
+	
 	public void setElementId(String elementId) {
 		this.elementId = elementId;
 	}
