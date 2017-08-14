@@ -20,9 +20,13 @@ import javax.persistence.Table;
 public class InspectionPortNSCEntity {
 
 	private Long id;
-	private NetworkElementNSCEntity ingress;
-	private NetworkElementNSCEntity egress;
 	
+	@Column(name="ingressId")
+	private NetworkElementNSCEntity ingress;
+	
+	@Column(name="egressId")
+	private NetworkElementNSCEntity egress;
+
 	@Column(name="inspectionHookId")
 	private InspectionHookNSCEntity inspectionHook;
 	
@@ -35,8 +39,8 @@ public class InspectionPortNSCEntity {
 		this.id = id;
 	}
 
-	@OneToOne(cascade=CascadeType.ALL, orphanRemoval=false, fetch=LAZY, mappedBy="ingressInspectionPort", optional=true)
-	@JoinColumn(name="ingressId", nullable=true, unique=true, updatable=true)
+	@OneToOne(cascade=CascadeType.ALL, orphanRemoval=false, fetch=LAZY, optional=true)
+	@JoinColumn(name="ingressId", nullable=true, updatable=true)
 	public NetworkElementNSCEntity getIngress() {
 		return ingress;
 	}
@@ -44,8 +48,8 @@ public class InspectionPortNSCEntity {
 		this.ingress = ingress;
 	}
 
-	@OneToOne(cascade=CascadeType.ALL, orphanRemoval=false, fetch=LAZY, mappedBy="egressInspectionPort", optional=true)
-	@JoinColumn(name="egressId", nullable=true, unique=true, updatable=true)
+	@OneToOne(cascade=CascadeType.ALL, orphanRemoval=false, fetch=LAZY, optional=true)
+	@JoinColumn(name="egressId", nullable=true, updatable=true)
 	public NetworkElementNSCEntity getEgress() {
 		return egress;
 	}
@@ -53,8 +57,8 @@ public class InspectionPortNSCEntity {
 		this.egress = egress;
 	}
 	
-	@OneToOne(mappedBy="inspectionPort")
-	@JoinColumn(name="inspectionHookId", nullable=true)
+	@OneToOne(cascade=CascadeType.ALL, orphanRemoval=false, fetch=LAZY, optional=true)
+	@JoinColumn(name="inspectionHookId", nullable=true, updatable=true)
     public InspectionHookNSCEntity getInspectionHook() {
 		return inspectionHook;
 	}

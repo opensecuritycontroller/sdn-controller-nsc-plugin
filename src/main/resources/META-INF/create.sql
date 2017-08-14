@@ -7,8 +7,8 @@ drop table if exists NetworkElement;
 drop table if exists MacAddress;
 drop table if exists PortIp;
 
-create table if not exists InspectionHook (hookId varchar(255), inspectedPortId varchar(255), inspectionPortId bigint, tag bigint, hookOrder bigint, encType varchar(255), failurePolicyType varchar(255), primary key (hookId) );
-create table if not exists InspectionPort (id bigint not null, inspectionHookId bigint, ingressId varchar(255), egressId varchar(255), primary key (id) );
+create table if not exists InspectionHook (hookId varchar(255) not null, inspectedPortId varchar(255), inspectionPortId bigint, tag bigint, hookOrder bigint, encType varchar(255), failurePolicyType varchar(255), primary key (hookId) );
+create table if not exists InspectionPort (id bigint not null, inspectionHookId varchar(255), ingressId varchar(255), egressId varchar(255), primary key (id) );
 
 create table if not exists NetworkElement (elementId varchar(255) not null, inspectionHookId varchar(255), ingressPortId bigint, egressPortId bigint, primary key (elementId) );
 create table if not exists MacAddress (id bigint not null, elementId varchar(255), macAddress varchar(128), primary key (id) );
@@ -17,6 +17,16 @@ create table if not exists PortIp (id bigint not null, elementId varchar(255), p
 alter table MacAddress add constraint if not exists FK_MAC_ADDRESS_NETWORK_ELEMENT foreign key (elementId) references NetworkElement;
 alter table PortIp add constraint if not exists FK_PORT_NETWORK_ELEMENT foreign key (elementId) references NetworkElement; 
 
-alter table InspectionPort add constraint if not exists FK_INSPECTION_PORT_INSPECTION_HOOK foreign key (inspectionHookId) references InspectionHook;
+alter table InspectionHook add constraint if not exists FK_INSPECTION_HOOK_NETWORK_ELEMENT foreign key (inspectedPortId) references NetworkElement;
+alter table NetworkElement add constraint if not exists FK_NETWORK_ELEMENT_INSPECTION_HOOK foreign key (inspectionHookId) references InspectionHook;
+
+alter table InspectionPort add constraint if not exists FK_INSPECTION_PORT_NETWORK_ELEMENT_INGR foreign key (ingressId) references NetworkElement;
+alter table InspectionPort add constraint if not exists FK_INSPECTION_PORT_NETWORK_ELEMENT_EGR foreign key (egressId) references NetworkElement;
+alter table NetworkElement add constraint if not exists FK_NETWORK_ELEMENT_INGR foreign key (ingressPortId) references InspectionPort;
+alter table NetworkElement add constraint if not exists FK_NETWORK_ELEMENT_EGR foreign key (egressPortId) references InspectionPort;
+
+
 alter table InspectionHook add constraint if not exists FK_INSPECTION_HOOK_INSPECTION_PORT foreign key (inspectionPortId) references InspectionPort;
+alter table InspectionPort add constraint if not exists FK_INSPECTION_PORT_INSPECTION_HOOK foreign key (inspectionHookId) references InspectionHook;
+
 

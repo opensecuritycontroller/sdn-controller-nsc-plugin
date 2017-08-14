@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -16,6 +17,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+
+import org.hibernate.annotations.GenericGenerator;
 
 @Entity
 @Table(name="NetworkElement")
@@ -27,11 +30,19 @@ public class NetworkElementNSCEntity {
 	private List<MacAddressNSCEntity> macAddressEntities;
 	private List<PortIpNSCEntity> portIpEntities;
 	
+	@Column(name="ingressPortId")
 	private InspectionPortNSCEntity ingressInspectionPort;
+	
+	@Column(name="egressPortId")
 	private InspectionPortNSCEntity egressInspectionPort;
+	
+	@Column(name="inspectionHookId")
 	private InspectionHookNSCEntity inspectionHook;
 	
 	@Id
+	@GeneratedValue(generator = "uuid")
+	@GenericGenerator(name = "uuid", strategy = "uuid2")
+	@Column(name = "elementId", unique = true)
 	public String getElementId() {
 		return elementId;
 	}
@@ -56,8 +67,8 @@ public class NetworkElementNSCEntity {
 		this.portIpEntities = portIpEntities;
 	}
 
-	@OneToOne(fetch=LAZY, optional=true)
-	@JoinColumn(name="ingressPortId", nullable=true)
+	@OneToOne(cascade=CascadeType.ALL, orphanRemoval=false, fetch=LAZY, optional=true)
+	@JoinColumn(name="ingressPortId", nullable=true, updatable=true)
 	public InspectionPortNSCEntity getIngressInspectionPort() {
 		return ingressInspectionPort;
 	}
@@ -65,8 +76,8 @@ public class NetworkElementNSCEntity {
 		this.ingressInspectionPort = inspectionPort;
 	}
 
-	@OneToOne(fetch=LAZY, optional=true)
-	@JoinColumn(name="egressPortId", nullable=true)
+	@OneToOne(cascade=CascadeType.ALL, orphanRemoval=false, fetch=LAZY, optional=true)
+	@JoinColumn(name="egressPortId", nullable=true, updatable=true)
 	public InspectionPortNSCEntity getEgressInspectionPort() {
 		return egressInspectionPort;
 	}
@@ -74,8 +85,8 @@ public class NetworkElementNSCEntity {
 		this.egressInspectionPort = inspectionPort;
 	}
 
-	@OneToOne(fetch=LAZY, optional=true)
-	@JoinColumn(name="inspectionHookId", nullable=true)
+	@OneToOne(cascade=CascadeType.ALL, orphanRemoval=false, fetch=LAZY, optional=true)
+	@JoinColumn(name="inspectionHookId", nullable=true, updatable=true)
 	public InspectionHookNSCEntity getInspectionHook() {
 		return inspectionHook;
 	}

@@ -3,6 +3,7 @@ package org.osc.controller.nsc.entities;
 import static javax.persistence.FetchType.LAZY;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -10,13 +11,19 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.GenericGenerator;
+
 
 @Entity
 @Table(name="InspectionHook")
 public class InspectionHookNSCEntity {
 	
 	private String hookId;
+	
+	@Column(name="inspectedPortId")
 	private NetworkElementNSCEntity inspectedPort;
+	
+	@Column(name="inspectionPortId")
     private InspectionPortNSCEntity inspectionPort; 
     private Long tag;
     private Long hookOrder;
@@ -25,8 +32,14 @@ public class InspectionHookNSCEntity {
 	
     public InspectionHookNSCEntity() {}
     
+	public int x;
+	
+	public int findX() { return x;}
 	
 	@Id
+	@GeneratedValue(generator = "uuid")
+	@GenericGenerator(name = "uuid", strategy = "uuid2")
+	@Column(name = "hookId", unique = true)
 	public String getHookId() {
 		return hookId;
 	}
@@ -34,8 +47,8 @@ public class InspectionHookNSCEntity {
 		this.hookId = hookId;
 	}
 	
-	@OneToOne(cascade=CascadeType.ALL, orphanRemoval=false, fetch=LAZY, optional=true, mappedBy="inspectionHook")
-	@JoinColumn(name="inspectedPortId", nullable=true, unique=true, updatable=true)
+	@OneToOne(cascade=CascadeType.ALL, orphanRemoval=false, fetch=LAZY, optional=true)
+	@JoinColumn(name="inspectedPortId", nullable=true, updatable=true)
 	public NetworkElementNSCEntity getInspectedPort() {
 		return inspectedPort;
 	}
@@ -43,8 +56,8 @@ public class InspectionHookNSCEntity {
 		this.inspectedPort = inspectedPort;
 	}
 
-	@OneToOne(cascade=CascadeType.ALL, orphanRemoval=true, fetch=LAZY, optional=true)
-	@JoinColumn(name="inspectionPortId", nullable=true, unique=true, updatable=true)
+	@OneToOne(cascade=CascadeType.ALL, orphanRemoval=false, fetch=LAZY, optional=true)
+	@JoinColumn(name="inspectionPortId", nullable=true, updatable=true)
 	public InspectionPortNSCEntity getInspectionPort() {
 		return inspectionPort;
 	}
