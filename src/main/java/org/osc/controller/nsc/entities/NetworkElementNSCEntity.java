@@ -51,7 +51,7 @@ public class NetworkElementNSCEntity {
 		this.elementId = elementId;
 	}
 	
-	@OneToMany(cascade=CascadeType.ALL, orphanRemoval=true, fetch=LAZY, mappedBy="element", targetEntity=MacAddressNSCEntity.class)
+	@OneToMany(cascade=CascadeType.ALL, orphanRemoval=true, fetch=LAZY, mappedBy="element")
 	public List<MacAddressNSCEntity> getMacAddressEntities() {
 		return macAddressEntities;
 	}
@@ -59,7 +59,7 @@ public class NetworkElementNSCEntity {
 		this.macAddressEntities = macAddressEntities;
 	}
 	
-	@OneToMany(cascade=CascadeType.ALL, orphanRemoval=true, fetch=LAZY, mappedBy="element", targetEntity=PortIpNSCEntity.class)
+	@OneToMany(cascade=CascadeType.ALL, orphanRemoval=true, fetch=LAZY, mappedBy="element")
 	public List<PortIpNSCEntity> getPortIpEntities() {
 		return portIpEntities;
 	}

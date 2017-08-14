@@ -349,10 +349,6 @@ public class OSGiIntegrationTest {
     	NetworkElementNSCEntity egress = new NetworkElementNSCEntity();
     	NetworkElementNSCEntity inspected = new NetworkElementNSCEntity();
     	
-    	ingress.setElementId(IMAC1_STR + IMAC2_STR);
-    	egress.setElementId(EMAC1_STR + EMAC2_STR);
-    	inspected.setElementId(IMAC2_STR + EMAC1_STR); 
-
     	MacAddressNSCEntity iMac1 = new MacAddressNSCEntity();
     	MacAddressNSCEntity iMac2 = new MacAddressNSCEntity();
     	MacAddressNSCEntity eMac1 = new MacAddressNSCEntity();
@@ -402,13 +398,13 @@ public class OSGiIntegrationTest {
     	
     	inspectionPort.setIngress(ingress);
     	inspectionPort.setEgress(egress);
+    	inspectionHook.setInspectedPort(inspected);
     	
     	inspectionPort.setInspectionHook(inspectionHook);
     	inspectionHook.setInspectionPort(inspectionPort);
     	
-    	inspectionHook.setInspectedPort(inspected);
     	
-
+    	
     	
     	InspectionHookNSCEntity inspHookEntity = txControl.required(() -> { 
     		
@@ -417,7 +413,8 @@ public class OSGiIntegrationTest {
     		
     		return inspectionHook; 
 		});
-/*
+    	
+
     	assertNotNull(inspectionPort.getId());
     	
     	List<MacAddressNSCEntity> lsMacs;
@@ -479,6 +476,6 @@ public class OSGiIntegrationTest {
     	
     	assertNotNull(foundPort);
     	assertEquals(inspectionPort.getId(), foundPort.getId());
-*/
+
     }
 }
