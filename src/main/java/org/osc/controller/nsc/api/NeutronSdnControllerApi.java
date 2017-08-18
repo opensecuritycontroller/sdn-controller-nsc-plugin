@@ -30,11 +30,8 @@ import static org.osgi.service.jdbc.DataSourceFactory.JDBC_USER;
 
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
 
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
 import javax.persistence.EntityManager;
 import javax.sql.DataSource;
 
@@ -55,99 +52,97 @@ import org.osgi.service.jpa.EntityManagerFactoryBuilder;
 import org.osgi.service.transaction.control.TransactionControl;
 import org.osgi.service.transaction.control.jpa.JPAEntityManagerProviderFactory;
 
-@Component(configurationPid = "com.intel.nsc.SdnController",
-        property = {
-                PLUGIN_NAME + "=NSC",
-                SUPPORT_OFFBOX_REDIRECTION + ":Boolean=false",
-                SUPPORT_SFC + ":Boolean=false",
-                SUPPORT_FAILURE_POLICY + ":Boolean=false",
-                USE_PROVIDER_CREDS + ":Boolean=true",
-                QUERY_PORT_INFO + ":Boolean=false",
-                SUPPORT_PORT_GROUP + ":Boolean=false"},
-        service={SdnControllerApi.class},
-        immediate=true
-        )
+@Component(configurationPid = "com.intel.nsc.SdnController", 
+	property = { 
+		PLUGIN_NAME + "=NSC",
+  		SUPPORT_OFFBOX_REDIRECTION + ":Boolean=false", 
+   		SUPPORT_SFC + ":Boolean=false",
+		SUPPORT_FAILURE_POLICY + ":Boolean=false", 
+		USE_PROVIDER_CREDS + ":Boolean=true",
+		QUERY_PORT_INFO + ":Boolean=false", 
+		SUPPORT_PORT_GROUP + ":Boolean=false" })
 public class NeutronSdnControllerApi implements SdnControllerApi {
 
-    @Reference(target="(osgi.local.enabled=true)")
-    private TransactionControl txControl;
+	@Reference(target = "(osgi.local.enabled=true)")
+	private TransactionControl txControl;
 
-    @Reference(target="(osgi.unit.name=nsc-mgr)")
-    private EntityManagerFactoryBuilder builder;
+	@Reference(target = "(osgi.unit.name=nsc-mgr)")
+	private EntityManagerFactoryBuilder builder;
 
-    @Reference(target="(osgi.jdbc.driver.class=org.h2.Driver)")
-    private DataSourceFactory jdbcFactory;
+	@Reference(target = "(osgi.jdbc.driver.class=org.h2.Driver)")
+	private DataSourceFactory jdbcFactory;
 
-    @Reference(target="(osgi.local.enabled=true)")
-    private JPAEntityManagerProviderFactory resourceFactory;
+	@Reference(target = "(osgi.local.enabled=true)")
+	private JPAEntityManagerProviderFactory resourceFactory;
 
-    private EntityManager em;
+	private EntityManager em;
 
-    Logger log = Logger.getLogger(NeutronSdnControllerApi.class);
+	Logger log = Logger.getLogger(NeutronSdnControllerApi.class);
 
-    private final static String VERSION = "0.1";
-    private final static String NAME = "NSC";
+	private final static String VERSION = "0.1";
+	private final static String NAME = "NSC";
 
-    private static final String DB_URL_PREFIX = "jdbc:h2:./nscPlugin_";
-    private static final String DB_USER = "admin";
-    private static final String DB_PASSWORD = "admin123";
+	private static final String DB_URL_PREFIX = "jdbc:h2:./nscPlugin_";
+	private static final String DB_USER = "admin";
+	private static final String DB_PASSWORD = "admin123";
 
-   
-    public NeutronSdnControllerApi() {
-    }
-    
-    @Activate
-    public void activate(BundleContext context) {
-    }
+	public NeutronSdnControllerApi() {
+	}
 
-    @Override
-    public Status getStatus(VirtualizationConnectorElement vc, String region) throws Exception {
-        // TODO: Future. We should not rely on list ports instead we should send a valid status
-        // based on is SDN controller ready to serve
-//        try (NeutronSecurityControllerApi neutronApi = new NeutronSecurityControllerApi(new Endpoint(vc))) {
-//            neutronApi.test();
-//        }
- 
-        return new Status(NAME, VERSION, true);
-    }
+	@Activate
+	public void activate(BundleContext context) {
+	}
 
-    @Override
-    public SdnRedirectionApi createRedirectionApi(VirtualizationConnectorElement vc, String region) {
+	@Override
+	public Status getStatus(VirtualizationConnectorElement vc, String region) throws Exception {
+		// TODO: Future. We should not rely on list ports instead we should send
+		// a valid status
+		// based on is SDN controller ready to serve
+		// try (NeutronSecurityControllerApi neutronApi = new
+		// NeutronSecurityControllerApi(new Endpoint(vc))) {
+		// neutronApi.test();
+		// }
 
-    	if (vc == null || vc.getName() == null || vc.getName().length() == 0) {
-    		throw new IllegalArgumentException("Non-null VC with non-empty name required!");
-    	}
+		return new Status(NAME, VERSION, true);
+	}
 
-    	Properties props = new Properties();
+	@Override
+	public SdnRedirectionApi createRedirectionApi(VirtualizationConnectorElement vc, String region) {
 
-    	props.setProperty(JDBC_URL, DB_URL_PREFIX + vc.getControllerIpAddress());        
-    	props.setProperty(JDBC_USER, DB_USER);
-    	props.setProperty(JDBC_PASSWORD, DB_PASSWORD);
+		if (vc == null || vc.getName() == null || vc.getName().length() == 0) {
+			throw new IllegalArgumentException("Non-null VC with non-empty name required!");
+		}
 
-    	DataSource ds = null;
-    	try {
-    		ds = this.jdbcFactory.createDataSource(props);
-    	} catch (SQLException e) {
-    		log.error(e);
-    		return null; 
-    	}
+		Properties props = new Properties();
 
-    	this.em = this.resourceFactory.getProviderFor(this.builder,
-    			singletonMap("javax.persistence.nonJtaDataSource", (Object)ds), null)
-    			.getResource(this.txControl);
+		props.setProperty(JDBC_URL, DB_URL_PREFIX + vc.getControllerIpAddress());
+		props.setProperty(JDBC_USER, DB_USER);
+		props.setProperty(JDBC_PASSWORD, DB_PASSWORD);
 
-    	return new NeutronSdnRedirectionApi(vc, region, txControl, em);
-    }
+		DataSource ds = null;
+		try {
+			ds = this.jdbcFactory.createDataSource(props);
+		} catch (SQLException e) {
+			log.error(e);
+			return null;
+		}
 
-    @Override
-    public HashMap<String, FlowPortInfo> queryPortInfo(VirtualizationConnectorElement vc, String region,
-                                                       HashMap<String, FlowInfo> portsQuery) throws Exception {
-        throw new NotImplementedException("NSC SDN Controller does not support flow based query");
-    }
+		this.em = this.resourceFactory
+				.getProviderFor(this.builder, singletonMap("javax.persistence.nonJtaDataSource", (Object) ds), null)
+				.getResource(this.txControl);
 
-    @Override
-    public void close() throws Exception {    	
-    	// this.em.close();    	
-    }
+		return new NeutronSdnRedirectionApi(vc, region, txControl, em);
+	}
+
+	@Override
+	public HashMap<String, FlowPortInfo> queryPortInfo(VirtualizationConnectorElement vc, String region,
+			HashMap<String, FlowInfo> portsQuery) throws Exception {
+		throw new NotImplementedException("NSC SDN Controller does not support flow based query");
+	}
+
+	@Override
+	public void close() throws Exception {
+		// this.em.close();
+	}
 
 }

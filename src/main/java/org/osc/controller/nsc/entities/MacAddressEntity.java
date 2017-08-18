@@ -7,41 +7,40 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.Table;
 
 @Entity
-@Table(name="MacAddress")
-public class MacAddressNSCEntity {
+public class MacAddressEntity {
 
 	private Long id;
-	private NetworkElementNSCEntity element;
+	private NetworkElementEntity element;
 	private String macAddress;
-	
+
 	@Id
-    @GeneratedValue
-    public Long getId() {
+	@GeneratedValue
+	public Long getId() {
 		return id;
 	}
+
 	public void setId(Long id) {
 		this.id = id;
 	}
 
-	@ManyToOne(fetch=LAZY)
-    @JoinColumn(name="elementId")
-	public NetworkElementNSCEntity getElement() {
+	@ManyToOne(fetch = LAZY)
+	@JoinColumn(name = "elementId")
+	public NetworkElementEntity getElement() {
 		return element;
 	}
-	public void setElement(NetworkElementNSCEntity element) {
+
+	public void setElement(NetworkElementEntity element) {
 		this.element = element;
 	}
-	
-    public String getMacAddress() {
+
+	public String getMacAddress() {
 		return macAddress;
 	}
+
 	public void setMacAddress(String macAddress) {
 		this.macAddress = macAddress;
 	}
-	
-	
 
 }

@@ -7,37 +7,38 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.Table;
 
 @Entity
-@Table(name="PortIp")
-public class PortIpNSCEntity {
+public class PortIpEntity {
 
 	private Long id;
-	private NetworkElementNSCEntity element;
+	private NetworkElementEntity element;
 	private String portIp;
-	
+
 	@Id
-    @GeneratedValue
-    public Long getId() {
+	@GeneratedValue
+	public Long getId() {
 		return id;
 	}
+
 	public void setId(Long id) {
 		this.id = id;
 	}
-    
-	@ManyToOne(fetch=LAZY)
-    @JoinColumn(name="elementId")
-	public NetworkElementNSCEntity getElement() {
+
+	@ManyToOne(fetch = LAZY)
+	@JoinColumn(name = "elementId")
+	public NetworkElementEntity getElement() {
 		return element;
 	}
-	public void setElement(NetworkElementNSCEntity element) {
+
+	public void setElement(NetworkElementEntity element) {
 		this.element = element;
 	}
 
 	public String getPortIp() {
 		return portIp;
 	}
+
 	public void setPortIp(String portIp) {
 		this.portIp = portIp;
 	}
