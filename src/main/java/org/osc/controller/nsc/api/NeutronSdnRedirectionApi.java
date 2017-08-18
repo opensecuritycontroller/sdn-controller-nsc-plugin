@@ -16,15 +16,18 @@
  *******************************************************************************/
 package org.osc.controller.nsc.api;
 
+import java.util.Arrays;
 import java.util.List;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.log4j.Logger;
+import org.hibernate.jpa.criteria.CriteriaBuilderImpl;
 import org.osc.controller.nsc.entities.InspectionHookNSCEntity;
 import org.osc.controller.nsc.entities.InspectionPortNSCEntity;
 import org.osc.controller.nsc.utils.NSCUtils;
@@ -66,22 +69,15 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
 
     @Override
     public InspectionHookElement getInspectionHook(NetworkElement inspectedPort, InspectionPortElement inspectionPort)
-            throws Exception {
-//        try (NeutronSecurityControllerApi neutronApi = new NeutronSecurityControllerApi(new Endpoint(this.vc))) {
-//            return neutronApi.getInspectionHookByPorts(this.region, inspectedPort.getElementId(), inspectionPort);
-//        }
-    	CriteriaBuilder cb = this.em.getCriteriaBuilder();
-    	String inspectedPortId = (inspectedPort != null? inspectedPort.getElementId() : null);
-        CriteriaQuery<InspectionHookNSCEntity> q = cb.createQuery(InspectionHookNSCEntity.class);
-        Root<InspectionHookNSCEntity> r = q.from(InspectionHookNSCEntity.class);
-        q.where(cb.equal(r.get("inspectedPortId"), inspectedPortId));
-        			   
-
+            throws Exception {        
         try {
-        	InspectionHookNSCEntity entity = this.em.createQuery(q).getSingleResult();        	
+        	InspectionHookNSCEntity entity = utils.inspHookByInspectedAndPort(inspectedPort, inspectionPort);        	         
         	return NSCUtils.makeInspectionHookElement(entity);
         } catch (Exception e) {
-            LOGGER.error(String.format("Finding Network Element %s :", inspectedPortId), e); // TODO
+        	String inspectedPortId = inspectedPort != null ? inspectedPort.getElementId() : null;
+        	String inspectionPortId = inspectionPort != null ?  inspectionPort.getElementId() : null;
+            LOGGER.error(String.format("Finding Network Element (inspected %s ; inspectnPort %s) :", 
+            		                   inspectedPortId, inspectionPortId), e); // TODO
             return null;
         }
     }
@@ -90,19 +86,6 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
     public String installInspectionHook(List<NetworkElement> inspectedPort, InspectionPortElement inspectionPort, Long tag,
             TagEncapsulationType encType, Long order, FailurePolicyType failurePolicyType)
                     throws NetworkPortNotFoundException, Exception {
-//        InspectionHook inspectionHook = new InspectionHook();
-//        // For NSC only one inspected port is expected
-//        inspectionHook.setInspectedPortId(inspectedPort.iterator().next().getElementId());
-//        inspectionHook.setInspectionPort(inspectionPort);
-//        inspectionHook.setOrder(order);
-//        inspectionHook.setTag(tag);
-//        inspectionHook.setEncType(encType == null ? null : encType.toString());
-//        inspectionHook.setFailurePolicyType(failurePolicyType.toString());
-
-//        NeutronSecurityControllerApi neutronApi = new NeutronSecurityControllerApi(new Endpoint(this.vc));
-//        neutronApi.addInspectionHook(this.region, inspectionHook);
-//        return inspectionHook.getHookId();
-    	
     	
     	NetworkElement inspected = null;
     	if (inspectedPort != null && inspectedPort.size() > 0) {
@@ -111,8 +94,6 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
     	
     	InspectionHookNSCEntity inspHookEntity = utils.makeInspectionHookEntity(inspected, inspectionPort, tag, encType, order, failurePolicyType);    	
     	txControl.required(() -> { em.persist(inspHookEntity); return null;});
-    	
-    	
     	
     	return null;
     }
@@ -157,6 +138,13 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
 //            inspectionHook.setTag(tag);
 //            neutronApi.updateInspectionHook(this.region, inspectionHook);
 //        }
+    
+	    txControl.required(() -> {
+	    	InspectionHookNSCEntity entity = utils.inspHookByInspectedAndPort(inspectedPort, inspectionPort);
+	    	entity.setTag(tag);
+	    	return null;
+	    });
+    
     }
 
     @Override
@@ -175,6 +163,13 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
 //            inspectionHook.setFailurePolicyType(failurePolicyType.toString());
 //            neutronApi.updateInspectionHook(this.region, inspectionHook);
 //        }
+
+    	txControl.required(() -> {
+        	InspectionHookNSCEntity entity = utils.inspHookByInspectedAndPort(inspectedPort, inspectionPort);
+        	String typeStr = failurePolicyType != null ? failurePolicyType.name() : null;
+        	entity.setFailurePolicyType(typeStr);
+        	return null;
+        });
     }
 
     @Override
@@ -188,6 +183,21 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
 //                }
 //            }
 //        }
+    	
+    	txControl.required(() -> {
+    		Query q =  em.createQuery("DELETE FROM InspectionHook WHERE inspectedPortId = :portId");    		
+    		String portId = inspectedPort != null ? inspectedPort.getElementId() : null;
+    		q.setParameter("portId", portId);
+    		
+    		q.executeUpdate();
+    		q =  em.createQuery("FROM InspectionHook WHERE inspectedPortId = :portId");
+    		q.setParameter("portId", portId);
+    		if (q.getMaxResults() > 0) {
+    			LOGGER.error("Deleting inspection hooks for inspectedPortId failed! inspectedPortId: " + portId);
+    		}
+    		return null;
+		}); 
+    					
     }
 
     // Inspection port methods
@@ -196,7 +206,24 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
 //        try (NeutronSecurityControllerApi neutronApi = new NeutronSecurityControllerApi(new Endpoint(this.vc))) {
 //            return neutronApi.getInspectionPort(this.region, inspectionPort);
 //        }
-    	return null;
+    	
+    	String portIdStr = inspectionPort != null ? inspectionPort.getElementId() : null;
+    	
+    	return txControl.required(() -> {
+    		
+    		Long portId = null;
+    		try {
+    			portId = Long.parseLong(portIdStr);
+    		} catch (NumberFormatException nfe) {
+    			LOGGER.error("Inspection port id of non-numeric format passed to NSC controller " + portIdStr);
+    			return null;
+    		}
+    		
+    		InspectionPortNSCEntity e = utils.txInspectionPortEntityById(portId);
+        	return NSCUtils.makeInspectionPortElement(e);    		
+		}); 
+    	
+
     }
 
     @Override
@@ -204,11 +231,15 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
     	
     	InspectionPortNSCEntity entity = NSCUtils.makeInspectionPortEntity(inspectionPort);
     	
-    	txControl.required(() -> { em.persist(inspectionPort); em.flush(); return null; });
-//        try (NeutronSecurityControllerApi neutronApi = new NeutronSecurityControllerApi(new Endpoint(this.vc))) {
-//            neutronApi.addInspectionPort(this.region, inspectionPort);
-//        }
-    	return null;
+    	 
+		return txControl.required(() -> { 
+	    		em.persist(entity); 
+	    		em.flush(); 
+	    		
+	    		InspectionPortNSCEntity e = em.find(InspectionPortNSCEntity.class, entity.getId());
+	    		
+	    		return NSCUtils.makeInspectionPortElement(e);
+			});
     }
 
     @Override
@@ -220,6 +251,12 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
 //            inspectionHook.setOrder(order);
 //            neutronApi.updateInspectionHook(this.region, inspectionHook);
 //        }	
+    	
+	    txControl.required(() -> {
+	    	InspectionHookNSCEntity entity = utils.inspHookByInspectedAndPort(inspectedPort, inspectionPort);
+	    	entity.setHookOrder(order);
+	    	return null;
+	    });
     }
 
     @Override
@@ -230,13 +267,6 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
 
     @Override
     public void updateInspectionHook(InspectionHookElement existingInspectionHook) throws Exception {
-//    	InspectionHookNSCEntity inspHookEntity = makeInspectionHookEntity(inspectedPort, inspectionPort, 
-//				tag, encType, order, failurePolicyType);    	
-//
-//    		txControl.required(() -> { em.persist(inspHookEntity); em.flush(); return null; });
-//        NetworkElement inspectedPort = existingInspectionHook.getInspectedPort();
-//        InspectionPortElement inspectionPort = existingInspectionHook.getInspectionPort();
-
 //        try (NeutronSecurityControllerApi neutronApi = new NeutronSecurityControllerApi(new Endpoint(this.vc))) {
 //            InspectionHookNSCEntity inspectionHook = new InspectionHookNSCEntity();
             // neutronApi.getInspectionHookByPorts(this.region, inspectedPort.getElementId(),
@@ -249,10 +279,21 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
 //            inspectionHook.setFailurePolicyType(existingInspectionHook.getFailurePolicyType().toString());
 //            neutronApi.updateInspectionHook(this.region, inspectionHook);
 //        }
+
+    	if (existingInspectionHook == null) {
+    		return;
+    	}
+    	
+    	installInspectionHook(Arrays.asList(existingInspectionHook.getInspectedPort()), 
+    						  existingInspectionHook.getInspectionPort(),
+    						  existingInspectionHook.getTag(),
+    						  existingInspectionHook.getEncType(),
+    						  existingInspectionHook.getOrder(),
+    						  existingInspectionHook.getFailurePolicyType());    	
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() throws Exception {    	
         // Nothing to do
     }
 
@@ -297,8 +338,5 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
         throw new NotImplementedException("Not expected to be called for NSC. "
                 + "Currently only called for SDN controllers that support port group.");
     }
-    
-    
-
     
 }

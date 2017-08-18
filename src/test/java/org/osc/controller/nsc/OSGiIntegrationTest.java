@@ -31,6 +31,7 @@ import static org.osgi.service.jdbc.DataSourceFactory.JDBC_PASSWORD;
 import static org.osgi.service.jdbc.DataSourceFactory.JDBC_URL;
 import static org.osgi.service.jdbc.DataSourceFactory.JDBC_USER;
 
+import java.io.File;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -48,7 +49,7 @@ import javax.persistence.criteria.Root;
 import javax.sql.DataSource;
 
 import org.apache.log4j.Logger;
-
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -58,6 +59,7 @@ import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerMethod;
 import org.ops4j.pax.exam.util.PathUtils;
+import org.osc.controller.nsc.api.NeutronSdnRedirectionApi;
 import org.osc.controller.nsc.entities.InspectionHookNSCEntity;
 import org.osc.controller.nsc.entities.InspectionPortNSCEntity;
 import org.osc.controller.nsc.entities.MacAddressNSCEntity;
@@ -88,7 +90,12 @@ Unresolved requirements: [[openstack4j-jersey2 [17](R 17.0)] osgi.wiring.package
 @ExamReactorStrategy(PerMethod.class)
 public class OSGiIntegrationTest {
 
-    private static final String EADDR2_STR = "192.168.0.12";
+    
+    private static final String TEST_DB_URL_PREFIX = "jdbc:h2:";
+    private static final String TEST_DB_FILENAME = "./nscPlugin_OSGiIntegrationTest";
+    private static final String TEST_DB_URL = TEST_DB_URL_PREFIX + TEST_DB_FILENAME;
+    
+	private static final String EADDR2_STR = "192.168.0.12";
 
 	private static final String EADDR1_STR = "192.168.0.11";
 
@@ -113,7 +120,7 @@ public class OSGiIntegrationTest {
     
     @Inject
     SdnControllerApi api;
-
+    
     private TransactionControl txControl;
     private EntityManagerFactoryBuilder builder;
     private DataSourceFactory jdbcFactory;
@@ -121,8 +128,24 @@ public class OSGiIntegrationTest {
 
     private EntityManager em;
 
-    
-    
+    private InspectionHookNSCEntity inspectionHook;
+    private InspectionPortNSCEntity inspectionPort;
+
+    private NetworkElementNSCEntity ingress;
+    private NetworkElementNSCEntity egress;
+    private NetworkElementNSCEntity inspected;
+	
+    private MacAddressNSCEntity iMac1;
+    private MacAddressNSCEntity iMac2;
+    private MacAddressNSCEntity eMac1;
+    private MacAddressNSCEntity eMac2;
+    private MacAddressNSCEntity inspMac;
+	
+    private PortIpNSCEntity iPort1;
+    private PortIpNSCEntity iPort2;
+    private PortIpNSCEntity ePort1;
+    private PortIpNSCEntity ePort2;
+
     
     @org.ops4j.pax.exam.Configuration
     public Option[] config() {
@@ -220,7 +243,7 @@ public class OSGiIntegrationTest {
     	
     	Properties props = new Properties();
 
-    	props.setProperty(JDBC_URL, "jdbc:h2:./nscPlugin_OSGiIntegrationTest");        
+    	props.setProperty(JDBC_URL, TEST_DB_URL);        
     	props.setProperty(JDBC_USER, "admin");
     	props.setProperty(JDBC_PASSWORD, "admin123");
 
@@ -237,127 +260,31 @@ public class OSGiIntegrationTest {
     			.getResource(this.txControl);
 
     	assertNotNull(em);
+    	
+    	setupDataObjects();
 
     }
 
-//    @Test
-    public void testRegistered() throws InterruptedException {
-//        SdnControllerApi objectA = api.getService();
-//        SdnControllerApi objectB = api.getService();
-//        assertSame(objectA, objectB);
-    }
-
-    /**
-     * This test doesn't really validate much, it would be better if
-     * we could start a simple local server to connect to...
-     * @throws Exception
-     */
-//    @Test
-    public void testConnect() throws Exception {
-
-        api.getStatus(new VirtualizationConnectorElement() {
-
-            @Override
-            public boolean isProviderHttps() {
-                return false;
-            }
-
-            @Override
-            public boolean isControllerHttps() {
-                return false;
-            }
-
-            @Override
-            public String getProviderUsername() {
-                return "user";
-            }
-
-            @Override
-            public String getProviderPassword() {
-                return "password";
-            }
-
-            @Override
-            public String getProviderIpAddress() {
-                return "127.0.0.1";
-            }
-
-            @Override
-            public Map<String, String> getProviderAttributes() {
-                return new HashMap<>();
-            }
-
-            @Override
-            public String getProviderAdminTenantName() {
-                return "bar";
-            }
-
-            @Override
-            public String getName() {
-                return "baz";
-            }
-
-            @Override
-            public String getControllerUsername() {
-                return "fizz";
-            }
-
-            @Override
-            public String getControllerPassword() {
-                return "buzz";
-            }
-
-            @Override
-            public String getControllerIpAddress() {
-                return "127.0.0.1";
-            }
-
-            @Override
-            public SSLContext getSslContext() {
-                try {
-                    return SSLContext.getDefault();
-                } catch (NoSuchAlgorithmException e) {
-                    e.printStackTrace();
-                }
-                return null;
-            }
-
-            @Override
-            public TrustManager[] getTruststoreManager() throws Exception {
-                return new TrustManager[0];
-            }
-
-			@Override
-			public String getProviderAdminDomainId() {
-				return "default";
-			}
-        }, "foo");
-    }
-
-    
-    @Test
-    public void testNetworkElementWithTwoPortsAndMacAddresses() throws Exception {
-    	SdnControllerApi service = api;
+	private void setupDataObjects() {
+    	inspectionHook = new InspectionHookNSCEntity();
     	
-    	final InspectionHookNSCEntity inspectionHook = new InspectionHookNSCEntity();
+    	inspectionPort = new InspectionPortNSCEntity();
     	
-    	InspectionPortNSCEntity inspectionPort = new InspectionPortNSCEntity();
+    	ingress = new NetworkElementNSCEntity();
+    	egress = new NetworkElementNSCEntity();
+    	inspected = new NetworkElementNSCEntity();
     	
-    	NetworkElementNSCEntity ingress = new NetworkElementNSCEntity();
-    	NetworkElementNSCEntity egress = new NetworkElementNSCEntity();
-    	NetworkElementNSCEntity inspected = new NetworkElementNSCEntity();
-    	
-    	MacAddressNSCEntity iMac1 = new MacAddressNSCEntity();
-    	MacAddressNSCEntity iMac2 = new MacAddressNSCEntity();
-    	MacAddressNSCEntity eMac1 = new MacAddressNSCEntity();
-    	MacAddressNSCEntity eMac2 = new MacAddressNSCEntity();
-    	MacAddressNSCEntity inspMac = new MacAddressNSCEntity();
+    	iMac1 = new MacAddressNSCEntity();
+    	iMac2 = new MacAddressNSCEntity();
+    	eMac1 = new MacAddressNSCEntity();
+    	eMac2 = new MacAddressNSCEntity();
+    	inspMac = new MacAddressNSCEntity();
     	
     	
-    	PortIpNSCEntity iPort1 = new PortIpNSCEntity();
-    	PortIpNSCEntity iPort2 = new PortIpNSCEntity();
-    	PortIpNSCEntity ePort1 = new PortIpNSCEntity();
-    	PortIpNSCEntity ePort2 = new PortIpNSCEntity();
+    	iPort1 = new PortIpNSCEntity();
+    	iPort2 = new PortIpNSCEntity();
+    	ePort1 = new PortIpNSCEntity();
+    	ePort2 = new PortIpNSCEntity();
     	
     	iMac1.setMacAddress(IMAC1_STR);
     	iMac2.setMacAddress(IMAC2_STR);
@@ -398,8 +325,28 @@ public class OSGiIntegrationTest {
     	inspectionHook.setInspectedPort(inspected);
     	
     	inspectionPort.setInspectionHook(inspectionHook);
-    	inspectionHook.setInspectionPort(inspectionPort);
+    	inspectionHook.setInspectionPort(inspectionPort);		
+	}
+    
+	@After
+	public void tearDown() {
+		File dbfile = new File(TEST_DB_FILENAME + ".h2.db");
+		
+		if (!dbfile.delete()) {
+			throw new IllegalStateException("Failed to delete database file : " + dbfile.getAbsolutePath());
+		}
 
+		File tracefile = new File(TEST_DB_FILENAME + ".trace.db");
+		
+		if (!tracefile.delete()) {
+			throw new IllegalStateException("Failed to delete trace file : " + tracefile.getAbsolutePath());
+		}
+	}
+
+	@Test
+    public void verifyCorrectNumberOfMacsAdPortIps() throws Exception {
+    	
+    	assertEquals(null, inspectionPort.getId());
     	
     	InspectionHookNSCEntity inspHookEntity = txControl.required(() -> { 
     		em.persist(inspectionHook);
@@ -436,9 +383,17 @@ public class OSGiIntegrationTest {
 
     	assertEquals(4, lsPorts.size());
     	 
+    }
+
+    @Test
+    public void verifyHookAndPortPersistedAfterSingleHookPersistenceWithObjectGraphSetUp() {
+
+    	InspectionHookNSCEntity inspHookEntity = txControl.required(() -> { 
+    		em.persist(inspectionHook);
+    		return inspectionHook; 
+		});
+    	
     	InspectionHookNSCEntity persistedHook = txControl.required(() -> { 
-			assertTrue("EM is closed!", em.isOpen());
-			
 			InspectionHookNSCEntity ph = em.find(InspectionHookNSCEntity.class, 
 						   						 inspectionHook.getHookId());
 			InspectionPortNSCEntity iprt = em.find(InspectionPortNSCEntity.class, inspectionPort.getId());
@@ -455,8 +410,16 @@ public class OSGiIntegrationTest {
     	InspectionPortNSCEntity persistedPort = persistedHook.getInspectionPort();
     	
     	assertNotNull(persistedPort);
-    	assertEquals(inspectionHook.getInspectionPort().getId(), persistedPort.getId());
-    	
+    	assertEquals(inspectionHook.getInspectionPort().getId(), persistedPort.getId());    	    
+    }
+    
+    @Test
+    public void testUtilsInspPortByNetworkElements() throws Exception {
+
+    	InspectionHookNSCEntity inspHookEntity = txControl.required(() -> { 
+    		em.persist(inspectionHook);
+    		return inspectionHook; 
+		});
     	
     	// TODO : Separate the tests!
     	NSCUtils utils = new NSCUtils(em, txControl);
@@ -466,7 +429,20 @@ public class OSGiIntegrationTest {
     	InspectionPortNSCEntity foundPort = utils.inspPortByNetworkElements(ingressElement, egressElement);
     	
     	assertNotNull(foundPort);
-    	assertEquals(inspectionPort.getId(), foundPort.getId());
+    	assertEquals(inspectionPort.getId(), foundPort.getId());   	
+
+    }
+    
+    @Test
+    public void testUtilsNetworkElementEntityByElementId() throws Exception {
+
+    	InspectionHookNSCEntity inspHookEntity = txControl.required(() -> { 
+    		em.persist(inspectionHook);
+    		return inspectionHook; 
+		});
+    	
+    	// TODO : Separate the tests!
+    	NSCUtils utils = new NSCUtils(em, txControl);
     	
     	NetworkElementNSCEntity foundNE = 
     			txControl.required(() -> { 
@@ -479,9 +455,23 @@ public class OSGiIntegrationTest {
     	assertNotNull(foundNE.getMacAddressEntities());
     	assertEquals(1, foundNE.getMacAddressEntities().size());
 
+    }
+    
+    @Test
+    public void testUtilsInspHookByInspectedAndPort() throws Exception {
+
+    	InspectionHookNSCEntity inspHookEntity = txControl.required(() -> { 
+    		em.persist(inspectionHook);
+    		return inspectionHook; 
+		});
+    	
+    	// TODO : Separate the tests!
+    	NSCUtils utils = new NSCUtils(em, txControl);
+    	   
+
     	InspectionHookNSCEntity foundIH = 
     			txControl.required(() -> { 
-    				InspectionPortNSCEntity ipe = em.find(foundPort.getClass(), foundPort.getId());
+    				InspectionPortNSCEntity ipe = em.find(inspectionPort.getClass(), inspectionPort.getId());
     				assertNotNull(ipe);
     		    	NetworkElement ne = NSCUtils.makeNetworkElement(inspected);
     		    	InspectionPortElement prte = NSCUtils.makeInspectionPortElement(ipe);
@@ -500,4 +490,61 @@ public class OSGiIntegrationTest {
 		assertEquals(foundIH.getInspectionPort().getId(), inspectionPort.getId());
 
     }
+
+    @Test
+    public void testRegisterInspectionPort() throws Exception {
+    	NSCUtils utils = new NSCUtils(em, txControl);
+    	NeutronSdnRedirectionApi redirApi = new NeutronSdnRedirectionApi(null, "boogus", txControl, em);
+    	
+    	InspectionPortElement element = new InspectionPortElement() {
+			
+    		private String parentId = inspectionHook.getHookId();
+    		private NetworkElement ingrElt = NSCUtils.makeNetworkElement(ingress);
+    		private NetworkElement egrElt = NSCUtils.makeNetworkElement(egress);
+    		
+			@Override
+			public String getParentId() {
+				return null;
+			}
+			
+			@Override
+			public String getElementId() {
+				return null;
+			}
+			
+			@Override
+			public NetworkElement getIngressPort() {
+				return ingrElt;
+			}
+			
+			@Override
+			public NetworkElement getEgressPort() {
+				
+				return egrElt;
+			}
+		};
+		
+		InspectionPortElement ipe = (InspectionPortElement) redirApi.registerInspectionPort(element);
+		
+		assertNotNull(ipe.getIngressPort());
+		
+		NetworkElementNSCEntity foundIngr = txControl.required(() -> 
+				utils.networkElementEntityByElementId(ipe.getIngressPort().getElementId()));
+		
+		assertNotNull(foundIngr);
+		assertEquals(ipe.getIngressPort().getElementId(), foundIngr.getElementId());
+		assertNotNull(foundIngr.getIngressInspectionPort());
+		assertEquals(ipe.getElementId(), foundIngr.getIngressInspectionPort().getId() + "");
+		
+		
+		InspectionPortElement ipeFound = redirApi.getInspectionPort(ipe);
+		assertEquals(ipe.getIngressPort().getElementId(), ipeFound.getIngressPort().getElementId());
+		assertEquals(ipe.getEgressPort().getElementId(), ipeFound.getEgressPort().getElementId());
+		assertEquals(ipe.getElementId(), ipeFound.getElementId());
+		
+		assertEquals(null, ipe.getParentId());
+		assertEquals(null, ipeFound.getParentId());
+		
+    }
+    
 }

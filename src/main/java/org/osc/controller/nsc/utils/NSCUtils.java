@@ -93,7 +93,7 @@ public class NSCUtils {
     	if (egress != null) {
     		NetworkElementNSCEntity egressEntity = makeNetworkElementEntity(egress);
     		egressEntity.setEgressInspectionPort(retVal);
-    		retVal.setIngress(egressEntity);
+    		retVal.setEgress(egressEntity);
     	}
     	
     	return retVal;    	
@@ -231,8 +231,18 @@ public class NSCUtils {
     		private InspectionPortElement inspectionPort = makeInspectionPortElement(entity.getInspectionPort());
     		private NetworkElement inspected = makeNetworkElement(entity.getInspectedPort());
     		private String hookId = entity.getHookId();
-    		private FailurePolicyType policyType = FailurePolicyType.fromText(entity.getFailurePolicyType());
-    		private TagEncapsulationType encType = TagEncapsulationType.fromText(entity.getEncType());
+    		private FailurePolicyType policyType;
+    		private TagEncapsulationType encType;
+    		
+    		{
+	    		if (entity.getFailurePolicyType() != null) {
+	    			policyType = FailurePolicyType.fromText(entity.getFailurePolicyType());
+	    		}
+
+	    		if (entity.getEncType() != null) {
+	    			encType = TagEncapsulationType.fromText(entity.getEncType());	    			
+	    		}
+    		}
     		
     		
 			@Override
@@ -263,12 +273,12 @@ public class NSCUtils {
 			
 			@Override
 			public FailurePolicyType getFailurePolicyType() {
-				return FailurePolicyType.fromText(entity.getFailurePolicyType());
+				return policyType;
 			}
 			
 			@Override
 			public TagEncapsulationType getEncType() {
-				return TagEncapsulationType.fromText(entity.getEncType());
+				return encType;
 			}
 		};
     };
@@ -329,7 +339,11 @@ public class NSCUtils {
     }
 
     public InspectionHookNSCEntity inspHookByInspectedAndPort(NetworkElement inspected, InspectionPortElement  element) {
-    	return txControl.required(() -> txInspHookByInspectedAndPort(inspected, element));
+    	return txControl.required(() -> { 
+    		InspectionHookNSCEntity e = txInspHookByInspectedAndPort(inspected, element);
+    		loadFullEntity(e);
+    		return e;
+    	});
     }
 
     private InspectionHookNSCEntity txInspHookByInspectedAndPort(NetworkElement inspected, InspectionPortElement element) {
@@ -376,11 +390,11 @@ public class NSCUtils {
 
     }
     
-    public InspectionPortNSCEntity inspectionPortEntityById(Long id) {
+    public InspectionPortNSCEntity txInspectionPortEntityById(Long id) {
     	return em.find(InspectionPortNSCEntity.class, id);
     }
 
-    public NetworkElementNSCEntity networkElementEntityById(Long id) {
+    public NetworkElementNSCEntity txNetworkElementEntityById(Long id) {
     	return em.find(NetworkElementNSCEntity.class, id);
     }
 
@@ -418,6 +432,10 @@ public class NSCUtils {
 		};
 
 		return retVal;
+    }
+    
+    private static void loadFullEntity(InspectionHookNSCEntity e) {
+    	makeInspectionHookElement(e);
     }
     
 }
