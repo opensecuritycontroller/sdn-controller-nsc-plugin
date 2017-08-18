@@ -47,6 +47,8 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import javax.sql.DataSource;
 
+import org.apache.log4j.Logger;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -63,6 +65,7 @@ import org.osc.controller.nsc.entities.NetworkElementNSCEntity;
 import org.osc.controller.nsc.entities.PortIpNSCEntity;
 import org.osc.controller.nsc.utils.NSCUtils;
 import org.osc.sdk.controller.api.SdnControllerApi;
+import org.osc.sdk.controller.element.InspectionPortElement;
 import org.osc.sdk.controller.element.NetworkElement;
 import org.osc.sdk.controller.element.VirtualizationConnectorElement;
 import org.osgi.framework.BundleContext;
@@ -132,14 +135,14 @@ public class OSGiIntegrationTest {
                 // And some dependencies
                 mavenBundle("org.apache.felix", "org.apache.felix.scr").versionAsInProject(),
 
-                mavenBundle("org.ow2.asm", "asm").versionAsInProject(),
-                mavenBundle("org.ow2.asm", "asm-commons").versionAsInProject(),
-                mavenBundle("org.ow2.asm", "asm-tree").versionAsInProject(),
-                mavenBundle("org.apache.aries", "org.apache.aries.util").versionAsInProject(),
-                mavenBundle("org.apache.aries.spifly", "org.apache.aries.spifly.dynamic.bundle").versionAsInProject(),
-                mavenBundle("com.codahale.metrics", "metrics-core").versionAsInProject(),
-                mavenBundle("com.codahale.metrics", "metrics-healthchecks").versionAsInProject(),
-                mavenBundle("com.codahale.metrics", "metrics-jvm").versionAsInProject(),
+//                mavenBundle("org.ow2.asm", "asm").versionAsInProject(),
+//                mavenBundle("org.ow2.asm", "asm-commons").versionAsInProject(),
+//                mavenBundle("org.ow2.asm", "asm-tree").versionAsInProject(),
+//                mavenBundle("org.apache.aries", "org.apache.aries.util").versionAsInProject(),
+//                mavenBundle("org.apache.aries.spifly", "org.apache.aries.spifly.dynamic.bundle").versionAsInProject(),
+//                mavenBundle("com.codahale.metrics", "metrics-core").versionAsInProject(),
+//                mavenBundle("com.codahale.metrics", "metrics-healthchecks").versionAsInProject(),
+//                mavenBundle("com.codahale.metrics", "metrics-jvm").versionAsInProject(),
                 
                 
                 mavenBundle("org.osc.api", "sdn-controller-api").versionAsInProject(),
@@ -290,11 +293,6 @@ public class OSGiIntegrationTest {
             }
 
             @Override
-            public String getProviderAdminDomainId() {
-                return "default";
-            }
-
-            @Override
             public String getName() {
                 return "baz";
             }
@@ -382,7 +380,6 @@ public class OSGiIntegrationTest {
     	iMac2.setElement(ingress);
     	eMac1.setElement(egress);
     	eMac2.setElement(egress);
-
     	
     	ingress.setMacAddressEntities(asList(iMac1, iMac2));
     	ingress.setPortIpEntities(asList(iPort1, iPort2));
@@ -402,19 +399,13 @@ public class OSGiIntegrationTest {
     	
     	inspectionPort.setInspectionHook(inspectionHook);
     	inspectionHook.setInspectionPort(inspectionPort);
-    	
-    	
-    	
+
     	
     	InspectionHookNSCEntity inspHookEntity = txControl.required(() -> { 
-    		
     		em.persist(inspectionHook);
-    		
-    		
     		return inspectionHook; 
 		});
     	
-
     	assertNotNull(inspectionPort.getId());
     	
     	List<MacAddressNSCEntity> lsMacs;
@@ -467,7 +458,7 @@ public class OSGiIntegrationTest {
     	assertEquals(inspectionHook.getInspectionPort().getId(), persistedPort.getId());
     	
     	
-    	// TODO : Separate!
+    	// TODO : Separate the tests!
     	NSCUtils utils = new NSCUtils(em, txControl);
 
     	NetworkElement ingressElement = NSCUtils.makeNetworkElement(ingress);
@@ -476,6 +467,37 @@ public class OSGiIntegrationTest {
     	
     	assertNotNull(foundPort);
     	assertEquals(inspectionPort.getId(), foundPort.getId());
+    	
+    	NetworkElementNSCEntity foundNE = 
+    			txControl.required(() -> { 
+    				NetworkElementNSCEntity e =  utils.networkElementEntityByElementId(inspected.getElementId());
+    				e.getMacAddressEntities().size();
+    				return e;
+				});
+    	
+    	assertNotNull(foundNE);
+    	assertNotNull(foundNE.getMacAddressEntities());
+    	assertEquals(1, foundNE.getMacAddressEntities().size());
+
+    	InspectionHookNSCEntity foundIH = 
+    			txControl.required(() -> { 
+    				InspectionPortNSCEntity ipe = em.find(foundPort.getClass(), foundPort.getId());
+    				assertNotNull(ipe);
+    		    	NetworkElement ne = NSCUtils.makeNetworkElement(inspected);
+    		    	InspectionPortElement prte = NSCUtils.makeInspectionPortElement(ipe);
+    				InspectionHookNSCEntity ihe =  utils.inspHookByInspectedAndPort(ne, prte);
+    			
+    						
+    				assertNotNull(ihe);
+    				assertEquals(inspectionHook.getHookId(), ihe.getHookId());
+    				assertNotNull(ihe.getInspectionPort());
+    				assertEquals(ihe.getInspectionPort().getId(), ipe.getId());
+    				return ihe;
+				});
+    	
+    	assertEquals(foundIH.getHookId(), inspectionHook.getHookId());
+		assertNotNull(foundIH.getInspectionPort());
+		assertEquals(foundIH.getInspectionPort().getId(), inspectionPort.getId());
 
     }
 }

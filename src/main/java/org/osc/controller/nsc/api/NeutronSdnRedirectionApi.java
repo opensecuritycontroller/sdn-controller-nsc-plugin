@@ -78,7 +78,7 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
         			   
 
         try {
-        	InspectionHookNSCEntity entity = this.em.createQuery(q).getSingleResult();
+        	InspectionHookNSCEntity entity = this.em.createQuery(q).getSingleResult();        	
         	return NSCUtils.makeInspectionHookElement(entity);
         } catch (Exception e) {
             LOGGER.error(String.format("Finding Network Element %s :", inspectedPortId), e); // TODO
@@ -90,18 +90,31 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
     public String installInspectionHook(List<NetworkElement> inspectedPort, InspectionPortElement inspectionPort, Long tag,
             TagEncapsulationType encType, Long order, FailurePolicyType failurePolicyType)
                     throws NetworkPortNotFoundException, Exception {
-        InspectionHook inspectionHook = new InspectionHook();
-        // For NSC only one inspected port is expected
-        inspectionHook.setInspectedPortId(inspectedPort.iterator().next().getElementId());
-        inspectionHook.setInspectionPort(inspectionPort);
-        inspectionHook.setOrder(order);
-        inspectionHook.setTag(tag);
-        inspectionHook.setEncType(encType == null ? null : encType.toString());
-        inspectionHook.setFailurePolicyType(failurePolicyType.toString());
+//        InspectionHook inspectionHook = new InspectionHook();
+//        // For NSC only one inspected port is expected
+//        inspectionHook.setInspectedPortId(inspectedPort.iterator().next().getElementId());
+//        inspectionHook.setInspectionPort(inspectionPort);
+//        inspectionHook.setOrder(order);
+//        inspectionHook.setTag(tag);
+//        inspectionHook.setEncType(encType == null ? null : encType.toString());
+//        inspectionHook.setFailurePolicyType(failurePolicyType.toString());
 
 //        NeutronSecurityControllerApi neutronApi = new NeutronSecurityControllerApi(new Endpoint(this.vc));
 //        neutronApi.addInspectionHook(this.region, inspectionHook);
-        return inspectionHook.getHookId();
+//        return inspectionHook.getHookId();
+    	
+    	
+    	NetworkElement inspected = null;
+    	if (inspectedPort != null && inspectedPort.size() > 0) {
+    		inspected = inspectedPort.iterator().next();
+    	}
+    	
+    	InspectionHookNSCEntity inspHookEntity = utils.makeInspectionHookEntity(inspected, inspectionPort, tag, encType, order, failurePolicyType);    	
+    	txControl.required(() -> { em.persist(inspHookEntity); return null;});
+    	
+    	
+    	
+    	return null;
     }
 
     @Override
@@ -112,6 +125,20 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
 //        } catch (NetworkPortNotFoundException nfe) {
 //            this.log.info(String.format("Port with Id: '%s' not found", nfe.getPortId()));
 //        }
+    	
+    	if (inspectedPort != null && inspectedPort.size() > 0) {
+
+    		NetworkElement inspected = inspectedPort.get(0);
+    		
+        	txControl.requiresNew(() -> {
+        		InspectionHookNSCEntity entity = utils.inspHookByInspectedAndPort(inspected, inspectionPort);
+        		if (entity != null) {
+        			em.remove(entity);    			
+        		}
+        		return null;
+        	});
+    	}
+    	
     }
 
     @Override
@@ -173,7 +200,7 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
     }
 
     @Override
-    public void registerInspectionPort(InspectionPortElement inspectionPort) throws Exception {
+    public Element registerInspectionPort(InspectionPortElement inspectionPort) throws Exception {
     	
     	InspectionPortNSCEntity entity = NSCUtils.makeInspectionPortEntity(inspectionPort);
     	
@@ -181,6 +208,7 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
 //        try (NeutronSecurityControllerApi neutronApi = new NeutronSecurityControllerApi(new Endpoint(this.vc))) {
 //            neutronApi.addInspectionPort(this.region, inspectionPort);
 //        }
+    	return null;
     }
 
     @Override
@@ -191,7 +219,7 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
 //                    inspectionPort);
 //            inspectionHook.setOrder(order);
 //            neutronApi.updateInspectionHook(this.region, inspectionHook);
-//        }
+//        }	
     }
 
     @Override

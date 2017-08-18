@@ -57,6 +57,14 @@ public class NetworkElementNSCEntity {
 	}
 	public void setMacAddressEntities(List<MacAddressNSCEntity> macAddressEntities) {
 		this.macAddressEntities = macAddressEntities;
+		
+		if (macAddressEntities != null) {
+			for (MacAddressNSCEntity e : macAddressEntities) {
+				if (e != null) {
+					e.setElement(this);
+				}
+			}
+		}
 	}
 	
 	@OneToMany(cascade=CascadeType.ALL, orphanRemoval=true, fetch=LAZY, mappedBy="element")
@@ -65,6 +73,14 @@ public class NetworkElementNSCEntity {
 	}
 	public void setPortIpEntities(List<PortIpNSCEntity> portIpEntities) {
 		this.portIpEntities = portIpEntities;
+		
+		if (portIpEntities != null) {
+			for (PortIpNSCEntity e : portIpEntities) {
+				if (e != null) {
+					e.setElement(this);
+				}
+			}
+		}
 	}
 
 	@OneToOne(cascade=CascadeType.ALL, orphanRemoval=false, fetch=LAZY, optional=true)

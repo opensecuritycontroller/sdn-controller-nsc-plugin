@@ -32,10 +32,6 @@ public class InspectionHookNSCEntity {
 	
     public InspectionHookNSCEntity() {}
     
-	public int x;
-	
-	public int findX() { return x;}
-	
 	@Id
 	@GeneratedValue(generator = "uuid")
 	@GenericGenerator(name = "uuid", strategy = "uuid2")
