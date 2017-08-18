@@ -101,11 +101,6 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
     @Override
     public void removeInspectionHook(List<NetworkElement> inspectedPort, InspectionPortElement inspectionPort)
             throws Exception {
-//        try (NeutronSecurityControllerApi neutronApi = new NeutronSecurityControllerApi(new Endpoint(this.vc))) {
-//            neutronApi.deleteInspectionHookByPorts(this.region, inspectedPort.iterator().next().getElementId(), inspectionPort);
-//        } catch (NetworkPortNotFoundException nfe) {
-//            this.log.info(String.format("Port with Id: '%s' not found", nfe.getPortId()));
-//        }
     	
     	if (inspectedPort != null && inspectedPort.size() > 0) {
 
@@ -132,12 +127,7 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
     @Override
     public void setInspectionHookTag(NetworkElement inspectedPort, InspectionPortElement inspectionPort, Long tag)
             throws Exception {
-//        try (NeutronSecurityControllerApi neutronApi = new NeutronSecurityControllerApi(new Endpoint(this.vc))) {
-//            InspectionHook inspectionHook = neutronApi.getInspectionHookByPorts(this.region, inspectedPort.getElementId(),
-//                    inspectionPort);
-//            inspectionHook.setTag(tag);
-//            neutronApi.updateInspectionHook(this.region, inspectionHook);
-//        }
+
     
 	    txControl.required(() -> {
 	    	InspectionHookNSCEntity entity = utils.inspHookByInspectedAndPort(inspectedPort, inspectionPort);
@@ -157,12 +147,7 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
     @Override
     public void setInspectionHookFailurePolicy(NetworkElement inspectedPort, InspectionPortElement inspectionPort,
                                                FailurePolicyType failurePolicyType) throws Exception {
-//        try (NeutronSecurityControllerApi neutronApi = new NeutronSecurityControllerApi(new Endpoint(this.vc))) {
-//            InspectionHook inspectionHook = neutronApi.getInspectionHookByPorts(this.region, inspectedPort.getElementId(),
-//                    inspectionPort);
-//            inspectionHook.setFailurePolicyType(failurePolicyType.toString());
-//            neutronApi.updateInspectionHook(this.region, inspectionHook);
-//        }
+
 
     	txControl.required(() -> {
         	InspectionHookNSCEntity entity = utils.inspHookByInspectedAndPort(inspectedPort, inspectionPort);
@@ -174,15 +159,7 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
 
     @Override
     public void removeAllInspectionHooks(NetworkElement inspectedPort) throws Exception {
-//        try (NeutronSecurityControllerApi neutronApi = new NeutronSecurityControllerApi(new Endpoint(this.vc))) {
-//            List<InspectionHook> inspectionHooksByPort = neutronApi.getInspectionHooksByPort(this.region,
-//                    inspectedPort.getElementId());
-//            if (inspectionHooksByPort != null) {
-//                for (InspectionHook hook : inspectionHooksByPort) {
-//                    neutronApi.deleteInspectionHook(this.region, hook.getInspectedPortId());
-//                }
-//            }
-//        }
+
     	
     	txControl.required(() -> {
     		Query q =  em.createQuery("DELETE FROM InspectionHook WHERE inspectedPortId = :portId");    		
@@ -203,9 +180,7 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
     // Inspection port methods
     @Override
     public InspectionPortElement getInspectionPort(InspectionPortElement inspectionPort) throws Exception {
-//        try (NeutronSecurityControllerApi neutronApi = new NeutronSecurityControllerApi(new Endpoint(this.vc))) {
-//            return neutronApi.getInspectionPort(this.region, inspectionPort);
-//        }
+
     	
     	String portIdStr = inspectionPort != null ? inspectionPort.getElementId() : null;
     	
@@ -245,12 +220,7 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
     @Override
     public void setInspectionHookOrder(NetworkElement inspectedPort, InspectionPortElement inspectionPort, Long order)
             throws Exception {
-//        try (NeutronSecurityControllerApi neutronApi = new NeutronSecurityControllerApi(new Endpoint(this.vc))) {
-//            InspectionHook inspectionHook = neutronApi.getInspectionHookByPorts(this.region, inspectedPort.getElementId(),
-//                    inspectionPort);
-//            inspectionHook.setOrder(order);
-//            neutronApi.updateInspectionHook(this.region, inspectionHook);
-//        }	
+
     	
 	    txControl.required(() -> {
 	    	InspectionHookNSCEntity entity = utils.inspHookByInspectedAndPort(inspectedPort, inspectionPort);
@@ -267,18 +237,6 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
 
     @Override
     public void updateInspectionHook(InspectionHookElement existingInspectionHook) throws Exception {
-//        try (NeutronSecurityControllerApi neutronApi = new NeutronSecurityControllerApi(new Endpoint(this.vc))) {
-//            InspectionHookNSCEntity inspectionHook = new InspectionHookNSCEntity();
-            // neutronApi.getInspectionHookByPorts(this.region, inspectedPort.getElementId(),
-//                    inspectionPort);
-//            inspectionHook.setInspectedPortId(inspectedPort.getElementId());
-//            inspectionHook.setInspectionPort(existingInspectionHook.getInspectionPort());
-//            inspectionHook.setOrder(existingInspectionHook.getOrder());
-//            inspectionHook.setTag(existingInspectionHook.getTag());
-//            inspectionHook.setEncType(existingInspectionHook.getEncType().toString());
-//            inspectionHook.setFailurePolicyType(existingInspectionHook.getFailurePolicyType().toString());
-//            neutronApi.updateInspectionHook(this.region, inspectionHook);
-//        }
 
     	if (existingInspectionHook == null) {
     		return;
