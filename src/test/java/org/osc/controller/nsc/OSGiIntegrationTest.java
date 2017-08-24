@@ -20,15 +20,8 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonMap;
 import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.ops4j.pax.exam.CoreOptions.bootClasspathLibrary;
-import static org.ops4j.pax.exam.CoreOptions.bundle;
-import static org.ops4j.pax.exam.CoreOptions.junitBundles;
-import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.CoreOptions.options;
-import static org.ops4j.pax.exam.CoreOptions.systemPackage;
-import static org.osgi.service.jdbc.DataSourceFactory.JDBC_PASSWORD;
-import static org.osgi.service.jdbc.DataSourceFactory.JDBC_URL;
-import static org.osgi.service.jdbc.DataSourceFactory.JDBC_USER;
+import static org.ops4j.pax.exam.CoreOptions.*;
+import static org.osgi.service.jdbc.DataSourceFactory.*;
 
 import java.io.File;
 import java.sql.SQLException;
@@ -81,433 +74,439 @@ Unresolved requirements: [[openstack4j-jersey2 [17](R 17.0)] osgi.wiring.package
 @ExamReactorStrategy(PerMethod.class)
 public class OSGiIntegrationTest {
 
-	private static final String TEST_DB_URL_PREFIX = "jdbc:h2:";
-	private static final String TEST_DB_FILENAME = "./nscPlugin_OSGiIntegrationTest";
-	private static final String TEST_DB_URL = TEST_DB_URL_PREFIX + TEST_DB_FILENAME;
+    private static final String TEST_DB_URL_PREFIX = "jdbc:h2:";
+    private static final String TEST_DB_FILENAME = "./nscPlugin_OSGiIntegrationTest";
+    private static final String TEST_DB_URL = TEST_DB_URL_PREFIX + TEST_DB_FILENAME;
 
-	private static final String EADDR2_STR = "192.168.0.12";
+    private static final String EADDR2_STR = "192.168.0.12";
 
-	private static final String EADDR1_STR = "192.168.0.11";
+    private static final String EADDR1_STR = "192.168.0.11";
 
-	private static final String IADDR2_STR = "10.4.3.2";
+    private static final String IADDR2_STR = "10.4.3.2";
 
-	private static final String IADDR1_STR = "10.4.3.1";
+    private static final String IADDR1_STR = "10.4.3.1";
 
-	private static final String EMAC2_STR = "ee:ff:aa:bb:cc:02";
+    private static final String EMAC2_STR = "ee:ff:aa:bb:cc:02";
 
-	private static final String EMAC1_STR = "ee:ff:aa:bb:cc:01";
+    private static final String EMAC1_STR = "ee:ff:aa:bb:cc:01";
 
-	private static final String IMAC1_STR = "ff:ff:aa:bb:cc:01";
+    private static final String IMAC1_STR = "ff:ff:aa:bb:cc:01";
 
-	private static final String IMAC2_STR = "ff:ff:aa:bb:cc:02";
+    private static final String IMAC2_STR = "ff:ff:aa:bb:cc:02";
 
-	private static final String INSPMAC1_STR = "aa:aa:aa:bb:cc:01";
+    private static final String INSPMAC1_STR = "aa:aa:aa:bb:cc:01";
 
-	private static final String HOOK_ID = "TEST_INSP_HOOK";
+    private static final String HOOK_ID = "TEST_INSP_HOOK";
 
-	@Inject
-	BundleContext context;
+    @Inject
+    BundleContext context;
 
-	@Inject
-	SdnControllerApi api;
+    @Inject
+    SdnControllerApi api;
 
-	private TransactionControl txControl;
-	private EntityManagerFactoryBuilder builder;
-	private DataSourceFactory jdbcFactory;
-	private JPAEntityManagerProviderFactory resourceFactory;
+    private TransactionControl txControl;
+    private EntityManagerFactoryBuilder builder;
+    private DataSourceFactory jdbcFactory;
+    private JPAEntityManagerProviderFactory resourceFactory;
 
-	private EntityManager em;
+    private EntityManager em;
 
-	private InspectionHookEntity inspectionHook;
-	private InspectionPortEntity inspectionPort;
+    private InspectionHookEntity inspectionHook;
+    private InspectionPortEntity inspectionPort;
 
-	private NetworkElementEntity ingress;
-	private NetworkElementEntity egress;
-	private NetworkElementEntity inspected;
+    private NetworkElementEntity ingress;
+    private NetworkElementEntity egress;
+    private NetworkElementEntity inspected;
 
-	private MacAddressEntity iMac1;
-	private MacAddressEntity iMac2;
-	private MacAddressEntity eMac1;
-	private MacAddressEntity eMac2;
-	private MacAddressEntity inspMac;
+    private MacAddressEntity iMac1;
+    private MacAddressEntity iMac2;
+    private MacAddressEntity eMac1;
+    private MacAddressEntity eMac2;
+    private MacAddressEntity inspMac;
 
-	private PortIpEntity iPort1;
-	private PortIpEntity iPort2;
-	private PortIpEntity ePort1;
-	private PortIpEntity ePort2;
+    private PortIpEntity iPort1;
+    private PortIpEntity iPort2;
+    private PortIpEntity ePort1;
+    private PortIpEntity ePort2;
 
-	@org.ops4j.pax.exam.Configuration
-	public Option[] config() {
+    @org.ops4j.pax.exam.Configuration
+    public Option[] config() {
 
-		try {
-			return options(
+        try {
+            return options(
 
-					// Load the current module from its built classes so we get
-					// the latest from Eclipse
-					bundle("reference:file:" + PathUtils.getBaseDir() + "/target/classes/"),
-					// And some dependencies
-					mavenBundle("org.apache.felix", "org.apache.felix.scr").versionAsInProject(),
+                    // Load the current module from its built classes so we get
+                    // the latest from Eclipse
+                    bundle("reference:file:" + PathUtils.getBaseDir() + "/target/classes/"),
+                    // And some dependencies
+                    mavenBundle("org.apache.felix", "org.apache.felix.scr").versionAsInProject(),
 
-					mavenBundle("org.osc.api", "sdn-controller-api").versionAsInProject(),
+                    mavenBundle("org.osc.api", "sdn-controller-api").versionAsInProject(),
 
-					mavenBundle("org.osgi", "org.osgi.core").versionAsInProject(),
+                    mavenBundle("org.osgi", "org.osgi.core").versionAsInProject(),
 
-					mavenBundle("org.apache.aries.jpa", "org.apache.aries.jpa.container").versionAsInProject(),
-					mavenBundle("org.apache.aries.tx-control", "tx-control-service-local").versionAsInProject(),
-					mavenBundle("org.apache.aries.tx-control", "tx-control-provider-jpa-local").versionAsInProject(),
-					mavenBundle("com.h2database", "h2").versionAsInProject(),
+                    mavenBundle("org.apache.aries.jpa", "org.apache.aries.jpa.container").versionAsInProject(),
+                    mavenBundle("org.apache.aries.tx-control", "tx-control-service-local").versionAsInProject(),
+                    mavenBundle("org.apache.aries.tx-control", "tx-control-provider-jpa-local").versionAsInProject(),
+                    mavenBundle("com.h2database", "h2").versionAsInProject(),
 
-					// Hibernate
+                    // Hibernate
 
-					systemPackage("javax.xml.stream;version=1.0"), systemPackage("javax.xml.stream.events;version=1.0"),
-					systemPackage("javax.xml.stream.util;version=1.0"), systemPackage("javax.transaction;version=1.1"),
-					systemPackage("javax.transaction.xa;version=1.1"),
-					mavenBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.antlr", "2.7.7_5"),
-					mavenBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.dom4j", "1.6.1_5"),
-					mavenBundle("org.javassist", "javassist", "3.18.1-GA"),
-					mavenBundle("org.jboss.logging", "jboss-logging", "3.3.0.Final"),
-					mavenBundle("org.jboss", "jandex", "2.0.0.Final"),
-					mavenBundle("org.hibernate.common", "hibernate-commons-annotations").versionAsInProject(),
-					mavenBundle("org.hibernate", "hibernate-core").versionAsInProject(),
-					mavenBundle("org.hibernate", "hibernate-osgi").versionAsInProject(),
-					mavenBundle("com.fasterxml", "classmate").versionAsInProject(),
-					mavenBundle("org.javassist", "javassist").versionAsInProject(),
+                    systemPackage("javax.xml.stream;version=1.0"), systemPackage("javax.xml.stream.events;version=1.0"),
+                    systemPackage("javax.xml.stream.util;version=1.0"), systemPackage("javax.transaction;version=1.1"),
+                    systemPackage("javax.transaction.xa;version=1.1"),
 
-					mavenBundle("log4j", "log4j").versionAsInProject(),
+					mavenBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.antlr").versionAsInProject(),
+					mavenBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.dom4j").versionAsInProject(),
+                    mavenBundle("org.javassist", "javassist").versionAsInProject(),
+                    mavenBundle("org.jboss.logging", "jboss-logging").versionAsInProject(),
+                    mavenBundle("org.jboss", "jandex").versionAsInProject(),
 
-					mavenBundle("org.apache.directory.studio", "org.apache.commons.lang").versionAsInProject(),
+                    mavenBundle("org.hibernate.common", "hibernate-commons-annotations").versionAsInProject(),
+                    mavenBundle("org.hibernate", "hibernate-core").versionAsInProject(),
+                    mavenBundle("org.hibernate", "hibernate-osgi").versionAsInProject(),
+                    mavenBundle("com.fasterxml", "classmate").versionAsInProject(),
+                    mavenBundle("org.javassist", "javassist").versionAsInProject(),
 
-					// Uncomment this line to allow remote debugging
-					// CoreOptions.vmOption("-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=1044"),
-					bootClasspathLibrary(mavenBundle("org.apache.geronimo.specs", "geronimo-jta_1.1_spec", "1.1.1"))
-							.beforeFramework(),
-					junitBundles()
+                    mavenBundle("log4j", "log4j").versionAsInProject(),
 
-			);
-		} catch (Throwable t) {
+                    mavenBundle("org.apache.directory.studio", "org.apache.commons.lang").versionAsInProject(),
 
-			System.err.println(t.getClass().getName() + ":\n" + t.getMessage());
-			t.printStackTrace(System.err);
-			throw t;
-		}
-	}
+                    // Uncomment this line to allow remote debugging
+                    // CoreOptions.vmOption("-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=1044"),
+                    bootClasspathLibrary(mavenBundle("org.apache.geronimo.specs", "geronimo-jta_1.1_spec", "1.1.1"))
+                            .beforeFramework(),
+                    junitBundles()
 
-	@Before
-	public void setup() {
+            );
+        } catch (Throwable t) {
 
-		ServiceReference<DataSourceFactory> dsRef = context.getServiceReference(DataSourceFactory.class);
-		this.jdbcFactory = this.context.getService(dsRef);
+            System.err.println(t.getClass().getName() + ":\n" + t.getMessage());
+            t.printStackTrace(System.err);
+            throw t;
+        }
+    }
 
-		ServiceReference<EntityManagerFactoryBuilder> emRef = context
-				.getServiceReference(EntityManagerFactoryBuilder.class);
-		this.builder = this.context.getService(emRef);
+    @Before
+    public void setup() {
 
-		ServiceReference<TransactionControl> txcRef = context.getServiceReference(TransactionControl.class);
-		txControl = this.context.getService(txcRef);
+        ServiceReference<DataSourceFactory> dsRef = this.context.getServiceReference(DataSourceFactory.class);
+        this.jdbcFactory = this.context.getService(dsRef);
 
-		ServiceReference<JPAEntityManagerProviderFactory> jpaRef = context
-				.getServiceReference(JPAEntityManagerProviderFactory.class);
-		resourceFactory = this.context.getService(jpaRef);
+        ServiceReference<EntityManagerFactoryBuilder> emRef = this.context
+                .getServiceReference(EntityManagerFactoryBuilder.class);
+        this.builder = this.context.getService(emRef);
 
-		assertNotNull(this.jdbcFactory);
-		assertNotNull(this.builder);
-		assertNotNull(this.txControl);
-		assertNotNull(this.resourceFactory);
+        ServiceReference<TransactionControl> txcRef = this.context.getServiceReference(TransactionControl.class);
+        this.txControl = this.context.getService(txcRef);
 
-		Properties props = new Properties();
+        ServiceReference<JPAEntityManagerProviderFactory> jpaRef = this.context
+                .getServiceReference(JPAEntityManagerProviderFactory.class);
+        this.resourceFactory = this.context.getService(jpaRef);
 
-		props.setProperty(JDBC_URL, TEST_DB_URL);
-		props.setProperty(JDBC_USER, "admin");
-		props.setProperty(JDBC_PASSWORD, "admin123");
+        assertNotNull(this.jdbcFactory);
+        assertNotNull(this.builder);
+        assertNotNull(this.txControl);
+        assertNotNull(this.resourceFactory);
 
-		DataSource ds = null;
-		try {
-			ds = this.jdbcFactory.createDataSource(props);
-		} catch (SQLException e) {
-			Assert.fail(e.getClass() + " : " + e.getMessage());
-		}
+        Properties props = new Properties();
 
-		this.em = this.resourceFactory
-				.getProviderFor(this.builder, singletonMap("javax.persistence.nonJtaDataSource", (Object) ds), null)
-				.getResource(this.txControl);
+        props.setProperty(JDBC_URL, TEST_DB_URL);
+        props.setProperty(JDBC_USER, "admin");
+        props.setProperty(JDBC_PASSWORD, "admin123");
 
-		assertNotNull(em);
+        DataSource ds = null;
+        try {
+            ds = this.jdbcFactory.createDataSource(props);
+        } catch (SQLException e) {
+            Assert.fail(e.getClass() + " : " + e.getMessage());
+        }
 
-		setupDataObjects();
+        this.em = this.resourceFactory
+                .getProviderFor(this.builder, singletonMap("javax.persistence.nonJtaDataSource", (Object) ds), null)
+                .getResource(this.txControl);
 
-	}
+        assertNotNull(this.em);
 
-	private void setupDataObjects() {
-		inspectionHook = new InspectionHookEntity();
+        setupDataObjects();
 
-		inspectionPort = new InspectionPortEntity();
+    }
 
-		ingress = new NetworkElementEntity();
-		egress = new NetworkElementEntity();
-		inspected = new NetworkElementEntity();
+    private void setupDataObjects() {
+        this.inspectionHook = new InspectionHookEntity();
 
-		iMac1 = new MacAddressEntity();
-		iMac2 = new MacAddressEntity();
-		eMac1 = new MacAddressEntity();
-		eMac2 = new MacAddressEntity();
-		inspMac = new MacAddressEntity();
+        this.inspectionPort = new InspectionPortEntity();
 
-		iPort1 = new PortIpEntity();
-		iPort2 = new PortIpEntity();
-		ePort1 = new PortIpEntity();
-		ePort2 = new PortIpEntity();
+        this.ingress = new NetworkElementEntity();
+        this.egress = new NetworkElementEntity();
+        this.inspected = new NetworkElementEntity();
 
-		iMac1.setMacAddress(IMAC1_STR);
-		iMac2.setMacAddress(IMAC2_STR);
-		eMac1.setMacAddress(EMAC1_STR);
-		eMac2.setMacAddress(EMAC2_STR);
+        this.iMac1 = new MacAddressEntity();
+        this.iMac2 = new MacAddressEntity();
+        this.eMac1 = new MacAddressEntity();
+        this.eMac2 = new MacAddressEntity();
+        this.inspMac = new MacAddressEntity();
 
-		inspMac.setMacAddress(INSPMAC1_STR);
+        this.iPort1 = new PortIpEntity();
+        this.iPort2 = new PortIpEntity();
+        this.ePort1 = new PortIpEntity();
+        this.ePort2 = new PortIpEntity();
 
-		iPort1.setPortIp(IADDR1_STR);
-		iPort2.setPortIp(IADDR2_STR);
-		ePort1.setPortIp(EADDR1_STR);
-		ePort2.setPortIp(EADDR2_STR);
+        this.ingress.setElementId(IMAC1_STR + IMAC1_STR);
+        this.egress.setElementId(EMAC1_STR + EMAC1_STR);
+        this.inspected.setElementId("iNsPeCtEdPoRt");
 
-		iPort1.setElement(ingress);
-		iPort2.setElement(ingress);
-		ePort1.setElement(egress);
-		ePort2.setElement(egress);
+        this.iMac1.setMacAddress(IMAC1_STR);
+        this.iMac2.setMacAddress(IMAC2_STR);
+        this.eMac1.setMacAddress(EMAC1_STR);
+        this.eMac2.setMacAddress(EMAC2_STR);
 
-		iMac1.setElement(ingress);
-		iMac2.setElement(ingress);
-		eMac1.setElement(egress);
-		eMac2.setElement(egress);
+        this.inspMac.setMacAddress(INSPMAC1_STR);
 
-		ingress.setMacAddressEntities(asList(iMac1, iMac2));
-		ingress.setPortIpEntities(asList(iPort1, iPort2));
+        this.iPort1.setPortIp(IADDR1_STR);
+        this.iPort2.setPortIp(IADDR2_STR);
+        this.ePort1.setPortIp(EADDR1_STR);
+        this.ePort2.setPortIp(EADDR2_STR);
 
-		egress.setMacAddressEntities(asList(eMac1, eMac2));
-		egress.setPortIpEntities(asList(ePort1, ePort2));
+        this.iPort1.setElement(this.ingress);
+        this.iPort2.setElement(this.ingress);
+        this.ePort1.setElement(this.egress);
+        this.ePort2.setElement(this.egress);
 
-		inspected.setMacAddressEntities(asList(inspMac));
+        this.iMac1.setElement(this.ingress);
+        this.iMac2.setElement(this.ingress);
+        this.eMac1.setElement(this.egress);
+        this.eMac2.setElement(this.egress);
 
-		ingress.setIngressInspectionPort(inspectionPort);
-		egress.setEgressInspectionPort(inspectionPort);
-		inspected.setInspectionHook(inspectionHook);
+        this.ingress.setMacAddressEntities(asList(this.iMac1, this.iMac2));
+        this.ingress.setPortIpEntities(asList(this.iPort1, this.iPort2));
 
-		inspectionPort.setIngress(ingress);
-		inspectionPort.setEgress(egress);
-		inspectionHook.setInspectedPort(inspected);
+        this.egress.setMacAddressEntities(asList(this.eMac1, this.eMac2));
+        this.egress.setPortIpEntities(asList(this.ePort1, this.ePort2));
 
-		inspectionPort.setInspectionHook(inspectionHook);
-		inspectionHook.setInspectionPort(inspectionPort);
-	}
+        this.inspected.setMacAddressEntities(asList(this.inspMac));
 
-	@After
-	public void tearDown() {
-		File dbfile = new File(TEST_DB_FILENAME + ".h2.db");
+        this.ingress.setIngressInspectionPort(this.inspectionPort);
+        this.egress.setEgressInspectionPort(this.inspectionPort);
+        this.inspected.setInspectionHook(this.inspectionHook);
 
-		if (!dbfile.delete()) {
-			throw new IllegalStateException("Failed to delete database file : " + dbfile.getAbsolutePath());
-		}
+        this.inspectionPort.setIngress(this.ingress);
+        this.inspectionPort.setEgress(this.egress);
+        this.inspectionHook.setInspectedPort(this.inspected);
 
-		File tracefile = new File(TEST_DB_FILENAME + ".trace.db");
+        this.inspectionPort.setInspectionHook(this.inspectionHook);
+        this.inspectionHook.setInspectionPort(this.inspectionPort);
+    }
 
-		if (!tracefile.delete()) {
-			throw new IllegalStateException("Failed to delete trace file : " + tracefile.getAbsolutePath());
-		}
-	}
+    @After
+    public void tearDown() {
+        File dbfile = new File(TEST_DB_FILENAME + ".h2.db");
 
-	@Test
-	public void verifyCorrectNumberOfMacsAdPortIps() throws Exception {
+        if (!dbfile.delete()) {
+            throw new IllegalStateException("Failed to delete database file : " + dbfile.getAbsolutePath());
+        }
 
-		assertEquals(null, inspectionPort.getId());
+        File tracefile = new File(TEST_DB_FILENAME + ".trace.db");
 
-		InspectionHookEntity inspHookEntity = txControl.required(() -> {
-			em.persist(inspectionHook);
-			return inspectionHook;
-		});
+        if (!tracefile.delete()) {
+            throw new IllegalStateException("Failed to delete trace file : " + tracefile.getAbsolutePath());
+        }
+    }
 
-		assertNotNull(inspectionPort.getId());
+    @Test
+    public void verifyCorrectNumberOfMacsAdPortIps() throws Exception {
 
-		List<MacAddressEntity> lsMacs;
+        assertEquals(null, this.inspectionPort.getId());
 
-		lsMacs = txControl.requiresNew(() -> {
-			CriteriaBuilder cb = this.em.getCriteriaBuilder();
+        InspectionHookEntity inspHookEntity = this.txControl.required(() -> {
+            this.em.persist(this.inspectionHook);
+            return this.inspectionHook;
+        });
 
-			CriteriaQuery<MacAddressEntity> query = cb.createQuery(MacAddressEntity.class);
-			Root<MacAddressEntity> from = query.from(MacAddressEntity.class);
-			query = query.select(from).distinct(true);
-			return this.em.createQuery(query).getResultList();
+        assertNotNull(this.inspectionPort.getId());
 
-		});
+        List<MacAddressEntity> lsMacs;
 
-		assertEquals(5, lsMacs.size());
+        lsMacs = this.txControl.requiresNew(() -> {
+            CriteriaBuilder cb = this.em.getCriteriaBuilder();
 
-		List<PortIpEntity> lsPorts;
+            CriteriaQuery<MacAddressEntity> query = cb.createQuery(MacAddressEntity.class);
+            Root<MacAddressEntity> from = query.from(MacAddressEntity.class);
+            query = query.select(from).distinct(true);
+            return this.em.createQuery(query).getResultList();
 
-		lsPorts = txControl.requiresNew(() -> {
-			CriteriaBuilder cb = this.em.getCriteriaBuilder();
+        });
 
-			CriteriaQuery<PortIpEntity> query = cb.createQuery(PortIpEntity.class);
-			Root<PortIpEntity> from = query.from(PortIpEntity.class);
-			query = query.select(from).distinct(true);
-			return this.em.createQuery(query).getResultList();
+        assertEquals(5, lsMacs.size());
 
-		});
+        List<PortIpEntity> lsPorts;
 
-		assertEquals(4, lsPorts.size());
+        lsPorts = this.txControl.requiresNew(() -> {
+            CriteriaBuilder cb = this.em.getCriteriaBuilder();
 
-	}
+            CriteriaQuery<PortIpEntity> query = cb.createQuery(PortIpEntity.class);
+            Root<PortIpEntity> from = query.from(PortIpEntity.class);
+            query = query.select(from).distinct(true);
+            return this.em.createQuery(query).getResultList();
 
-	@Test
-	public void verifyHookAndPortPersistedAfterSingleHookPersistenceWithObjectGraphSetUp() {
+        });
 
-		InspectionHookEntity inspHookEntity = txControl.required(() -> {
-			em.persist(inspectionHook);
-			return inspectionHook;
-		});
+        assertEquals(4, lsPorts.size());
 
-		InspectionHookEntity persistedHook = txControl.required(() -> {
-			InspectionHookEntity ph = em.find(InspectionHookEntity.class, inspectionHook.getHookId());
-			InspectionPortEntity iprt = em.find(InspectionPortEntity.class, inspectionPort.getId());
+    }
 
-			assertNotNull(inspectionPort.getInspectionHook());
-			assertEquals(inspectionPort.getId(), iprt.getId());
-			return ph;
-		});
+    @Test
+    public void verifyHookAndPortPersistedAfterSingleHookPersistenceWithObjectGraphSetUp() {
 
-		assertNotNull(inspectionHook.getHookId());
-		assertEquals(inspectionHook.getHookId(), persistedHook.getHookId());
+        InspectionHookEntity inspHookEntity = this.txControl.required(() -> {
+            this.em.persist(this.inspectionHook);
+            return this.inspectionHook;
+        });
 
-		InspectionPortEntity persistedPort = persistedHook.getInspectionPort();
+        InspectionHookEntity persistedHook = this.txControl.required(() -> {
+            InspectionHookEntity ph = this.em.find(InspectionHookEntity.class, this.inspectionHook.getHookId());
+            InspectionPortEntity iprt = this.em.find(InspectionPortEntity.class, this.inspectionPort.getId());
 
-		assertNotNull(persistedPort);
-		assertEquals(inspectionHook.getInspectionPort().getId(), persistedPort.getId());
-	}
+            assertNotNull(this.inspectionPort.getInspectionHook());
+            assertEquals(this.inspectionPort.getId(), iprt.getId());
+            return ph;
+        });
 
-	@Test
-	public void testUtilsInspPortByNetworkElements() throws Exception {
+        assertNotNull(this.inspectionHook.getHookId());
+        assertEquals(this.inspectionHook.getHookId(), persistedHook.getHookId());
 
-		InspectionHookEntity inspHookEntity = txControl.required(() -> {
-			em.persist(inspectionHook);
-			return inspectionHook;
-		});
+        InspectionPortEntity persistedPort = persistedHook.getInspectionPort();
 
-		// TODO : Separate the tests!
-		NSCUtils utils = new NSCUtils(em, txControl);
+        assertNotNull(persistedPort);
+        assertEquals(this.inspectionHook.getInspectionPort().getId(), persistedPort.getId());
+    }
 
-		NetworkElement ingressElement = NSCUtils.makeNetworkElement(ingress);
-		NetworkElement egressElement = NSCUtils.makeNetworkElement(egress);
-		InspectionPortEntity foundPort = utils.inspPortByNetworkElements(ingressElement, egressElement);
+    @Test
+    public void testUtilsInspPortByNetworkElements() throws Exception {
 
-		assertNotNull(foundPort);
-		assertEquals(inspectionPort.getId(), foundPort.getId());
+        InspectionHookEntity inspHookEntity = this.txControl.required(() -> {
+            this.em.persist(this.inspectionHook);
+            return this.inspectionHook;
+        });
 
-	}
+        // TODO : Separate the tests!
+        NSCUtils utils = new NSCUtils(this.em, this.txControl);
 
-	@Test
-	public void testUtilsNetworkElementEntityByElementId() throws Exception {
+        NetworkElement ingressElement = NSCUtils.makeNetworkElement(this.ingress);
+        NetworkElement egressElement = NSCUtils.makeNetworkElement(this.egress);
+        InspectionPortEntity foundPort = utils.inspPortByNetworkElements(ingressElement, egressElement);
 
-		InspectionHookEntity inspHookEntity = txControl.required(() -> {
-			em.persist(inspectionHook);
-			return inspectionHook;
-		});
+        assertNotNull(foundPort);
+        assertEquals(this.inspectionPort.getId(), foundPort.getId());
 
-		// TODO : Separate the tests!
-		NSCUtils utils = new NSCUtils(em, txControl);
+    }
 
-		NetworkElementEntity foundNE = txControl.required(() -> {
-			NetworkElementEntity e = utils.networkElementEntityByElementId(inspected.getElementId());
-			e.getMacAddressEntities().size();
-			return e;
-		});
+    @Test
+    public void testUtilsNetworkElementEntityByElementId() throws Exception {
 
-		assertNotNull(foundNE);
-		assertNotNull(foundNE.getMacAddressEntities());
-		assertEquals(1, foundNE.getMacAddressEntities().size());
+        InspectionHookEntity inspHookEntity = this.txControl.required(() -> {
+            this.em.persist(this.inspectionHook);
+            return this.inspectionHook;
+        });
 
-	}
+        // TODO : Separate the tests!
+        NSCUtils utils = new NSCUtils(this.em, this.txControl);
 
-	@Test
-	public void testUtilsInspHookByInspectedAndPort() throws Exception {
-		InspectionHookEntity inspHookEntity = txControl.required(() -> {
-			em.persist(inspectionHook);
-			return inspectionHook;
-		});
+        NetworkElementEntity foundNE = this.txControl.required(() -> {
+            NetworkElementEntity e = utils.networkElementEntityByElementId(this.inspected.getElementId());
+            e.getMacAddressEntities().size();
+            return e;
+        });
 
-		// TODO : Separate the tests!
-		NSCUtils utils = new NSCUtils(em, txControl);
+        assertNotNull(foundNE);
+        assertNotNull(foundNE.getMacAddressEntities());
+        assertEquals(1, foundNE.getMacAddressEntities().size());
 
-		InspectionHookEntity foundIH = txControl.required(() -> {
-			InspectionPortEntity ipe = em.find(inspectionPort.getClass(), inspectionPort.getId());
-			assertNotNull(ipe);
-			NetworkElement ne = NSCUtils.makeNetworkElement(inspected);
-			InspectionPortElement prte = NSCUtils.makeInspectionPortElement(ipe);
-			InspectionHookEntity ihe = utils.inspHookByInspectedAndPort(ne, prte);
+    }
 
-			assertNotNull(ihe);
-			assertEquals(inspectionHook.getHookId(), ihe.getHookId());
-			assertNotNull(ihe.getInspectionPort());
-			assertEquals(ihe.getInspectionPort().getId(), ipe.getId());
-			return ihe;
-		});
+    @Test
+    public void testUtilsInspHookByInspectedAndPort() throws Exception {
+        InspectionHookEntity inspHookEntity = this.txControl.required(() -> {
+            this.em.persist(this.inspectionHook);
+            return this.inspectionHook;
+        });
 
-		assertEquals(foundIH.getHookId(), inspectionHook.getHookId());
-		assertNotNull(foundIH.getInspectionPort());
-		assertEquals(foundIH.getInspectionPort().getId(), inspectionPort.getId());
+        // TODO : Separate the tests!
+        NSCUtils utils = new NSCUtils(this.em, this.txControl);
 
-	}
+        InspectionHookEntity foundIH = this.txControl.required(() -> {
+            InspectionPortEntity ipe = this.em.find(this.inspectionPort.getClass(), this.inspectionPort.getId());
+            assertNotNull(ipe);
+            NetworkElement ne = NSCUtils.makeNetworkElement(this.inspected);
+            InspectionPortElement prte = NSCUtils.makeInspectionPortElement(ipe);
+            InspectionHookEntity ihe = utils.inspHookByInspectedAndPort(ne, prte);
 
-	@Test
-	public void testRegisterInspectionPort() throws Exception {
-		NSCUtils utils = new NSCUtils(em, txControl);
-		NeutronSdnRedirectionApi redirApi = new NeutronSdnRedirectionApi(null, "boogus", txControl, em);
+            assertNotNull(ihe);
+            assertEquals(this.inspectionHook.getHookId(), ihe.getHookId());
+            assertNotNull(ihe.getInspectionPort());
+            assertEquals(ihe.getInspectionPort().getId(), ipe.getId());
+            return ihe;
+        });
 
-		InspectionPortElement element = new InspectionPortElement() {
+        assertEquals(foundIH.getHookId(), this.inspectionHook.getHookId());
+        assertNotNull(foundIH.getInspectionPort());
+        assertEquals(foundIH.getInspectionPort().getId(), this.inspectionPort.getId());
 
-			private String parentId = inspectionHook.getHookId();
-			private NetworkElement ingrElt = NSCUtils.makeNetworkElement(ingress);
-			private NetworkElement egrElt = NSCUtils.makeNetworkElement(egress);
+    }
 
-			@Override
-			public String getParentId() {
-				return null;
-			}
+    @Test
+    public void testRegisterInspectionPort() throws Exception {
+        NSCUtils utils = new NSCUtils(this.em, this.txControl);
+        NeutronSdnRedirectionApi redirApi = new NeutronSdnRedirectionApi(null, "boogus", this.txControl, this.em);
 
-			@Override
-			public String getElementId() {
-				return null;
-			}
+        InspectionPortElement element = new InspectionPortElement() {
 
-			@Override
-			public NetworkElement getIngressPort() {
-				return ingrElt;
-			}
+            private String parentId = OSGiIntegrationTest.this.inspectionHook.getHookId();
+            private NetworkElement ingrElt = NSCUtils.makeNetworkElement(OSGiIntegrationTest.this.ingress);
+            private NetworkElement egrElt = NSCUtils.makeNetworkElement(OSGiIntegrationTest.this.egress);
 
-			@Override
-			public NetworkElement getEgressPort() {
+            @Override
+            public String getParentId() {
+                return null;
+            }
 
-				return egrElt;
-			}
-		};
+            @Override
+            public String getElementId() {
+                return null;
+            }
 
-		InspectionPortElement ipe = (InspectionPortElement) redirApi.registerInspectionPort(element);
+            @Override
+            public NetworkElement getIngressPort() {
+                return this.ingrElt;
+            }
 
-		assertNotNull(ipe.getIngressPort());
+            @Override
+            public NetworkElement getEgressPort() {
 
-		NetworkElementEntity foundIngr = txControl
-				.required(() -> utils.networkElementEntityByElementId(ipe.getIngressPort().getElementId()));
+                return this.egrElt;
+            }
+        };
 
-		assertNotNull(foundIngr);
-		assertEquals(ipe.getIngressPort().getElementId(), foundIngr.getElementId());
-		assertNotNull(foundIngr.getIngressInspectionPort());
-		assertEquals(ipe.getElementId(), foundIngr.getIngressInspectionPort().getId() + "");
+        InspectionPortElement ipe = (InspectionPortElement) redirApi.registerInspectionPort(element);
 
-		InspectionPortElement ipeFound = redirApi.getInspectionPort(ipe);
-		assertEquals(ipe.getIngressPort().getElementId(), ipeFound.getIngressPort().getElementId());
-		assertEquals(ipe.getEgressPort().getElementId(), ipeFound.getEgressPort().getElementId());
-		assertEquals(ipe.getElementId(), ipeFound.getElementId());
+        assertNotNull(ipe.getIngressPort());
 
-		assertEquals(null, ipe.getParentId());
-		assertEquals(null, ipeFound.getParentId());
+        NetworkElementEntity foundIngr = this.txControl
+                .required(() -> utils.networkElementEntityByElementId(ipe.getIngressPort().getElementId()));
 
-	}
+        assertNotNull(foundIngr);
+        assertEquals(ipe.getIngressPort().getElementId(), foundIngr.getElementId());
+        assertNotNull(foundIngr.getIngressInspectionPort());
+        assertEquals(ipe.getElementId(), foundIngr.getIngressInspectionPort().getId() + "");
+
+        InspectionPortElement ipeFound = redirApi.getInspectionPort(ipe);
+        assertEquals(ipe.getIngressPort().getElementId(), ipeFound.getIngressPort().getElementId());
+        assertEquals(ipe.getEgressPort().getElementId(), ipeFound.getEgressPort().getElementId());
+        assertEquals(ipe.getElementId(), ipeFound.getElementId());
+
+        assertEquals(null, ipe.getParentId());
+        assertEquals(null, ipeFound.getParentId());
+
+    }
 
 }
