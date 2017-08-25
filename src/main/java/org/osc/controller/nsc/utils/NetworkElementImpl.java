@@ -8,7 +8,6 @@ import org.osc.sdk.controller.element.NetworkElement;
 
 public class NetworkElementImpl implements NetworkElement{
 
-
     private String elementId;
     private String parentId;
     private List<String> macAddresses = new ArrayList<>();
@@ -32,7 +31,6 @@ public class NetworkElementImpl implements NetworkElement{
         this.macAddresses.add(macAddress);
         this.portIPs.add(portIP);
     }
-
 
     @Override
     public String getElementId() {

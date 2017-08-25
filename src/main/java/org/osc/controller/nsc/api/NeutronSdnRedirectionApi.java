@@ -40,7 +40,7 @@ import org.osgi.service.transaction.control.TransactionControl;
 
 public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
 
-	private static final Logger LOGGER = Logger.getLogger(NeutronSdnRedirectionApi.class);
+	private static final Logger LOG = Logger.getLogger(NeutronSdnRedirectionApi.class);
 
 	private VirtualizationConnectorElement vc;
 	private String region;
@@ -70,7 +70,7 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
 		} catch (Exception e) {
 			String inspectedPortId = inspectedPort != null ? inspectedPort.getElementId() : null;
 			String inspectionPortId = inspectionPort != null ? inspectionPort.getElementId() : null;
-			LOGGER.error(String.format("Finding Network Element (inspected %s ; inspectnPort %s) :", inspectedPortId,
+			LOG.error(String.format("Finding Network Element (inspected %s ; inspectnPort %s) :", inspectedPortId,
 					inspectionPortId), e); // TODO
 			return null;
 		}
@@ -139,7 +139,6 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
 			entity.setTag(tag);
 			return null;
 		});
-
 	}
 
 	@Override
@@ -173,7 +172,7 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
 			q = this.em.createQuery("FROM InspectionHookEntity WHERE inspectedPortId = :portId");
 			q.setParameter("portId", portId);
 			if (q.getMaxResults() > 0) {
-				LOGGER.error("Deleting inspection hooks for inspectedPortId failed! inspectedPortId: " + portId);
+				LOG.error("Deleting inspection hooks for inspectedPortId failed! inspectedPortId: " + portId);
 			}
 			return null;
 		});
@@ -196,7 +195,7 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
 				try {
 					portId = Long.parseLong(portIdStr);
 				} catch (NumberFormatException nfe) {
-					LOGGER.error("Inspection port id of non-numeric format passed to NSC controller " + portIdStr);
+					LOG.error("Inspection port id of non-numeric format passed to NSC controller " + portIdStr);
 					return null;
 				}
 
@@ -204,7 +203,7 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
 				return NSCUtils.makeInspectionPortElement(ipEntity);
 			});
 		} catch (Exception e)  {
-			LOGGER.warn( "Failed to retrieve inspectionPort by id! Trying by ingress and egress." );
+			LOG.warn( "Failed to retrieve inspectionPort by id! Trying by ingress and egress." );
 		}
 
 		NetworkElement ingress = inspectionPort.getIngressPort();
@@ -212,13 +211,10 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
 
 		InspectionPortEntity ipEntity = this.utils.inspPortByNetworkElements(ingress, egress);
 		return NSCUtils.makeInspectionPortElement(ipEntity);
-
 	}
 
 	@Override
 	public Element registerInspectionPort(InspectionPortElement inspectionPort) throws Exception {
-
-
 
 		return this.txControl.required(() -> {
 

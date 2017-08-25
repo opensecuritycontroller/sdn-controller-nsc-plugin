@@ -8,7 +8,6 @@ public class InspectionPortElementImpl extends DefaultInspectionPort {
     private String elementId;
     private String parentId;
 
-
     public InspectionPortElementImpl() {
 
     }

@@ -35,7 +35,7 @@ public class InspectionHookEntity {
 	@GenericGenerator(name = "uuid", strategy = "uuid2")
 	@Column(name = "hookId", unique = true)
 	public String getHookId() {
-		return hookId;
+		return this.hookId;
 	}
 
 	public void setHookId(String hookId) {
@@ -45,7 +45,7 @@ public class InspectionHookEntity {
 	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = false, fetch = LAZY, optional = true)
 	@JoinColumn(name = "inspectedPortId", nullable = true, updatable = true)
 	public NetworkElementEntity getInspectedPort() {
-		return inspectedPort;
+		return this.inspectedPort;
 	}
 
 	public void setInspectedPort(NetworkElementEntity inspectedPort) {
@@ -55,7 +55,7 @@ public class InspectionHookEntity {
 	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = false, fetch = LAZY, optional = true)
 	@JoinColumn(name = "inspectionPortId", nullable = true, updatable = true)
 	public InspectionPortEntity getInspectionPort() {
-		return inspectionPort;
+		return this.inspectionPort;
 	}
 
 	public void setInspectionPort(InspectionPortEntity inspectionPort) {
@@ -63,7 +63,7 @@ public class InspectionHookEntity {
 	}
 
 	public Long getTag() {
-		return tag;
+		return this.tag;
 	}
 
 	public void setTag(Long tag) {
@@ -71,7 +71,7 @@ public class InspectionHookEntity {
 	}
 
 	public Long getHookOrder() {
-		return hookOrder;
+		return this.hookOrder;
 	}
 
 	public void setHookOrder(Long hookOrder) {
@@ -79,7 +79,7 @@ public class InspectionHookEntity {
 	}
 
 	public String getEncType() {
-		return encType;
+		return this.encType;
 	}
 
 	public void setEncType(String encType) {
@@ -87,11 +87,10 @@ public class InspectionHookEntity {
 	}
 
 	public String getFailurePolicyType() {
-		return failurePolicyType;
+		return this.failurePolicyType;
 	}
 
 	public void setFailurePolicyType(String failurePolicyType) {
 		this.failurePolicyType = failurePolicyType;
 	}
-
 }

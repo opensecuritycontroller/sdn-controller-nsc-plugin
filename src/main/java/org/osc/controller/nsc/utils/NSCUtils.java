@@ -79,7 +79,6 @@ public class NSCUtils {
         return retVal;
     }
 
-
     public NetworkElementEntity makeOrGetNetworkElementEntity(NetworkElement networkElement) {
         if (networkElement == null) {
             return null;
@@ -97,13 +96,12 @@ public class NSCUtils {
         return makeNetworkElementEntity(networkElement);
     }
 
-
     public InspectionPortEntity makeInspectionPortEntity(InspectionPortElement inspectionPortElement) {
 
-        
+
         NetworkElementEntity ingressEntity = null;
         NetworkElementEntity egressEntity = null;
-        
+
         NetworkElement ingress = inspectionPortElement.getIngressPort();
         if (ingress != null) {
             ingressEntity = makeOrGetNetworkElementEntity(ingress);
@@ -188,10 +186,10 @@ public class NSCUtils {
                                                     Long parentId,
                                                     Long elementId) {
 
-        List<String> macAddresses = macAddrEntities != null ? 
+        List<String> macAddresses = macAddrEntities != null ?
                 macAddrEntities.stream().map(s -> s.getMacAddress()).collect(Collectors.toList()) : null;
-                
-        List<String> portIPs = portIpEntities != null ? 
+
+        List<String> portIPs = portIpEntities != null ?
                 portIpEntities.stream().map(s -> s.getPortIp()).collect(Collectors.toList()) : null;
         String parentIdStr = parentId != null ? parentId.toString() : null;
         String elementIdStr = elementId != null ? elementId.toString() : null;
@@ -253,15 +251,6 @@ public class NSCUtils {
         q.setParameter("ingId", ingressId);
         q.setParameter("egId", egressId);
 
-        // CriteriaBuilder cb = this.em.getCriteriaBuilder();
-        // CriteriaQuery<InspectionPortNSCEntity> q =
-        // cb.createQuery(InspectionPortNSCEntity.class);
-        // Root<InspectionPortNSCEntity> r =
-        // q.from(InspectionPortNSCEntity.class);
-        // Predicate byIngress = cb.equal(r.get("ingress"), ingress);
-        // Predicate byEgress = cb.equal(r.get("egress"), egress);
-        // q.where(paramExpression)
-
         try {
             @SuppressWarnings("unchecked")
             List<InspectionPortEntity> ports = q.getResultList();
@@ -307,15 +296,6 @@ public class NSCUtils {
                 "FROM InspectionHookEntity WHERE inspectedPortId = :inspectedId AND inspectionPortId = :inspectionId ");
         q.setParameter("inspectedId", inspectedId);
         q.setParameter("inspectionId", portId);
-
-        // CriteriaQuery<InspectionHookNSCEntity> q =
-        // cb.createQuery(InspectionHookNSCEntity.class);
-        // Root<InspectionHookNSCEntity> r =
-        // q.from(InspectionHookNSCEntity.class);
-        // Predicate byPort = cb.equal(r.get("inspectionPortId"), portId);
-        // Predicate byInspected = cb.equal(r.get("inspectedPortId"),
-        // egress.getElementId());
-        // q.where(cb.and(byPort, byInspected));
 
         try {
             List<InspectionHookEntity> ports = q.getResultList();

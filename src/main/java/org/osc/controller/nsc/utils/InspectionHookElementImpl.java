@@ -55,7 +55,6 @@ public class InspectionHookElementImpl implements InspectionHookElement {
         }
     }
 
-
     @Override
     public Long getTag() {
         return this.tag;
