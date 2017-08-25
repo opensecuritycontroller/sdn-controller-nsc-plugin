@@ -88,8 +88,8 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
 
         InspectionHookEntity inspHookEntity = this.utils.makeInspectionHookEntity(inspected, inspectionPort, tag,
                 encType, order, failurePolicyType);
-        this.txControl.required(() -> {
 
+        this.txControl.required(() -> {
             String hookId = inspHookEntity.getHookId();
 
             if (this.em.find(InspectionHookEntity.class, hookId) != null) {
