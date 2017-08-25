@@ -35,8 +35,8 @@ public class NetworkElementEntity {
 	private InspectionHookEntity inspectionHook;
 
 	@Id
-	@GeneratedValue(generator = "uuid")
-	@GenericGenerator(name = "uuid", strategy = "uuid2")
+//	@GeneratedValue(generator = "uuid")
+//	@GenericGenerator(name = "uuid", strategy = "uuid2")
 	@Column(name = "elementId", unique = true)
 	public String getElementId() {
 		return elementId;

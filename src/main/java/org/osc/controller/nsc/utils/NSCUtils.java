@@ -1,6 +1,8 @@
 package org.osc.controller.nsc.utils;
 
 import static java.util.stream.Collectors.toList;
+import static org.osc.sdk.controller.FailurePolicyType.NA;
+import static org.osc.sdk.controller.TagEncapsulationType.VLAN;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -107,9 +109,12 @@ public class NSCUtils {
 		InspectionPortEntity inspPortEntity = makeInspectionPortEntity(inspectionPort);
 		final String elementId = inspectedPort.getElementId();
 
+		encType = (encType != null ? encType : VLAN);
+        failurePolicyType = (failurePolicyType != null ? failurePolicyType : NA);
+
 		NetworkElementEntity inspected = null;
 		try {
-			inspected = this.txControl.required(() -> em.find(NetworkElementEntity.class, elementId));
+			inspected = this.txControl.required(() -> this.em.find(NetworkElementEntity.class, elementId));
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage());
 			LOGGER.error(e);
@@ -158,22 +163,22 @@ public class NSCUtils {
 
 			@Override
 			public List<String> getPortIPs() {
-				return portIps;
+				return this.portIps;
 			}
 
 			@Override
 			public String getParentId() {
-				return parentId;
+				return this.parentId;
 			}
 
 			@Override
 			public List<String> getMacAddresses() {
-				return macAddresses;
+				return this.macAddresses;
 			}
 
 			@Override
 			public String getElementId() {
-				return elementId;
+				return this.elementId;
 			}
 		};
 
@@ -195,22 +200,22 @@ public class NSCUtils {
 
 			@Override
 			public NetworkElement getIngressPort() {
-				return ingressPort;
+				return this.ingressPort;
 			}
 
 			@Override
 			public NetworkElement getEgressPort() {
-				return egressPort;
+				return this.egressPort;
 			}
 
 			@Override
 			public String getElementId() {
-				return elementId;
+				return this.elementId;
 			}
 
 			@Override
 			public String getParentId() {
-				return parentId;
+				return this.parentId;
 			}
 		};
 
@@ -235,48 +240,48 @@ public class NSCUtils {
 
 			{
 				if (entity.getFailurePolicyType() != null) {
-					policyType = FailurePolicyType.fromText(entity.getFailurePolicyType());
+					this.policyType = FailurePolicyType.fromText(entity.getFailurePolicyType());
 				}
 
 				if (entity.getEncType() != null) {
-					encType = TagEncapsulationType.fromText(entity.getEncType());
+					this.encType = TagEncapsulationType.fromText(entity.getEncType());
 				}
 			}
 
 			@Override
 			public Long getTag() {
-				return tag;
+				return this.tag;
 			}
 
 			@Override
 			public Long getOrder() {
-				return hookOrder;
+				return this.hookOrder;
 			}
 
 			@Override
 			public InspectionPortElement getInspectionPort() {
-				return inspectionPort; // TODO
+				return this.inspectionPort; // TODO
 			}
 
 			@Override
 			public NetworkElement getInspectedPort() {
 				// TODO Auto-generated method stub
-				return inspected;
+				return this.inspected;
 			}
 
 			@Override
 			public String getHookId() {
-				return hookId;
+				return this.hookId;
 			}
 
 			@Override
 			public FailurePolicyType getFailurePolicyType() {
-				return policyType;
+				return this.policyType;
 			}
 
 			@Override
 			public TagEncapsulationType getEncType() {
-				return encType;
+				return this.encType;
 			}
 		};
 	};
@@ -297,7 +302,7 @@ public class NSCUtils {
 	}
 
 	public InspectionPortEntity inspPortByNetworkElements(NetworkElement ingress, NetworkElement egress) {
-		return txControl.requiresNew(() -> txInspPortByNetworkElements(ingress, egress));
+		return this.txControl.required(() -> txInspPortByNetworkElements(ingress, egress));
 	}
 
 	private InspectionPortEntity txInspPortByNetworkElements(NetworkElement ingress, NetworkElement egress) {
@@ -338,7 +343,7 @@ public class NSCUtils {
 	}
 
 	public InspectionHookEntity inspHookByInspectedAndPort(NetworkElement inspected, InspectionPortElement element) {
-		return txControl.required(() -> {
+		return this.txControl.required(() -> {
 			InspectionHookEntity e = txInspHookByInspectedAndPort(inspected, element);
 			loadFullEntity(e);
 			return e;
@@ -391,11 +396,11 @@ public class NSCUtils {
 	}
 
 	public InspectionPortEntity txInspectionPortEntityById(Long id) {
-		return em.find(InspectionPortEntity.class, id);
+		return this.em.find(InspectionPortEntity.class, id);
 	}
 
 	public NetworkElementEntity txNetworkElementEntityById(Long id) {
-		return em.find(NetworkElementEntity.class, id);
+		return this.em.find(NetworkElementEntity.class, id);
 	}
 
 	public static NetworkElement makeNetworkElement(List<MacAddressEntity> mas, List<PortIpEntity> ips, Long pid,

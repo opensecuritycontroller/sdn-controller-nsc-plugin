@@ -65,7 +65,7 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
 	public InspectionHookElement getInspectionHook(NetworkElement inspectedPort, InspectionPortElement inspectionPort)
 			throws Exception {
 		try {
-			InspectionHookEntity entity = utils.inspHookByInspectedAndPort(inspectedPort, inspectionPort);
+			InspectionHookEntity entity = this.utils.inspHookByInspectedAndPort(inspectedPort, inspectionPort);
 			return NSCUtils.makeInspectionHookElement(entity);
 		} catch (Exception e) {
 			String inspectedPortId = inspectedPort != null ? inspectedPort.getElementId() : null;
@@ -86,10 +86,18 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
 			inspected = inspectedPort.iterator().next();
 		}
 
-		InspectionHookEntity inspHookEntity = utils.makeInspectionHookEntity(inspected, inspectionPort, tag, encType,
+		InspectionHookEntity inspHookEntity = this.utils.makeInspectionHookEntity(inspected, inspectionPort, tag, encType,
 				order, failurePolicyType);
-		txControl.required(() -> {
-			em.persist(inspHookEntity);
+		this.txControl.required(() -> {
+
+		    String hookId = inspHookEntity.getHookId();
+
+		    if (this.em.find(InspectionHookEntity.class, hookId) != null) {
+		        this.em.merge(inspHookEntity);
+		    } else {
+		        this.em.persist(inspHookEntity);
+		    }
+
 			return null;
 		});
 
@@ -104,10 +112,10 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
 
 			NetworkElement inspected = inspectedPort.get(0);
 
-			txControl.requiresNew(() -> {
-				InspectionHookEntity entity = utils.inspHookByInspectedAndPort(inspected, inspectionPort);
+			this.txControl.requiresNew(() -> {
+				InspectionHookEntity entity = this.utils.inspHookByInspectedAndPort(inspected, inspectionPort);
 				if (entity != null) {
-					em.remove(entity);
+					this.em.remove(entity);
 				}
 				return null;
 			});
@@ -126,8 +134,8 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
 	public void setInspectionHookTag(NetworkElement inspectedPort, InspectionPortElement inspectionPort, Long tag)
 			throws Exception {
 
-		txControl.required(() -> {
-			InspectionHookEntity entity = utils.inspHookByInspectedAndPort(inspectedPort, inspectionPort);
+		this.txControl.required(() -> {
+			InspectionHookEntity entity = this.utils.inspHookByInspectedAndPort(inspectedPort, inspectionPort);
 			entity.setTag(tag);
 			return null;
 		});
@@ -145,8 +153,8 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
 	public void setInspectionHookFailurePolicy(NetworkElement inspectedPort, InspectionPortElement inspectionPort,
 			FailurePolicyType failurePolicyType) throws Exception {
 
-		txControl.required(() -> {
-			InspectionHookEntity entity = utils.inspHookByInspectedAndPort(inspectedPort, inspectionPort);
+		this.txControl.required(() -> {
+			InspectionHookEntity entity = this.utils.inspHookByInspectedAndPort(inspectedPort, inspectionPort);
 			String typeStr = failurePolicyType != null ? failurePolicyType.name() : null;
 			entity.setFailurePolicyType(typeStr);
 			return null;
@@ -156,13 +164,13 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
 	@Override
 	public void removeAllInspectionHooks(NetworkElement inspectedPort) throws Exception {
 
-		txControl.required(() -> {
-			Query q = em.createQuery("DELETE FROM InspectionHookEntity WHERE inspectedPortId = :portId");
+		this.txControl.required(() -> {
+			Query q = this.em.createQuery("DELETE FROM InspectionHookEntity WHERE inspectedPortId = :portId");
 			String portId = inspectedPort != null ? inspectedPort.getElementId() : null;
 			q.setParameter("portId", portId);
 
 			q.executeUpdate();
-			q = em.createQuery("FROM InspectionHookEntity WHERE inspectedPortId = :portId");
+			q = this.em.createQuery("FROM InspectionHookEntity WHERE inspectedPortId = :portId");
 			q.setParameter("portId", portId);
 			if (q.getMaxResults() > 0) {
 				LOGGER.error("Deleting inspection hooks for inspectedPortId failed! inspectedPortId: " + portId);
@@ -176,21 +184,34 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
 	@Override
 	public InspectionPortElement getInspectionPort(InspectionPortElement inspectionPort) throws Exception {
 
-		String portIdStr = inspectionPort != null ? inspectionPort.getElementId() : null;
+		if (inspectionPort == null) {
+			return null;
+		}
 
-		return txControl.required(() -> {
+		try {
+			String portIdStr = inspectionPort != null ? inspectionPort.getElementId() : null;
 
-			Long portId = null;
-			try {
-				portId = Long.parseLong(portIdStr);
-			} catch (NumberFormatException nfe) {
-				LOGGER.error("Inspection port id of non-numeric format passed to NSC controller " + portIdStr);
-				return null;
-			}
+			return this.txControl.required(() -> {
+				Long portId = null;
+				try {
+					portId = Long.parseLong(portIdStr);
+				} catch (NumberFormatException nfe) {
+					LOGGER.error("Inspection port id of non-numeric format passed to NSC controller " + portIdStr);
+					return null;
+				}
 
-			InspectionPortEntity e = utils.txInspectionPortEntityById(portId);
-			return NSCUtils.makeInspectionPortElement(e);
-		});
+				InspectionPortEntity ipEntity = this.utils.txInspectionPortEntityById(portId);
+				return NSCUtils.makeInspectionPortElement(ipEntity);
+			});
+		} catch (Exception e)  {
+			LOGGER.warn( "Failed to retrieve inspectionPort by id! Trying by ingress and egress." );
+		}
+
+		NetworkElement ingress = inspectionPort.getIngressPort();
+		NetworkElement egress = inspectionPort.getEgressPort();
+
+		InspectionPortEntity ipEntity = this.utils.inspPortByNetworkElements(ingress, egress);
+		return NSCUtils.makeInspectionPortElement(ipEntity);
 
 	}
 
@@ -199,11 +220,18 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
 
 		InspectionPortEntity entity = NSCUtils.makeInspectionPortEntity(inspectionPort);
 
-		return txControl.required(() -> {
-			em.persist(entity);
-			em.flush();
+		return this.txControl.required(() -> {
 
-			InspectionPortEntity e = em.find(InspectionPortEntity.class, entity.getId());
+			if (this.em.contains(entity)) {
+				this.em.merge(entity);
+			} else {
+				this.em.persist(entity);
+			}
+
+
+			this.em.flush();
+
+			InspectionPortEntity e = this.em.find(InspectionPortEntity.class, entity.getId());
 
 			return NSCUtils.makeInspectionPortElement(e);
 		});
@@ -213,8 +241,8 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
 	public void setInspectionHookOrder(NetworkElement inspectedPort, InspectionPortElement inspectionPort, Long order)
 			throws Exception {
 
-		txControl.required(() -> {
-			InspectionHookEntity entity = utils.inspHookByInspectedAndPort(inspectedPort, inspectionPort);
+		this.txControl.required(() -> {
+			InspectionHookEntity entity = this.utils.inspHookByInspectedAndPort(inspectedPort, inspectionPort);
 			entity.setHookOrder(order);
 			return null;
 		});
@@ -242,7 +270,7 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
 
 	@Override
 	public void close() throws Exception {
-		em.close();
+		this.em.close();
 	}
 
 	@Override
