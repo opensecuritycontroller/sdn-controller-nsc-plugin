@@ -28,7 +28,7 @@ import org.osgi.service.transaction.control.TransactionControl;
 
 public class NSCUtils {
 
-    private static final Logger LOGGER = Logger.getLogger(NSCUtils.class);
+    private static final Logger LOG = Logger.getLogger(NSCUtils.class);
 
     private TransactionControl txControl;
     private EntityManager em;
@@ -85,8 +85,8 @@ public class NSCUtils {
         }
 
         if (networkElement.getElementId() != null) {
-            NetworkElementEntity found = this.txControl.required(() -> this.em.find(NetworkElementEntity.class,
-                                                                               networkElement.getElementId()));
+            NetworkElementEntity found = this.txControl
+                    .required(() -> this.em.find(NetworkElementEntity.class, networkElement.getElementId()));
             // TODO : what if networkElement has same Id, different other fields?
             if (found != null) {
                 return found;
@@ -98,7 +98,6 @@ public class NSCUtils {
 
     public InspectionPortEntity makeInspectionPortEntity(InspectionPortElement inspectionPortElement) {
 
-
         NetworkElementEntity ingressEntity = null;
         NetworkElementEntity egressEntity = null;
 
@@ -106,9 +105,15 @@ public class NSCUtils {
         if (ingress != null) {
             ingressEntity = makeOrGetNetworkElementEntity(ingress);
         }
+
         NetworkElement egress = inspectionPortElement.getEgressPort();
+
         if (egress != null) {
-            egressEntity = makeOrGetNetworkElementEntity(egress);
+            if (ingressEntity != null && ingressEntity.getElementId().equals(egress.getElementId())) {
+                egressEntity = ingressEntity;
+            } else {
+                egressEntity = makeOrGetNetworkElementEntity(egress);
+            }
         }
 
         return new InspectionPortEntity(null, ingressEntity, egressEntity, null);
@@ -119,16 +124,35 @@ public class NSCUtils {
             return null;
         }
 
+        InspectionPortEntity entity = makeInspectionPortEntity(inspectionPortElement);
+        NetworkElementEntity ingress = entity.getIngress();
+        NetworkElementEntity egress = entity.getEgress();
+
         if (inspectionPortElement.getElementId() != null) {
-            InspectionPortEntity found = this.txControl.required(() -> this.em.find(InspectionPortEntity.class,
-                                                                               inspectionPortElement.getElementId()));
-            // TODO : what if inspectionPortElement has same Id, different other fields?
-            if (found != null) {
-                return found;
-            }
+            InspectionPortEntity found = this.txControl
+                    .required(() -> {
+                        InspectionPortEntity foundTmp = this.em.find(InspectionPortEntity.class, inspectionPortElement.getElementId());
+                        if (foundTmp != null) {
+
+                            if (ingress != null) {
+                                foundTmp.setIngress(ingress);
+                                ingress.setIngressInspectionPort(foundTmp);
+                            }
+
+                            if (egress != null) {
+                                foundTmp.setEgress(egress);
+                                egress.setEgressInspectionPort(foundTmp);
+                            }
+
+                            return foundTmp;
+                        }
+
+                        return null;
+                    });
+            entity = (found != null ? found : entity);
         }
 
-        return makeInspectionPortEntity(inspectionPortElement);
+        return entity;
     }
 
     public InspectionHookEntity makeInspectionHookEntity(NetworkElement inspectedPort,
@@ -182,15 +206,13 @@ public class NSCUtils {
     }
 
     public static NetworkElement makeNetworkElement(List<MacAddressEntity> macAddrEntities,
-                                                    List<PortIpEntity> portIpEntities,
-                                                    Long parentId,
-                                                    Long elementId) {
+            List<PortIpEntity> portIpEntities, Long parentId, Long elementId) {
 
-        List<String> macAddresses = macAddrEntities != null ?
-                macAddrEntities.stream().map(s -> s.getMacAddress()).collect(Collectors.toList()) : null;
+        List<String> macAddresses = macAddrEntities != null
+                ? macAddrEntities.stream().map(s -> s.getMacAddress()).collect(Collectors.toList()) : null;
 
-        List<String> portIPs = portIpEntities != null ?
-                portIpEntities.stream().map(s -> s.getPortIp()).collect(Collectors.toList()) : null;
+        List<String> portIPs = portIpEntities != null
+                ? portIpEntities.stream().map(s -> s.getPortIp()).collect(Collectors.toList()) : null;
         String parentIdStr = parentId != null ? parentId.toString() : null;
         String elementIdStr = elementId != null ? elementId.toString() : null;
 
@@ -234,12 +256,12 @@ public class NSCUtils {
         try {
             return this.em.createQuery(q).getSingleResult();
         } catch (Exception e) {
-            LOGGER.error(String.format("Finding Network Element %s ", elementId), e); // TODO
+            LOG.error(String.format("Finding Network Element %s ", elementId), e); // TODO
             return null;
         }
     }
 
-    public InspectionPortEntity inspPortByNetworkElements(NetworkElement ingress, NetworkElement egress) {
+    public InspectionPortEntity findInspPortByNetworkElements(NetworkElement ingress, NetworkElement egress) {
         return this.txControl.required(() -> txInspPortByNetworkElements(ingress, egress));
     }
 
@@ -255,23 +277,22 @@ public class NSCUtils {
             @SuppressWarnings("unchecked")
             List<InspectionPortEntity> ports = q.getResultList();
             if (ports == null || ports.size() == 0) {
-                LOGGER.warn(String.format("No Inspection ports by ingress %s and egress %s", ingressId, egressId));
+                LOG.warn(String.format("No Inspection ports by ingress %s and egress %s", ingressId, egressId));
                 return null;
             } else if (ports.size() > 0) {
-                LOGGER.warn(String.format("Multiple results! Inspection ports by ingress %s and egress %s", ingressId,
+                LOG.warn(String.format("Multiple results! Inspection ports by ingress %s and egress %s", ingressId,
                         egressId));
             }
             return ports.get(0);
 
         } catch (Exception e) {
-            LOGGER.error(String.format("Finding Inspection ports by ingress %s and egress %s", ingress.getElementId(),
+            LOG.error(String.format("Finding Inspection ports by ingress %s and egress %s", ingress.getElementId(),
                     egress.getElementId()), e); // TODO
             return null;
         }
-
     }
 
-    public InspectionHookEntity inspHookByInspectedAndPort(NetworkElement inspected, InspectionPortElement element) {
+    public InspectionHookEntity findInspHookByInspectedAndPort(NetworkElement inspected, InspectionPortElement element) {
         return this.txControl.required(() -> {
             InspectionHookEntity e = txInspHookByInspectedAndPort(inspected, element);
             loadFullEntity(e);
@@ -288,7 +309,7 @@ public class NSCUtils {
 
         String inspectedId = inspected != null ? inspected.getElementId() : null;
 
-        InspectionPortEntity inspPort = inspPortByNetworkElements(ingress, egress);
+        InspectionPortEntity inspPort = findInspPortByNetworkElements(ingress, egress);
 
         Long portId = inspPort != null ? inspPort.getId() : null;
 
@@ -300,16 +321,16 @@ public class NSCUtils {
         try {
             List<InspectionHookEntity> ports = q.getResultList();
             if (ports == null || ports.size() == 0) {
-                LOGGER.warn(String.format("No Inspection hooks by inspected %s and port %d", inspectedId, portId));
+                LOG.warn(String.format("No Inspection hooks by inspected %s and port %d", inspectedId, portId));
                 return null;
             } else if (ports.size() > 0) {
-                LOGGER.warn(String.format("Multiple results! Inspection hooks by inspected %s and port %d", inspectedId,
+                LOG.warn(String.format("Multiple results! Inspection hooks by inspected %s and port %d", inspectedId,
                         portId));
             }
             return ports.get(0);
 
         } catch (Exception e) {
-            LOGGER.error(String.format("Finding Inspection hooks by inspected %s and port %d", inspectedId, portId), e); // TODO
+            LOG.error(String.format("Finding Inspection hooks by inspected %s and port %d", inspectedId, portId), e); // TODO
             return null;
         }
 

@@ -401,7 +401,7 @@ public class OSGiIntegrationTest {
 
         NetworkElement ingressElement = NSCUtils.makeNetworkElement(this.ingress);
         NetworkElement egressElement = NSCUtils.makeNetworkElement(this.egress);
-        InspectionPortEntity foundPort = utils.inspPortByNetworkElements(ingressElement, egressElement);
+        InspectionPortEntity foundPort = utils.findInspPortByNetworkElements(ingressElement, egressElement);
 
         assertNotNull(foundPort);
         assertEquals(this.inspectionPort.getId(), foundPort.getId());
@@ -446,7 +446,7 @@ public class OSGiIntegrationTest {
             assertNotNull(ipe);
             NetworkElement ne = NSCUtils.makeNetworkElement(this.inspected);
             InspectionPortElement prte = NSCUtils.makeInspectionPortElement(ipe);
-            InspectionHookEntity ihe = utils.inspHookByInspectedAndPort(ne, prte);
+            InspectionHookEntity ihe = utils.findInspHookByInspectedAndPort(ne, prte);
 
             assertNotNull(ihe);
             assertEquals(this.inspectionHook.getHookId(), ihe.getHookId());

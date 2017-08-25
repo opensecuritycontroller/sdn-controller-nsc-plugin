@@ -65,7 +65,7 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
     public InspectionHookElement getInspectionHook(NetworkElement inspectedPort, InspectionPortElement inspectionPort)
             throws Exception {
         try {
-            InspectionHookEntity entity = this.utils.inspHookByInspectedAndPort(inspectedPort, inspectionPort);
+            InspectionHookEntity entity = this.utils.findInspHookByInspectedAndPort(inspectedPort, inspectionPort);
             return NSCUtils.makeInspectionHookElement(entity);
         } catch (Exception e) {
             String inspectedPortId = inspectedPort != null ? inspectedPort.getElementId() : null;
@@ -92,7 +92,7 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
         this.txControl.required(() -> {
             String hookId = inspHookEntity.getHookId();
 
-            if (this.em.find(InspectionHookEntity.class, hookId) != null) {
+            if (hookId != null && this.em.find(InspectionHookEntity.class, hookId) != null) {
                 this.em.merge(inspHookEntity);
             } else {
                 this.em.persist(inspHookEntity);
@@ -113,7 +113,7 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
             NetworkElement inspected = inspectedPort.get(0);
 
             this.txControl.requiresNew(() -> {
-                InspectionHookEntity entity = this.utils.inspHookByInspectedAndPort(inspected, inspectionPort);
+                InspectionHookEntity entity = this.utils.findInspHookByInspectedAndPort(inspected, inspectionPort);
                 if (entity != null) {
                     this.em.remove(entity);
                 }
@@ -135,7 +135,7 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
             throws Exception {
 
         this.txControl.required(() -> {
-            InspectionHookEntity entity = this.utils.inspHookByInspectedAndPort(inspectedPort, inspectionPort);
+            InspectionHookEntity entity = this.utils.findInspHookByInspectedAndPort(inspectedPort, inspectionPort);
             entity.setTag(tag);
             return null;
         });
@@ -153,7 +153,7 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
             FailurePolicyType failurePolicyType) throws Exception {
 
         this.txControl.required(() -> {
-            InspectionHookEntity entity = this.utils.inspHookByInspectedAndPort(inspectedPort, inspectionPort);
+            InspectionHookEntity entity = this.utils.findInspHookByInspectedAndPort(inspectedPort, inspectionPort);
             String typeStr = failurePolicyType != null ? failurePolicyType.name() : null;
             entity.setFailurePolicyType(typeStr);
             return null;
@@ -209,7 +209,7 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
         NetworkElement ingress = inspectionPort.getIngressPort();
         NetworkElement egress = inspectionPort.getEgressPort();
 
-        InspectionPortEntity ipEntity = this.utils.inspPortByNetworkElements(ingress, egress);
+        InspectionPortEntity ipEntity = this.utils.findInspPortByNetworkElements(ingress, egress);
         return NSCUtils.makeInspectionPortElement(ipEntity);
     }
 
@@ -221,17 +221,13 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
             // must be within this transaction, because if the DB retrievals inside makeInspectionPortEntry
             // are inside the required() call themselves. That makes them a part of a separate transaction
             InspectionPortEntity entity = this.utils.makeInspectionPortEntity(inspectionPort);
-            if (this.em.contains(entity)) {
-                this.em.merge(entity);
-            } else {
+
+            if (entity.getId() == null) {
                 this.em.persist(entity);
+                this.em.flush();
             }
 
-            this.em.flush();
-
-            InspectionPortEntity e = this.em.find(InspectionPortEntity.class, entity.getId());
-
-            return NSCUtils.makeInspectionPortElement(e);
+            return NSCUtils.makeInspectionPortElement(entity);
         });
     }
 
@@ -240,7 +236,7 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
             throws Exception {
 
         this.txControl.required(() -> {
-            InspectionHookEntity entity = this.utils.inspHookByInspectedAndPort(inspectedPort, inspectionPort);
+            InspectionHookEntity entity = this.utils.findInspHookByInspectedAndPort(inspectedPort, inspectionPort);
             entity.setHookOrder(order);
             return null;
         });
