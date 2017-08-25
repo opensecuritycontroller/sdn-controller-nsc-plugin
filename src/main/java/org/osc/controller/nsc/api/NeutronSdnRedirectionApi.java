@@ -143,14 +143,16 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
 
     @Override
     public FailurePolicyType getInspectionHookFailurePolicy(NetworkElement inspectedPort,
-            InspectionPortElement inspectionPort) throws Exception {
+                                        InspectionPortElement inspectionPort) throws Exception {
         InspectionHookElement inspectionHook = getInspectionHook(inspectedPort, inspectionPort);
         return inspectionHook == null ? null : inspectionHook.getFailurePolicyType();
     }
 
     @Override
-    public void setInspectionHookFailurePolicy(NetworkElement inspectedPort, InspectionPortElement inspectionPort,
-            FailurePolicyType failurePolicyType) throws Exception {
+    public void setInspectionHookFailurePolicy(NetworkElement inspectedPort,
+                                               InspectionPortElement inspectionPort,
+                                               FailurePolicyType failurePolicyType)
+                                                       throws Exception {
 
         this.txControl.required(() -> {
             InspectionHookEntity entity = this.utils.findInspHookByInspectedAndPort(inspectedPort, inspectionPort);
@@ -188,7 +190,7 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
         }
 
         try {
-            String portIdStr = inspectionPort != null ? inspectionPort.getElementId() : null;
+            String portIdStr = inspectionPort.getElementId();
 
             return this.txControl.required(() -> {
                 Long portId = null;

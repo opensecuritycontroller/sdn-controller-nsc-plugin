@@ -66,8 +66,6 @@ public class NeutronSdnControllerApi implements SdnControllerApi {
     @Reference(target = "(osgi.local.enabled=true)")
     private JPAEntityManagerProviderFactory resourceFactory;
 
-    private EntityManager em;
-
     Logger log = Logger.getLogger(NeutronSdnControllerApi.class);
 
     private final static String VERSION = "0.1";
@@ -99,7 +97,7 @@ public class NeutronSdnControllerApi implements SdnControllerApi {
 
         Properties props = new Properties();
 
-        props.setProperty(JDBC_URL, DB_URL_PREFIX + vc.getControllerIpAddress());
+        props.setProperty(JDBC_URL, DB_URL_PREFIX + vc.getName());
         props.setProperty(JDBC_USER, DB_USER);
         props.setProperty(JDBC_PASSWORD, DB_PASSWORD);
 
@@ -111,11 +109,12 @@ public class NeutronSdnControllerApi implements SdnControllerApi {
             return null;
         }
 
-        this.em = this.resourceFactory
+        EntityManager em = this.resourceFactory
                 .getProviderFor(this.builder, singletonMap("javax.persistence.nonJtaDataSource", (Object) ds), null)
                 .getResource(this.txControl);
 
-        return new NeutronSdnRedirectionApi(vc, region, this.txControl, this.em);
+
+        return new NeutronSdnRedirectionApi(vc, region, this.txControl, em);
     }
 
     @Override
@@ -126,5 +125,7 @@ public class NeutronSdnControllerApi implements SdnControllerApi {
 
     @Override
     public void close() throws Exception {
+
+
     }
 }
