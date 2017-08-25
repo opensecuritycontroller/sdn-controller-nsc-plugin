@@ -45,10 +45,13 @@ import org.osgi.service.transaction.control.TransactionControl;
 import org.osgi.service.transaction.control.jpa.JPAEntityManagerProviderFactory;
 
 @Component(configurationPid = "com.intel.nsc.SdnController",
-        property = { PLUGIN_NAME + "=NSC", SUPPORT_OFFBOX_REDIRECTION + ":Boolean=false",
-                SUPPORT_SFC + ":Boolean=false", SUPPORT_FAILURE_POLICY + ":Boolean=false",
-                USE_PROVIDER_CREDS + ":Boolean=true", QUERY_PORT_INFO + ":Boolean=false",
-                SUPPORT_PORT_GROUP + ":Boolean=false" })
+        property = { PLUGIN_NAME + "=NSC",
+                     SUPPORT_OFFBOX_REDIRECTION + ":Boolean=false",
+                     SUPPORT_SFC + ":Boolean=false",
+                     SUPPORT_FAILURE_POLICY + ":Boolean=false",
+                     USE_PROVIDER_CREDS + ":Boolean=true",
+                     QUERY_PORT_INFO + ":Boolean=false",
+                     SUPPORT_PORT_GROUP + ":Boolean=false" })
 public class NeutronSdnControllerApi implements SdnControllerApi {
 
     @Reference(target = "(osgi.local.enabled=true)")

@@ -206,13 +206,15 @@ public class NSCUtils {
     }
 
     public static NetworkElement makeNetworkElement(List<MacAddressEntity> macAddrEntities,
-            List<PortIpEntity> portIpEntities, Long parentId, Long elementId) {
+                                                    List<PortIpEntity> portIpEntities,
+                                                    Long parentId,
+                                                    Long elementId) {
 
-        List<String> macAddresses = macAddrEntities != null
-                ? macAddrEntities.stream().map(s -> s.getMacAddress()).collect(Collectors.toList()) : null;
+        List<String> macAddresses = macAddrEntities != null ?
+                macAddrEntities.stream().map(s -> s.getMacAddress()).collect(Collectors.toList()) : null;
 
-        List<String> portIPs = portIpEntities != null
-                ? portIpEntities.stream().map(s -> s.getPortIp()).collect(Collectors.toList()) : null;
+        List<String> portIPs = portIpEntities != null ?
+                portIpEntities.stream().map(s -> s.getPortIp()).collect(Collectors.toList()) : null;
         String parentIdStr = parentId != null ? parentId.toString() : null;
         String elementIdStr = elementId != null ? elementId.toString() : null;
 
