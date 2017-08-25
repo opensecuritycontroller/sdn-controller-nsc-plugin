@@ -430,15 +430,6 @@
 					          <attribute name="Import-Package" value="antlr; resolution := optional" />
 					        </manifest>
 					      </jar>
-                          <jar destfile="C:\Users\dgerenrx\prog\osc\sdn-controller-nsc-plugin\target/plugin/hibernateCoreExport.jar">
-                            <manifest>
-                              <attribute name="Bundle-ManifestVersion" value="2" />
-                              <attribute name="Bundle-SymbolicName" value="org.osc.manager.nsc.hibernate.core.fragment" />
-                              <attribute name="Bundle-Version" value="1.0.0" />
-                              <attribute name="Fragment-Host" value="org.hibernate.core;version=&quot;[5.2,5.3)&quot;" />                              
-                              <attribute name="Import-Package" value="antlr; resolution := optional" />
-                            </manifest>
-                          </jar>
 					    </tasks>
 					  </configuration>
 					</execution>
