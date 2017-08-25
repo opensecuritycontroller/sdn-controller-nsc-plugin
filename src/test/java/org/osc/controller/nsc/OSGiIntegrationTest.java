@@ -50,6 +50,7 @@ import org.osc.controller.nsc.entities.InspectionPortEntity;
 import org.osc.controller.nsc.entities.MacAddressEntity;
 import org.osc.controller.nsc.entities.NetworkElementEntity;
 import org.osc.controller.nsc.entities.PortIpEntity;
+import org.osc.controller.nsc.utils.InspectionPortElementImpl;
 import org.osc.controller.nsc.utils.NSCUtils;
 import org.osc.sdk.controller.api.SdnControllerApi;
 import org.osc.sdk.controller.element.InspectionPortElement;
@@ -129,6 +130,8 @@ public class OSGiIntegrationTest {
     private PortIpEntity ePort1;
     private PortIpEntity ePort2;
 
+    private NeutronSdnRedirectionApi redirApi;
+
     @org.ops4j.pax.exam.Configuration
     public Option[] config() {
 
@@ -156,8 +159,10 @@ public class OSGiIntegrationTest {
                     systemPackage("javax.xml.stream.util;version=1.0"), systemPackage("javax.transaction;version=1.1"),
                     systemPackage("javax.transaction.xa;version=1.1"),
 
-					mavenBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.antlr").versionAsInProject(),
-					mavenBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.dom4j").versionAsInProject(),
+                    mavenBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.antlr")
+                            .versionAsInProject(),
+                    mavenBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.dom4j")
+                            .versionAsInProject(),
                     mavenBundle("org.javassist", "javassist").versionAsInProject(),
                     mavenBundle("org.jboss.logging", "jboss-logging").versionAsInProject(),
                     mavenBundle("org.jboss", "jandex").versionAsInProject(),
@@ -176,9 +181,7 @@ public class OSGiIntegrationTest {
                     // CoreOptions.vmOption("-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=1044"),
                     bootClasspathLibrary(mavenBundle("org.apache.geronimo.specs", "geronimo-jta_1.1_spec", "1.1.1"))
                             .beforeFramework(),
-                    junitBundles()
-
-            );
+                    junitBundles());
         } catch (Throwable t) {
 
             System.err.println(t.getClass().getName() + ":\n" + t.getMessage());
@@ -299,7 +302,11 @@ public class OSGiIntegrationTest {
     }
 
     @After
-    public void tearDown() {
+    public void tearDown() throws Exception {
+
+        if (this.redirApi != null) {
+            this.redirApi.close();
+        }
         File dbfile = new File(TEST_DB_FILENAME + ".h2.db");
 
         if (!dbfile.delete()) {
@@ -457,56 +464,53 @@ public class OSGiIntegrationTest {
     @Test
     public void testRegisterInspectionPort() throws Exception {
         NSCUtils utils = new NSCUtils(this.em, this.txControl);
-        NeutronSdnRedirectionApi redirApi = new NeutronSdnRedirectionApi(null, "boogus", this.txControl, this.em);
+        this.redirApi = new NeutronSdnRedirectionApi(null, "boogus", this.txControl, this.em);
 
-        InspectionPortElement element = new InspectionPortElement() {
+        NetworkElement ingrElt = NSCUtils.makeNetworkElement(OSGiIntegrationTest.this.ingress);
+        NetworkElement egrElt = NSCUtils.makeNetworkElement(OSGiIntegrationTest.this.egress);
 
-            private String parentId = OSGiIntegrationTest.this.inspectionHook.getHookId();
-            private NetworkElement ingrElt = NSCUtils.makeNetworkElement(OSGiIntegrationTest.this.ingress);
-            private NetworkElement egrElt = NSCUtils.makeNetworkElement(OSGiIntegrationTest.this.egress);
+        InspectionPortElement inspectionPortElement = new InspectionPortElementImpl(ingrElt, egrElt, null, null);
+        inspectionPortElement = (InspectionPortElement) this.redirApi.registerInspectionPort(inspectionPortElement);
 
-            @Override
-            public String getParentId() {
-                return null;
-            }
+        assertNotNull(inspectionPortElement.getIngressPort());
 
-            @Override
-            public String getElementId() {
-                return null;
-            }
+        final InspectionPortElement inspectionPortElementTmp = inspectionPortElement;
+        NetworkElementEntity foundIngress = this.txControl.required(
+                () -> utils.networkElementEntityByElementId(inspectionPortElementTmp.getIngressPort().getElementId()));
 
-            @Override
-            public NetworkElement getIngressPort() {
-                return this.ingrElt;
-            }
+        assertNotNull(foundIngress);
+        assertEquals(inspectionPortElement.getIngressPort().getElementId(), foundIngress.getElementId());
+        assertNotNull(foundIngress.getIngressInspectionPort());
+        assertEquals(inspectionPortElement.getElementId(), foundIngress.getIngressInspectionPort().getId() + "");
 
-            @Override
-            public NetworkElement getEgressPort() {
+        InspectionPortElement foundInspPortElement = this.redirApi.getInspectionPort(inspectionPortElement);
+        assertEquals(inspectionPortElement.getIngressPort().getElementId(),
+                foundInspPortElement.getIngressPort().getElementId());
+        assertEquals(inspectionPortElement.getEgressPort().getElementId(),
+                foundInspPortElement.getEgressPort().getElementId());
+        assertEquals(inspectionPortElement.getElementId(), foundInspPortElement.getElementId());
 
-                return this.egrElt;
-            }
-        };
-
-        InspectionPortElement ipe = (InspectionPortElement) redirApi.registerInspectionPort(element);
-
-        assertNotNull(ipe.getIngressPort());
-
-        NetworkElementEntity foundIngr = this.txControl
-                .required(() -> utils.networkElementEntityByElementId(ipe.getIngressPort().getElementId()));
-
-        assertNotNull(foundIngr);
-        assertEquals(ipe.getIngressPort().getElementId(), foundIngr.getElementId());
-        assertNotNull(foundIngr.getIngressInspectionPort());
-        assertEquals(ipe.getElementId(), foundIngr.getIngressInspectionPort().getId() + "");
-
-        InspectionPortElement ipeFound = redirApi.getInspectionPort(ipe);
-        assertEquals(ipe.getIngressPort().getElementId(), ipeFound.getIngressPort().getElementId());
-        assertEquals(ipe.getEgressPort().getElementId(), ipeFound.getEgressPort().getElementId());
-        assertEquals(ipe.getElementId(), ipeFound.getElementId());
-
-        assertEquals(null, ipe.getParentId());
-        assertEquals(null, ipeFound.getParentId());
+        assertEquals(null, inspectionPortElement.getParentId());
+        assertEquals(null, foundInspPortElement.getParentId());
 
     }
 
+    @Test
+    public void testRegisterInspectionPortWithNetworkElementsAlreadyPersisted() throws Exception {
+        this.redirApi = new NeutronSdnRedirectionApi(null, "boogus", this.txControl, this.em);
+
+        this.txControl.required(() -> {
+            this.em.persist(this.ingress);
+            this.em.persist(this.egress);
+            return null;
+        });
+
+        String parentId = OSGiIntegrationTest.this.inspectionHook.getHookId();
+        NetworkElement ingrElt = NSCUtils.makeNetworkElement(OSGiIntegrationTest.this.ingress);
+        NetworkElement egrElt = NSCUtils.makeNetworkElement(OSGiIntegrationTest.this.egress);
+        InspectionPortElement inspectionPortElement = new InspectionPortElementImpl(ingrElt, egrElt, null, null);
+
+        // ... and the test
+        inspectionPortElement = (InspectionPortElement) this.redirApi.registerInspectionPort(inspectionPortElement);
+    }
 }

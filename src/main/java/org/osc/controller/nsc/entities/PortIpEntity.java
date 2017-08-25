@@ -11,36 +11,45 @@ import javax.persistence.ManyToOne;
 @Entity
 public class PortIpEntity {
 
-	private Long id;
-	private NetworkElementEntity element;
-	private String portIp;
+    private Long id;
+    private NetworkElementEntity element;
+    private String portIp;
 
-	@Id
-	@GeneratedValue
-	public Long getId() {
-		return id;
-	}
+    public PortIpEntity() {
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    }
 
-	@ManyToOne(fetch = LAZY)
-	@JoinColumn(name = "elementId")
-	public NetworkElementEntity getElement() {
-		return element;
-	}
+    public PortIpEntity(Long id, String portIp, NetworkElementEntity element) {
+        this.id = id;
+        this.portIp = portIp;
+        this.element = element;
+    }
 
-	public void setElement(NetworkElementEntity element) {
-		this.element = element;
-	}
+    @Id
+    @GeneratedValue
+    public Long getId() {
+        return this.id;
+    }
 
-	public String getPortIp() {
-		return portIp;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public void setPortIp(String portIp) {
-		this.portIp = portIp;
-	}
+    @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "elementId")
+    public NetworkElementEntity getElement() {
+        return this.element;
+    }
 
+    public void setElement(NetworkElementEntity element) {
+        this.element = element;
+    }
+
+    public String getPortIp() {
+        return this.portIp;
+    }
+
+    public void setPortIp(String portIp) {
+        this.portIp = portIp;
+    }
 }

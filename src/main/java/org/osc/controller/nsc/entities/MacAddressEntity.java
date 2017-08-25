@@ -11,36 +11,45 @@ import javax.persistence.ManyToOne;
 @Entity
 public class MacAddressEntity {
 
-	private Long id;
-	private NetworkElementEntity element;
-	private String macAddress;
+    private Long id;
+    private NetworkElementEntity element;
+    private String macAddress;
 
-	@Id
-	@GeneratedValue
-	public Long getId() {
-		return id;
-	}
+    public MacAddressEntity() {
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    }
 
-	@ManyToOne(fetch = LAZY)
-	@JoinColumn(name = "elementId")
-	public NetworkElementEntity getElement() {
-		return element;
-	}
+    public MacAddressEntity(Long id, String macAddress, NetworkElementEntity element) {
+        this.id = id;
+        this.macAddress = macAddress;
+        this.element = element;
+    }
 
-	public void setElement(NetworkElementEntity element) {
-		this.element = element;
-	}
+    @Id
+    @GeneratedValue
+    public Long getId() {
+        return this.id;
+    }
 
-	public String getMacAddress() {
-		return macAddress;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public void setMacAddress(String macAddress) {
-		this.macAddress = macAddress;
-	}
+    @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "elementId")
+    public NetworkElementEntity getElement() {
+        return this.element;
+    }
 
+    public void setElement(NetworkElementEntity element) {
+        this.element = element;
+    }
+
+    public String getMacAddress() {
+        return this.macAddress;
+    }
+
+    public void setMacAddress(String macAddress) {
+        this.macAddress = macAddress;
+    }
 }

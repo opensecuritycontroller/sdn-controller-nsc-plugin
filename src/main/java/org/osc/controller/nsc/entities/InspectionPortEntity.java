@@ -13,55 +13,73 @@ import javax.persistence.OneToOne;
 @Entity
 public class InspectionPortEntity {
 
-	private Long id;
+    private Long id;
 
-	@Column(name = "ingressId")
-	private NetworkElementEntity ingress;
+    @Column(name = "ingressId")
+    private NetworkElementEntity ingress;
 
-	@Column(name = "egressId")
-	private NetworkElementEntity egress;
+    @Column(name = "egressId")
+    private NetworkElementEntity egress;
 
-	@Column(name = "inspectionHookId")
-	private InspectionHookEntity inspectionHook;
+    @Column(name = "inspectionHookId")
+    private InspectionHookEntity inspectionHook;
 
-	@Id
-	@GeneratedValue
-	public Long getId() {
-		return id;
-	}
+    public InspectionPortEntity() {
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public InspectionPortEntity(Long id, NetworkElementEntity ingress, NetworkElementEntity egress,
+            InspectionHookEntity inspectionHook) {
+        this.id = id;
+        this.ingress = ingress;
+        this.egress = egress;
+        this.inspectionHook = inspectionHook;
 
-	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = false, fetch = LAZY, optional = true)
-	@JoinColumn(name = "ingressId", nullable = true, updatable = true)
-	public NetworkElementEntity getIngress() {
-		return ingress;
-	}
+        if (ingress != null) {
+            ingress.setIngressInspectionPort(this);
+        }
 
-	public void setIngress(NetworkElementEntity ingress) {
-		this.ingress = ingress;
-	}
+        if (egress != null) {
+            egress.setEgressInspectionPort(this);
+        }
+    }
 
-	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = false, fetch = LAZY, optional = true)
-	@JoinColumn(name = "egressId", nullable = true, updatable = true)
-	public NetworkElementEntity getEgress() {
-		return egress;
-	}
+    @Id
+    @GeneratedValue
+    public Long getId() {
+        return this.id;
+    }
 
-	public void setEgress(NetworkElementEntity egress) {
-		this.egress = egress;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = false, fetch = LAZY, optional = true)
-	@JoinColumn(name = "inspectionHookId", nullable = true, updatable = true)
-	public InspectionHookEntity getInspectionHook() {
-		return inspectionHook;
-	}
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = false, fetch = LAZY, optional = true)
+    @JoinColumn(name = "ingressId", nullable = true, updatable = true)
+    public NetworkElementEntity getIngress() {
+        return this.ingress;
+    }
 
-	public void setInspectionHook(InspectionHookEntity inspectionHook) {
-		this.inspectionHook = inspectionHook;
-	}
+    public void setIngress(NetworkElementEntity ingress) {
+        this.ingress = ingress;
+    }
 
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = false, fetch = LAZY, optional = true)
+    @JoinColumn(name = "egressId", nullable = true, updatable = true)
+    public NetworkElementEntity getEgress() {
+        return this.egress;
+    }
+
+    public void setEgress(NetworkElementEntity egress) {
+        this.egress = egress;
+    }
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = false, fetch = LAZY, optional = true)
+    @JoinColumn(name = "inspectionHookId", nullable = true, updatable = true)
+    public InspectionHookEntity getInspectionHook() {
+        return this.inspectionHook;
+    }
+
+    public void setInspectionHook(InspectionHookEntity inspectionHook) {
+        this.inspectionHook = inspectionHook;
+    }
 }

@@ -218,16 +218,18 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
 	@Override
 	public Element registerInspectionPort(InspectionPortElement inspectionPort) throws Exception {
 
-		InspectionPortEntity entity = NSCUtils.makeInspectionPortEntity(inspectionPort);
+
 
 		return this.txControl.required(() -> {
 
+		    // must be within this transaction, because if the DB retrievals inside makeInspectionPortEntry
+		    // are inside the required() call themselves. That makes them a part of a separate transaction
+		    InspectionPortEntity entity = this.utils.makeInspectionPortEntity(inspectionPort);
 			if (this.em.contains(entity)) {
 				this.em.merge(entity);
 			} else {
 				this.em.persist(entity);
 			}
-
 
 			this.em.flush();
 
@@ -270,7 +272,10 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
 
 	@Override
 	public void close() throws Exception {
-		this.em.close();
+	    this.txControl.required(() -> {
+    		this.em.close();
+    		return null;
+	    });
 	}
 
 	@Override

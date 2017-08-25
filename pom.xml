@@ -534,7 +534,7 @@
                 <executions>
                     <execution>
                         <id>generate-depends-file</id>
-                
+                        <phase>process-classes</phase>
                         <goals>
                             <goal>generate-depends-file</goal>
                         </goals>
