@@ -138,7 +138,7 @@
 			<groupId>org.apache.aries.tx-control</groupId>
 			<artifactId>tx-control-api</artifactId>
 			<version>0.0.2</version>
-			<!-- <scope>provided</scope> -->
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.osgi</groupId>
@@ -173,13 +173,13 @@
 			<groupId>org.apache.aries.tx-control</groupId>
 			<artifactId>tx-control-service-local</artifactId>
 			<version>0.0.2</version>
-			<!-- <scope>runtime</scope> -->
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.aries.jpa</groupId>
 			<artifactId>org.apache.aries.jpa.container</artifactId>
 			<version>2.5.0</version>
-			<!-- <scope>runtime</scope> -->
+			<scope>runtime</scope>
 		</dependency>
 	
 		<dependency>
@@ -393,7 +393,7 @@
 					  </goals>
 					  <configuration>
 					    <tasks>
-					      <jar destfile="C:\Users\dgerenrx\prog\osc\sdn-controller-nsc-plugin\target/plugin/h2ServiceExport.jar">
+					      <jar destfile="${project.build.directory}/plugin/h2ServiceExport.jar">
 					        <manifest>
 					          <attribute name="Bundle-ManifestVersion" value="2" />
 					          <attribute name="Bundle-SymbolicName" value="org.osc.manager.nsc.h2.fragment" />
@@ -402,7 +402,7 @@
 					          <attribute name="Provide-Capability" value="osgi.service;objectClass=org.osgi.service.jdbc.DataSourceFactory" />
 					        </manifest>
 					      </jar>
-					      <jar destfile="C:\Users\dgerenrx\prog\osc\sdn-controller-nsc-plugin\target/plugin/ariesJpaServiceExport.jar">
+					      <jar destfile="${project.build.directory}/plugin/ariesJpaServiceExport.jar">
 					        <manifest>
 					          <attribute name="Bundle-ManifestVersion" value="2" />
 					          <attribute name="Bundle-SymbolicName" value="org.osc.manager.nsc.aries.jpa.fragment" />
@@ -411,7 +411,7 @@
 					          <attribute name="Provide-Capability" value="osgi.service;objectClass=org.osgi.service.jpa.EntityManagerFactoryBuilder" />
 					        </manifest>
 					      </jar>
-					      <jar destfile="C:\Users\dgerenrx\prog\osc\sdn-controller-nsc-plugin\target/plugin/ariesTxControlServiceExport.jar">
+					      <jar destfile="${project.build.directory}/plugin/ariesTxControlServiceExport.jar">
 					        <manifest>
 					          <attribute name="Bundle-ManifestVersion" value="2" />
 					          <attribute name="Bundle-SymbolicName" value="org.osc.manager.nsc.aries.tx.control.fragment" />
@@ -420,7 +420,7 @@
 					          <attribute name="Provide-Capability" value="osgi.service;objectClass=org.osgi.service.transaction.control.TransactionControl;osgi.local.enabled=true" />
 					        </manifest>
 					      </jar>
-					      <jar destfile="C:\Users\dgerenrx\prog\osc\sdn-controller-nsc-plugin\target/plugin/hibernateServiceExport.jar">
+					      <jar destfile="${project.build.directory}/plugin/hibernateServiceExport.jar">
 					        <manifest>
 					          <attribute name="Bundle-ManifestVersion" value="2" />
 					          <attribute name="Bundle-SymbolicName" value="org.osc.manager.nsc.hibernate.fragment" />

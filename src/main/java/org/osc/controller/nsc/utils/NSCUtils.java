@@ -42,7 +42,7 @@ public class NSCUtils {
         return new MacAddressEntity(null, macAddressStr, null);
     }
 
-    public static PortIpEntity makePortIpEntity(String portIpStr) {
+    public PortIpEntity makePortIpEntity(String portIpStr) {
         return new PortIpEntity(null, portIpStr, null);
     }
 
@@ -179,7 +179,7 @@ public class NSCUtils {
         return retVal;
     }
 
-    public static NetworkElement makeNetworkElement(NetworkElementEntity netwkEntity) {
+    public NetworkElement makeNetworkElement(NetworkElementEntity netwkEntity) {
 
         if (netwkEntity == null) {
             return null;
@@ -205,7 +205,7 @@ public class NSCUtils {
         return new NetworkElementImpl(elementId, parentId, macAddresses, portIPs);
     }
 
-    public static NetworkElement makeNetworkElement(List<MacAddressEntity> macAddrEntities,
+    public NetworkElement makeNetworkElement(List<MacAddressEntity> macAddrEntities,
                                                     List<PortIpEntity> portIpEntities,
                                                     Long parentId,
                                                     Long elementId) {
@@ -221,7 +221,7 @@ public class NSCUtils {
         return new NetworkElementImpl(elementIdStr, parentIdStr, macAddresses, portIPs);
     }
 
-    public static InspectionPortElement makeInspectionPortElement(InspectionPortEntity entity) {
+    public InspectionPortElement makeInspectionPortElement(InspectionPortEntity entity) {
 
         if (entity == null) {
             return null;
@@ -235,7 +235,7 @@ public class NSCUtils {
         return new InspectionPortElementImpl(ingressPort, egressPort, elementId, null);
     }
 
-    public static InspectionHookElement makeInspectionHookElement(final InspectionHookEntity entity) {
+    public InspectionHookElement makeInspectionHookElement(final InspectionHookEntity entity) {
 
         if (entity == null) {
             return null;
@@ -346,7 +346,7 @@ public class NSCUtils {
         return this.em.find(NetworkElementEntity.class, id);
     }
 
-    private static void loadFullEntity(InspectionHookEntity inspectionHookEntity) {
+    private void loadFullEntity(InspectionHookEntity inspectionHookEntity) {
         makeInspectionHookElement(inspectionHookEntity);
     }
 

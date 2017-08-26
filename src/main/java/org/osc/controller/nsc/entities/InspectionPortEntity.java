@@ -3,7 +3,6 @@ package org.osc.controller.nsc.entities;
 import static javax.persistence.FetchType.LAZY;
 
 import javax.persistence.CascadeType;
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -13,15 +12,20 @@ import javax.persistence.OneToOne;
 @Entity
 public class InspectionPortEntity {
 
+    @Id
+    @GeneratedValue
     private Long id;
 
-    @Column(name = "ingressId")
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = false, fetch = LAZY, optional = true)
+    @JoinColumn(name = "ingressId", nullable = true, updatable = true)
     private NetworkElementEntity ingress;
 
-    @Column(name = "egressId")
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = false, fetch = LAZY, optional = true)
+    @JoinColumn(name = "egressId", nullable = true, updatable = true)
     private NetworkElementEntity egress;
 
-    @Column(name = "inspectionHookId")
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = false, fetch = LAZY, optional = true)
+    @JoinColumn(name = "inspectionHookId", nullable = true, updatable = true)
     private InspectionHookEntity inspectionHook;
 
     public InspectionPortEntity() {
@@ -43,8 +47,6 @@ public class InspectionPortEntity {
         }
     }
 
-    @Id
-    @GeneratedValue
     public Long getId() {
         return this.id;
     }
@@ -53,8 +55,6 @@ public class InspectionPortEntity {
         this.id = id;
     }
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = false, fetch = LAZY, optional = true)
-    @JoinColumn(name = "ingressId", nullable = true, updatable = true)
     public NetworkElementEntity getIngress() {
         return this.ingress;
     }
@@ -63,8 +63,6 @@ public class InspectionPortEntity {
         this.ingress = ingress;
     }
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = false, fetch = LAZY, optional = true)
-    @JoinColumn(name = "egressId", nullable = true, updatable = true)
     public NetworkElementEntity getEgress() {
         return this.egress;
     }
@@ -73,8 +71,6 @@ public class InspectionPortEntity {
         this.egress = egress;
     }
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = false, fetch = LAZY, optional = true)
-    @JoinColumn(name = "inspectionHookId", nullable = true, updatable = true)
     public InspectionHookEntity getInspectionHook() {
         return this.inspectionHook;
     }

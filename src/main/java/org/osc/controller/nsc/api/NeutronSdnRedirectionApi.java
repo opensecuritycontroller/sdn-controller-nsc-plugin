@@ -66,7 +66,7 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
             throws Exception {
         try {
             InspectionHookEntity entity = this.utils.findInspHookByInspectedAndPort(inspectedPort, inspectionPort);
-            return NSCUtils.makeInspectionHookElement(entity);
+            return this.utils.makeInspectionHookElement(entity);
         } catch (Exception e) {
             String inspectedPortId = inspectedPort != null ? inspectedPort.getElementId() : null;
             String inspectionPortId = inspectionPort != null ? inspectionPort.getElementId() : null;
@@ -89,7 +89,7 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
         InspectionHookEntity inspHookEntity = this.utils.makeInspectionHookEntity(inspected, inspectionPort, tag,
                 encType, order, failurePolicyType);
 
-        this.txControl.required(() -> {
+        return this.txControl.required(() -> {
             String hookId = inspHookEntity.getHookId();
 
             if (hookId != null && this.em.find(InspectionHookEntity.class, hookId) != null) {
@@ -98,10 +98,8 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
                 this.em.persist(inspHookEntity);
             }
 
-            return null;
+            return hookId;
         });
-
-        return null;
     }
 
     @Override
@@ -166,11 +164,16 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
     public void removeAllInspectionHooks(NetworkElement inspectedPort) throws Exception {
 
         this.txControl.required(() -> {
-            Query q = this.em.createQuery("DELETE FROM InspectionHookEntity WHERE inspectedPortId = :portId");
-            String portId = inspectedPort != null ? inspectedPort.getElementId() : null;
+            Query q = this.em.createQuery("FROM InspectionHookEntity WHERE inspectedPortId = :portId");
+            String portId = (inspectedPort != null ? inspectedPort.getElementId() : null);
             q.setParameter("portId", portId);
 
-            q.executeUpdate();
+            List<InspectionHookEntity> results = q.getResultList();
+
+            for (InspectionHookEntity inspectionHookEntity : results) {
+                this.em.remove(inspectionHookEntity);
+            }
+
             q = this.em.createQuery("FROM InspectionHookEntity WHERE inspectedPortId = :portId");
             q.setParameter("portId", portId);
             if (q.getMaxResults() > 0) {
@@ -202,7 +205,7 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
                 }
 
                 InspectionPortEntity ipEntity = this.utils.txInspectionPortEntityById(portId);
-                return NSCUtils.makeInspectionPortElement(ipEntity);
+                return this.utils.makeInspectionPortElement(ipEntity);
             });
         } catch (Exception e) {
             LOG.warn("Failed to retrieve inspectionPort by id! Trying by ingress and egress.");
@@ -212,7 +215,7 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
         NetworkElement egress = inspectionPort.getEgressPort();
 
         InspectionPortEntity ipEntity = this.utils.findInspPortByNetworkElements(ingress, egress);
-        return NSCUtils.makeInspectionPortElement(ipEntity);
+        return this.utils.makeInspectionPortElement(ipEntity);
     }
 
     @Override
@@ -222,14 +225,13 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
 
             // must be within this transaction, because if the DB retrievals inside makeInspectionPortEntry
             // are inside the required() call themselves. That makes them a part of a separate transaction
-            InspectionPortEntity entity = this.utils.makeInspectionPortEntity(inspectionPort);
+            InspectionPortEntity entity = this.utils.makeOrGetInspectionPortEntity(inspectionPort);
 
             if (entity.getId() == null) {
                 this.em.persist(entity);
-                this.em.flush();
             }
 
-            return NSCUtils.makeInspectionPortElement(entity);
+            return this.utils.makeInspectionPortElement(entity);
         });
     }
 

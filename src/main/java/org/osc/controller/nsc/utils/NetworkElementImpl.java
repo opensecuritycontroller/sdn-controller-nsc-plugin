@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.osc.sdk.controller.element.NetworkElement;
 
-public class NetworkElementImpl implements NetworkElement{
+public class NetworkElementImpl implements NetworkElement {
 
     private String elementId;
     private String parentId;

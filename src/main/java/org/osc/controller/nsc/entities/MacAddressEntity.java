@@ -11,12 +11,17 @@ import javax.persistence.ManyToOne;
 @Entity
 public class MacAddressEntity {
 
+    @Id
+    @GeneratedValue
     private Long id;
+
+    @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "elementId")
     private NetworkElementEntity element;
+
     private String macAddress;
 
     public MacAddressEntity() {
-
     }
 
     public MacAddressEntity(Long id, String macAddress, NetworkElementEntity element) {
@@ -25,8 +30,6 @@ public class MacAddressEntity {
         this.element = element;
     }
 
-    @Id
-    @GeneratedValue
     public Long getId() {
         return this.id;
     }
@@ -35,8 +38,6 @@ public class MacAddressEntity {
         this.id = id;
     }
 
-    @ManyToOne(fetch = LAZY)
-    @JoinColumn(name = "elementId")
     public NetworkElementEntity getElement() {
         return this.element;
     }

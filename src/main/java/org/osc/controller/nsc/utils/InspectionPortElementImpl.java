@@ -9,7 +9,6 @@ public class InspectionPortElementImpl extends DefaultInspectionPort {
     private String parentId;
 
     public InspectionPortElementImpl() {
-
     }
 
     public InspectionPortElementImpl(NetworkElement ingress, NetworkElement egress, String elementId, String parentId) {

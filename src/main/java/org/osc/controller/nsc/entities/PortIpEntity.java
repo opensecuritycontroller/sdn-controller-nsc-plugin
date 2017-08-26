@@ -11,8 +11,14 @@ import javax.persistence.ManyToOne;
 @Entity
 public class PortIpEntity {
 
+    @Id
+    @GeneratedValue
     private Long id;
+
+    @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "elementId")
     private NetworkElementEntity element;
+
     private String portIp;
 
     public PortIpEntity() {
@@ -25,8 +31,6 @@ public class PortIpEntity {
         this.element = element;
     }
 
-    @Id
-    @GeneratedValue
     public Long getId() {
         return this.id;
     }
@@ -35,8 +39,6 @@ public class PortIpEntity {
         this.id = id;
     }
 
-    @ManyToOne(fetch = LAZY)
-    @JoinColumn(name = "elementId")
     public NetworkElementEntity getElement() {
         return this.element;
     }

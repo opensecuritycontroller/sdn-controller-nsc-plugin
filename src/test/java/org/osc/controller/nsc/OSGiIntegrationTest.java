@@ -64,20 +64,14 @@ import org.osgi.service.transaction.control.jpa.JPAEntityManagerProviderFactory;
 
 import junit.framework.Assert;
 
-/*TODO: test is commented, because there is a problem with openstack4j dependecies injected directly into osgi (whicch is build during that test)
-    Problem is related to importing some packages and test is failing because of:
-org.osgi.framework.BundleException: Unable to resolve openstack4j-jersey2 [17](R 17.0): missing requirement [openstack4j-jersey2 [17](R 17.0)] osgi.wiring.package;
-(&(osgi.wiring.package=org.openstack4j.core.transport.internal)(version>=3.0.0)(!(version>=4.0.0))) [caused by: Unable to resolve openstack4j-core [16](R 16.0): missing requirement
-[openstack4j-core [16](R 16.0)] osgi.extender; (osgi.extender=osgi.serviceloader.processor)]
-Unresolved requirements: [[openstack4j-jersey2 [17](R 17.0)] osgi.wiring.package; (&(osgi.wiring.package=org.openstack4j.core.transport.internal)(version>=3.0.0)(!(version>=4.0.0)))]
-*/
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerMethod.class)
 public class OSGiIntegrationTest {
 
     private static final String TEST_DB_URL_PREFIX = "jdbc:h2:";
     private static final String TEST_DB_FILENAME = "./nscPlugin_OSGiIntegrationTest";
-    private static final String TEST_DB_URL = TEST_DB_URL_PREFIX + TEST_DB_FILENAME;
+    private static final String TEST_DB_URL_SUFFIX = ";MVCC\\=FALSE;LOCK_TIMEOUT\\=10000;MV_STORE=FALSE;";
+    private static final String TEST_DB_URL = TEST_DB_URL_PREFIX + TEST_DB_FILENAME + TEST_DB_URL_SUFFIX;
 
     private static final String EADDR2_STR = "192.168.0.12";
 
@@ -399,8 +393,8 @@ public class OSGiIntegrationTest {
         // TODO : Separate the tests!
         NSCUtils utils = new NSCUtils(this.em, this.txControl);
 
-        NetworkElement ingressElement = NSCUtils.makeNetworkElement(this.ingress);
-        NetworkElement egressElement = NSCUtils.makeNetworkElement(this.egress);
+        NetworkElement ingressElement = utils.makeNetworkElement(this.ingress);
+        NetworkElement egressElement = utils.makeNetworkElement(this.egress);
         InspectionPortEntity foundPort = utils.findInspPortByNetworkElements(ingressElement, egressElement);
 
         assertNotNull(foundPort);
@@ -444,8 +438,8 @@ public class OSGiIntegrationTest {
         InspectionHookEntity foundIH = this.txControl.required(() -> {
             InspectionPortEntity ipe = this.em.find(this.inspectionPort.getClass(), this.inspectionPort.getId());
             assertNotNull(ipe);
-            NetworkElement ne = NSCUtils.makeNetworkElement(this.inspected);
-            InspectionPortElement prte = NSCUtils.makeInspectionPortElement(ipe);
+            NetworkElement ne = utils.makeNetworkElement(this.inspected);
+            InspectionPortElement prte = utils.makeInspectionPortElement(ipe);
             InspectionHookEntity ihe = utils.findInspHookByInspectedAndPort(ne, prte);
 
             assertNotNull(ihe);
@@ -466,8 +460,8 @@ public class OSGiIntegrationTest {
         NSCUtils utils = new NSCUtils(this.em, this.txControl);
         this.redirApi = new NeutronSdnRedirectionApi(null, "boogus", this.txControl, this.em);
 
-        NetworkElement ingrElt = NSCUtils.makeNetworkElement(OSGiIntegrationTest.this.ingress);
-        NetworkElement egrElt = NSCUtils.makeNetworkElement(OSGiIntegrationTest.this.egress);
+        NetworkElement ingrElt = utils.makeNetworkElement(OSGiIntegrationTest.this.ingress);
+        NetworkElement egrElt = utils.makeNetworkElement(OSGiIntegrationTest.this.egress);
 
         InspectionPortElement inspectionPortElement = new InspectionPortElementImpl(ingrElt, egrElt, null, null);
         inspectionPortElement = (InspectionPortElement) this.redirApi.registerInspectionPort(inspectionPortElement);
@@ -476,7 +470,11 @@ public class OSGiIntegrationTest {
 
         final InspectionPortElement inspectionPortElementTmp = inspectionPortElement;
         NetworkElementEntity foundIngress = this.txControl.required(
-                () -> utils.networkElementEntityByElementId(inspectionPortElementTmp.getIngressPort().getElementId()));
+                () -> {
+                    NetworkElementEntity elementEntity = utils.networkElementEntityByElementId(inspectionPortElementTmp.getIngressPort().getElementId());
+                    utils.makeNetworkElement(elementEntity);
+                    return elementEntity;
+                });
 
         assertNotNull(foundIngress);
         assertEquals(inspectionPortElement.getIngressPort().getElementId(), foundIngress.getElementId());
@@ -497,6 +495,7 @@ public class OSGiIntegrationTest {
 
     @Test
     public void testRegisterInspectionPortWithNetworkElementsAlreadyPersisted() throws Exception {
+        NSCUtils utils = new NSCUtils(this.em, this.txControl);
         this.redirApi = new NeutronSdnRedirectionApi(null, "boogus", this.txControl, this.em);
 
         this.txControl.required(() -> {
@@ -506,8 +505,8 @@ public class OSGiIntegrationTest {
         });
 
         String parentId = OSGiIntegrationTest.this.inspectionHook.getHookId();
-        NetworkElement ingrElt = NSCUtils.makeNetworkElement(OSGiIntegrationTest.this.ingress);
-        NetworkElement egrElt = NSCUtils.makeNetworkElement(OSGiIntegrationTest.this.egress);
+        NetworkElement ingrElt = utils.makeNetworkElement(OSGiIntegrationTest.this.ingress);
+        NetworkElement egrElt = utils.makeNetworkElement(OSGiIntegrationTest.this.egress);
         InspectionPortElement inspectionPortElement = new InspectionPortElementImpl(ingrElt, egrElt, null, null);
 
         // ... and the test

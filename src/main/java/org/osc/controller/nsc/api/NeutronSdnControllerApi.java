@@ -35,8 +35,6 @@ import org.osc.sdk.controller.Status;
 import org.osc.sdk.controller.api.SdnControllerApi;
 import org.osc.sdk.controller.api.SdnRedirectionApi;
 import org.osc.sdk.controller.element.VirtualizationConnectorElement;
-import org.osgi.framework.BundleContext;
-import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.jdbc.DataSourceFactory;
@@ -45,13 +43,13 @@ import org.osgi.service.transaction.control.TransactionControl;
 import org.osgi.service.transaction.control.jpa.JPAEntityManagerProviderFactory;
 
 @Component(configurationPid = "com.intel.nsc.SdnController",
-        property = { PLUGIN_NAME + "=NSC",
-                     SUPPORT_OFFBOX_REDIRECTION + ":Boolean=false",
-                     SUPPORT_SFC + ":Boolean=false",
-                     SUPPORT_FAILURE_POLICY + ":Boolean=false",
-                     USE_PROVIDER_CREDS + ":Boolean=true",
-                     QUERY_PORT_INFO + ":Boolean=false",
-                     SUPPORT_PORT_GROUP + ":Boolean=false" })
+    property = { PLUGIN_NAME + "=NSC",
+                 SUPPORT_OFFBOX_REDIRECTION + ":Boolean=false",
+                 SUPPORT_SFC + ":Boolean=false",
+                 SUPPORT_FAILURE_POLICY + ":Boolean=false",
+                 USE_PROVIDER_CREDS + ":Boolean=true",
+                 QUERY_PORT_INFO + ":Boolean=false",
+                 SUPPORT_PORT_GROUP + ":Boolean=false" })
 public class NeutronSdnControllerApi implements SdnControllerApi {
 
     @Reference(target = "(osgi.local.enabled=true)")
@@ -74,12 +72,9 @@ public class NeutronSdnControllerApi implements SdnControllerApi {
     private static final String DB_URL_PREFIX = "jdbc:h2:./nscPlugin_";
     private static final String DB_USER = "admin";
     private static final String DB_PASSWORD = "admin123";
+    private static final String URL_OPTS = ";MVCC\\=FALSE;LOCK_TIMEOUT\\=10000;MV_STORE=FALSE;";
 
     public NeutronSdnControllerApi() {
-    }
-
-    @Activate
-    public void activate(BundleContext context) {
     }
 
     @Override
@@ -97,7 +92,8 @@ public class NeutronSdnControllerApi implements SdnControllerApi {
 
         Properties props = new Properties();
 
-        props.setProperty(JDBC_URL, DB_URL_PREFIX + vc.getName());
+        props.setProperty(JDBC_URL, DB_URL_PREFIX + vc.getName() + URL_OPTS);
+
         props.setProperty(JDBC_USER, DB_USER);
         props.setProperty(JDBC_PASSWORD, DB_PASSWORD);
 
@@ -106,7 +102,7 @@ public class NeutronSdnControllerApi implements SdnControllerApi {
             ds = this.jdbcFactory.createDataSource(props);
         } catch (SQLException e) {
             this.log.error(e);
-            return null;
+            throw new IllegalStateException(e.getMessage(), e);
         }
 
         EntityManager em = this.resourceFactory
@@ -125,7 +121,5 @@ public class NeutronSdnControllerApi implements SdnControllerApi {
 
     @Override
     public void close() throws Exception {
-
-
     }
 }

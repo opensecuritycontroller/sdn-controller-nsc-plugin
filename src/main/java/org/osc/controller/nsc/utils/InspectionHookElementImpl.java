@@ -6,7 +6,6 @@ import org.osc.sdk.controller.element.InspectionHookElement;
 import org.osc.sdk.controller.element.InspectionPortElement;
 import org.osc.sdk.controller.element.NetworkElement;
 
-
 public class InspectionHookElementImpl implements InspectionHookElement {
 
     private Long tag;
@@ -17,7 +16,8 @@ public class InspectionHookElementImpl implements InspectionHookElement {
     private FailurePolicyType policyType = FailurePolicyType.NA;
     private TagEncapsulationType encType = TagEncapsulationType.VLAN;
 
-    public InspectionHookElementImpl() {}
+    public InspectionHookElementImpl() {
+    }
 
     public InspectionHookElementImpl(Long tag, Long hookOrder, InspectionPortElement inspectionPort,
             NetworkElement inspected, String hookId, FailurePolicyType policyType, TagEncapsulationType encType) {
