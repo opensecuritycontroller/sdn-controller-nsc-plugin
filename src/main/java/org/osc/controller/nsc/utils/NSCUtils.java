@@ -132,23 +132,23 @@ public class NSCUtils {
             InspectionPortEntity found = this.txControl
                     .required(() -> {
                         InspectionPortEntity foundTmp = this.em.find(InspectionPortEntity.class, inspectionPortElement.getElementId());
-                        if (foundTmp != null) {
+                if (foundTmp != null) {
 
-                            if (ingress != null) {
-                                foundTmp.setIngress(ingress);
-                                ingress.setIngressInspectionPort(foundTmp);
-                            }
+                    if (ingress != null) {
+                        foundTmp.setIngress(ingress);
+                        ingress.setIngressInspectionPort(foundTmp);
+                    }
 
-                            if (egress != null) {
-                                foundTmp.setEgress(egress);
-                                egress.setEgressInspectionPort(foundTmp);
-                            }
+                    if (egress != null) {
+                        foundTmp.setEgress(egress);
+                        egress.setEgressInspectionPort(foundTmp);
+                    }
 
-                            return foundTmp;
-                        }
+                    return foundTmp;
+                }
 
-                        return null;
-                    });
+                return null;
+            });
             entity = (found != null ? found : entity);
         }
 
@@ -205,10 +205,8 @@ public class NSCUtils {
         return new NetworkElementImpl(elementId, parentId, macAddresses, portIPs);
     }
 
-    public NetworkElement makeNetworkElement(List<MacAddressEntity> macAddrEntities,
-                                                    List<PortIpEntity> portIpEntities,
-                                                    Long parentId,
-                                                    Long elementId) {
+    public NetworkElement makeNetworkElement(List<MacAddressEntity> macAddrEntities, List<PortIpEntity> portIpEntities,
+            Long parentId, Long elementId) {
 
         List<String> macAddresses = macAddrEntities != null ?
                 macAddrEntities.stream().map(s -> s.getMacAddress()).collect(Collectors.toList()) : null;
@@ -294,7 +292,8 @@ public class NSCUtils {
         }
     }
 
-    public InspectionHookEntity findInspHookByInspectedAndPort(NetworkElement inspected, InspectionPortElement element) {
+    public InspectionHookEntity findInspHookByInspectedAndPort(NetworkElement inspected,
+            InspectionPortElement element) {
         return this.txControl.required(() -> {
             InspectionHookEntity e = txInspHookByInspectedAndPort(inspected, element);
             loadFullEntity(e);

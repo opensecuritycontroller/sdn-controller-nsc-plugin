@@ -141,16 +141,14 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
 
     @Override
     public FailurePolicyType getInspectionHookFailurePolicy(NetworkElement inspectedPort,
-                                        InspectionPortElement inspectionPort) throws Exception {
+            InspectionPortElement inspectionPort) throws Exception {
         InspectionHookElement inspectionHook = getInspectionHook(inspectedPort, inspectionPort);
         return inspectionHook == null ? null : inspectionHook.getFailurePolicyType();
     }
 
     @Override
-    public void setInspectionHookFailurePolicy(NetworkElement inspectedPort,
-                                               InspectionPortElement inspectionPort,
-                                               FailurePolicyType failurePolicyType)
-                                                       throws Exception {
+    public void setInspectionHookFailurePolicy(NetworkElement inspectedPort, InspectionPortElement inspectionPort,
+            FailurePolicyType failurePolicyType) throws Exception {
 
         this.txControl.required(() -> {
             InspectionHookEntity entity = this.utils.findInspHookByInspectedAndPort(inspectedPort, inspectionPort);
@@ -300,7 +298,6 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
     public void removeInspectionPort(InspectionPortElement inspectionPort)
             throws NetworkPortNotFoundException, Exception {
         // no-op
-
     }
 
     @Override
@@ -318,5 +315,4 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
         throw new NotImplementedException("Not expected to be called for NSC. "
                 + "Currently only called for SDN controllers that support port group.");
     }
-
 }

@@ -469,12 +469,12 @@ public class OSGiIntegrationTest {
         assertNotNull(inspectionPortElement.getIngressPort());
 
         final InspectionPortElement inspectionPortElementTmp = inspectionPortElement;
-        NetworkElementEntity foundIngress = this.txControl.required(
-                () -> {
-                    NetworkElementEntity elementEntity = utils.networkElementEntityByElementId(inspectionPortElementTmp.getIngressPort().getElementId());
-                    utils.makeNetworkElement(elementEntity);
-                    return elementEntity;
-                });
+        NetworkElementEntity foundIngress = this.txControl.required(() -> {
+            NetworkElementEntity elementEntity = utils
+                    .networkElementEntityByElementId(inspectionPortElementTmp.getIngressPort().getElementId());
+            utils.makeNetworkElement(elementEntity);
+            return elementEntity;
+        });
 
         assertNotNull(foundIngress);
         assertEquals(inspectionPortElement.getIngressPort().getElementId(), foundIngress.getElementId());
