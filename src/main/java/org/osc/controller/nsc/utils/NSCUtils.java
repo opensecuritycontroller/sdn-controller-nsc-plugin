@@ -230,7 +230,10 @@ public class NSCUtils {
 
         String elementId = (entity.getId() != null ? entity.getId().toString() : null);
 
-        return new InspectionPortElementImpl(ingressPort, egressPort, elementId, null);
+        InspectionHookEntity inspectionHookEntity = entity.getInspectionHook();
+        String parentId = (inspectionHookEntity != null ? inspectionHookEntity.getHookId() : null);
+
+        return new InspectionPortElementImpl(ingressPort, egressPort, elementId, parentId);
     }
 
     public InspectionHookElement makeInspectionHookElement(final InspectionHookEntity entity) {
