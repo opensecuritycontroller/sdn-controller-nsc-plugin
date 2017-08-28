@@ -304,6 +304,29 @@ public class NSCUtils {
         });
     }
 
+    public InspectionPortEntity txInspectionPortEntityById(Long id) {
+        return this.em.find(InspectionPortEntity.class, id);
+    }
+
+    public NetworkElementEntity txNetworkElementEntityById(Long id) {
+        return this.em.find(NetworkElementEntity.class, id);
+    }
+
+    public void removeSingleInspectionHook(InspectionHookEntity inspectionHookEntity) {
+
+        this.txControl.required(() -> {
+            NetworkElementEntity networkElementEntity = inspectionHookEntity.getInspectedPort();
+            InspectionPortEntity inspectionPortEntity = inspectionHookEntity.getInspectionPort();
+
+            inspectionHookEntity.setInspectionPort(null);
+            inspectionPortEntity.setInspectionHook(null);
+            inspectionHookEntity.setInspectedPort(null);
+            networkElementEntity.setInspectionHook(null);
+            this.em.remove(inspectionHookEntity);
+            return null;
+        });
+    }
+
     private InspectionHookEntity txInspHookByInspectedAndPort(NetworkElement inspected, InspectionPortElement element) {
         CriteriaBuilder cb = this.em.getCriteriaBuilder();
 
@@ -340,16 +363,7 @@ public class NSCUtils {
 
     }
 
-    public InspectionPortEntity txInspectionPortEntityById(Long id) {
-        return this.em.find(InspectionPortEntity.class, id);
-    }
-
-    public NetworkElementEntity txNetworkElementEntityById(Long id) {
-        return this.em.find(NetworkElementEntity.class, id);
-    }
-
     private void loadFullEntity(InspectionHookEntity inspectionHookEntity) {
         makeInspectionHookElement(inspectionHookEntity);
     }
-
 }

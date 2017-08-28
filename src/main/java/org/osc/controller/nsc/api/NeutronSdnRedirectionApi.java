@@ -86,16 +86,16 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
             inspected = inspectedPort.iterator().next();
         }
 
-        InspectionHookEntity inspHookEntity = this.utils.makeInspectionHookEntity(inspected, inspectionPort, tag,
+        InspectionHookEntity inspectionHookEntity = this.utils.makeInspectionHookEntity(inspected, inspectionPort, tag,
                 encType, order, failurePolicyType);
 
         return this.txControl.required(() -> {
-            String hookId = inspHookEntity.getHookId();
+            String hookId = inspectionHookEntity.getHookId();
 
             if (hookId != null && this.em.find(InspectionHookEntity.class, hookId) != null) {
-                this.em.merge(inspHookEntity);
+                this.em.merge(inspectionHookEntity);
             } else {
-                this.em.persist(inspHookEntity);
+                this.em.persist(inspectionHookEntity);
             }
 
             return hookId;
@@ -113,7 +113,7 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
             this.txControl.requiresNew(() -> {
                 InspectionHookEntity entity = this.utils.findInspHookByInspectedAndPort(inspected, inspectionPort);
                 if (entity != null) {
-                    this.em.remove(entity);
+                    this.utils.removeSingleInspectionHook(entity);
                 }
                 return null;
             });
@@ -169,7 +169,7 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
             List<InspectionHookEntity> results = q.getResultList();
 
             for (InspectionHookEntity inspectionHookEntity : results) {
-                this.em.remove(inspectionHookEntity);
+                this.utils.removeSingleInspectionHook(inspectionHookEntity);
             }
 
             q = this.em.createQuery("FROM InspectionHookEntity WHERE inspectedPortId = :portId");
