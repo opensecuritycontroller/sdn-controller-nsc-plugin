@@ -240,7 +240,7 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
 
         this.txControl.required(() -> {
             InspectionHookEntity entity = this.utils.findInspHookByInspectedAndPort(inspectedPort, inspectionPort);
-            entity.setHookOrder(order);
+            entity.setOrder(order);
             return null;
         });
     }

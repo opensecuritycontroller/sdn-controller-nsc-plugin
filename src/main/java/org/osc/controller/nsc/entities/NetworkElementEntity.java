@@ -24,6 +24,10 @@ public class NetworkElementEntity implements NetworkElement {
     @Column(name = "elementId", unique = true)
     private String elementId;
 
+    // TODO : for SFC functionality
+    @Transient
+    private String parentId;
+
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = LAZY, mappedBy = "element")
     private List<MacAddressEntity> macAddressEntities;
 
@@ -41,6 +45,19 @@ public class NetworkElementEntity implements NetworkElement {
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = false, fetch = LAZY, optional = true)
     @JoinColumn(name = "inspectionHookId", nullable = true, updatable = true)
     private InspectionHookEntity inspectionHook;
+
+    public NetworkElementEntity() {
+    }
+
+    public NetworkElementEntity(String elementId, List<MacAddressEntity> macAddressEntities,
+            List<PortIpEntity> portIpEntities, String parentId) {
+        super();
+        this.elementId = elementId;
+        this.parentId = parentId;
+        this.macAddressEntities = macAddressEntities;
+        this.portIpEntities = portIpEntities;
+    }
+
 
     @Override
     public String getElementId() {
@@ -123,8 +140,7 @@ public class NetworkElementEntity implements NetworkElement {
 
     @Override
     public String getParentId() {
-        // TODO Implement for SFC story
-        return null;
+        return this.parentId;
     }
 
 

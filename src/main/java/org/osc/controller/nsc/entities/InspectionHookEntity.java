@@ -34,7 +34,7 @@ public class InspectionHookEntity implements InspectionHookElement {
     @JoinColumn(name = "inspectionPortId", nullable = true, updatable = true)
     private InspectionPortEntity inspectionPort;
     private Long tag;
-    private Long hookOrder;
+    private Long order;
 
     @Enumerated(STRING)
     private TagEncapsulationType encType;
@@ -81,12 +81,12 @@ public class InspectionHookEntity implements InspectionHookElement {
         this.tag = tag;
     }
 
-    public Long getHookOrder() {
-        return this.hookOrder;
+    public Long getOrder() {
+        return this.order;
     }
 
-    public void setHookOrder(Long hookOrder) {
-        this.hookOrder = hookOrder;
+    public void setOrder(Long order) {
+        this.order = order;
     }
 
     @Override
@@ -105,11 +105,5 @@ public class InspectionHookEntity implements InspectionHookElement {
 
     public void setFailurePolicyType(FailurePolicyType failurePolicyType) {
         this.failurePolicyType = failurePolicyType;
-    }
-
-    @Override
-    public Long getOrder() {
-        // TODO Auto-generated method stub
-        return null;
     }
 }

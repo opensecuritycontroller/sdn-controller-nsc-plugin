@@ -6,7 +6,6 @@ import static org.osc.sdk.controller.TagEncapsulationType.VLAN;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -118,7 +117,7 @@ public class NSCUtils {
 
         retVal.setInspectedPort(inspected);
         retVal.setInspectionPort(inspectionPortEntity);
-        retVal.setHookOrder(order);
+        retVal.setOrder(order);
         retVal.setTag(tag);
         retVal.setEncType(encType);
         retVal.setFailurePolicyType(failurePolicyType);
@@ -130,27 +129,11 @@ public class NSCUtils {
     }
 
     public NetworkElement makeNetworkElement(NetworkElementEntity netwkEntity) {
-
         loadFullEntity(netwkEntity);
         return netwkEntity;
     }
 
-    public NetworkElement makeNetworkElement(List<MacAddressEntity> macAddrEntities, List<PortIpEntity> portIpEntities,
-            Long parentId, Long elementId) {
-
-        List<String> macAddresses = macAddrEntities != null ?
-                macAddrEntities.stream().map(s -> s.getMacAddress()).collect(Collectors.toList()) : null;
-
-        List<String> portIPs = portIpEntities != null ?
-                portIpEntities.stream().map(s -> s.getPortIp()).collect(Collectors.toList()) : null;
-        String parentIdStr = parentId != null ? parentId.toString() : null;
-        String elementIdStr = elementId != null ? elementId.toString() : null;
-
-        return new NetworkElementImpl(elementIdStr, parentIdStr, macAddresses, portIPs);
-    }
-
     public InspectionPortElement makeInspectionPortElement(InspectionPortEntity inspectionPortEntity) {
-
         loadFullEntity(inspectionPortEntity);
         return inspectionPortEntity;
     }
@@ -281,7 +264,7 @@ public class NSCUtils {
         inspectionHookEntity.getElementId();
         inspectionHookEntity.getEncType();
         inspectionHookEntity.getFailurePolicyType();
-        inspectionHookEntity.getHookOrder();
+        inspectionHookEntity.getOrder();
 
         NetworkElementEntity inspected = inspectionHookEntity.getInspectedPort();
         loadFullEntity(inspected);
