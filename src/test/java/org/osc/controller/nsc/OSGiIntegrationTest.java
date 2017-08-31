@@ -47,7 +47,7 @@ import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerMethod;
 import org.ops4j.pax.exam.util.PathUtils;
-import org.osc.controller.nsc.api.NeutronSdnRedirectionApi;
+import org.osc.controller.nsc.api.SampleSdnRedirectionApi;
 import org.osc.controller.nsc.entities.InspectionHookEntity;
 import org.osc.controller.nsc.entities.InspectionPortEntity;
 import org.osc.controller.nsc.entities.MacAddressEntity;
@@ -127,7 +127,7 @@ public class OSGiIntegrationTest {
     private PortIpEntity ePort1;
     private PortIpEntity ePort2;
 
-    private NeutronSdnRedirectionApi redirApi;
+    private SampleSdnRedirectionApi redirApi;
 
     @org.ops4j.pax.exam.Configuration
     public Option[] config() {
@@ -463,7 +463,7 @@ public class OSGiIntegrationTest {
     @Test
     public void testRegisterInspectionPort() throws Exception {
         NSCUtils utils = new NSCUtils(this.em, this.txControl);
-        this.redirApi = new NeutronSdnRedirectionApi(null, "boogus", this.txControl, this.em);
+        this.redirApi = new SampleSdnRedirectionApi(null, "boogus", this.txControl, this.em);
 
         InspectionPortElement inspectionPortElement = new InspectionPortEntity(null, this.ingress, this.egress, null);
         inspectionPortElement = (InspectionPortElement) this.redirApi.registerInspectionPort(inspectionPortElement);
@@ -516,7 +516,7 @@ public class OSGiIntegrationTest {
     @Test
     public void testRegisterInspectionPortWithNetworkElementsAlreadyPersisted() throws Exception {
         NSCUtils utils = new NSCUtils(this.em, this.txControl);
-        this.redirApi = new NeutronSdnRedirectionApi(null, "boogus", this.txControl, this.em);
+        this.redirApi = new SampleSdnRedirectionApi(null, "boogus", this.txControl, this.em);
 
         this.txControl.required(() -> {
             this.em.persist(this.ingress);
@@ -534,7 +534,7 @@ public class OSGiIntegrationTest {
     @Test
     public void testInstallInspectionHook() throws Exception {
         NSCUtils utils = new NSCUtils(this.em, this.txControl);
-        this.redirApi = new NeutronSdnRedirectionApi(null, "boogus", this.txControl, this.em);
+        this.redirApi = new SampleSdnRedirectionApi(null, "boogus", this.txControl, this.em);
 
         InspectionPortElement inspectionPortElement = new InspectionPortEntity(null, this.ingress, this.egress, null);
         final String hookId = this.redirApi.installInspectionHook(Arrays.asList(this.inspected), inspectionPortElement,

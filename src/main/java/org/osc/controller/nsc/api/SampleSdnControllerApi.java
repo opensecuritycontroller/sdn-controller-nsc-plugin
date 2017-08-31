@@ -50,7 +50,7 @@ import org.osgi.service.transaction.control.jpa.JPAEntityManagerProviderFactory;
                  USE_PROVIDER_CREDS + ":Boolean=true",
                  QUERY_PORT_INFO + ":Boolean=false",
                  SUPPORT_PORT_GROUP + ":Boolean=false" })
-public class NeutronSdnControllerApi implements SdnControllerApi {
+public class SampleSdnControllerApi implements SdnControllerApi {
 
     @Reference(target = "(osgi.local.enabled=true)")
     private TransactionControl txControl;
@@ -64,7 +64,7 @@ public class NeutronSdnControllerApi implements SdnControllerApi {
     @Reference(target = "(osgi.local.enabled=true)")
     private JPAEntityManagerProviderFactory resourceFactory;
 
-    Logger log = Logger.getLogger(NeutronSdnControllerApi.class);
+    Logger log = Logger.getLogger(SampleSdnControllerApi.class);
 
     private final static String VERSION = "0.1";
     private final static String NAME = "NSC";
@@ -74,7 +74,7 @@ public class NeutronSdnControllerApi implements SdnControllerApi {
     private static final String DB_PASSWORD = "admin123";
     private static final String URL_OPTS = ";MVCC\\=FALSE;LOCK_TIMEOUT\\=10000;MV_STORE=FALSE;";
 
-    public NeutronSdnControllerApi() {
+    public SampleSdnControllerApi() {
     }
 
     @Override
@@ -110,7 +110,7 @@ public class NeutronSdnControllerApi implements SdnControllerApi {
                 .getResource(this.txControl);
 
 
-        return new NeutronSdnRedirectionApi(vc, region, this.txControl, em);
+        return new SampleSdnRedirectionApi(vc, region, this.txControl, em);
     }
 
     @Override

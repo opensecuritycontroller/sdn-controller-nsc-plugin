@@ -37,9 +37,9 @@ import org.osc.sdk.controller.element.VirtualizationConnectorElement;
 import org.osc.sdk.controller.exception.NetworkPortNotFoundException;
 import org.osgi.service.transaction.control.TransactionControl;
 
-public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
+public class SampleSdnRedirectionApi implements SdnRedirectionApi {
 
-    private static final Logger LOG = Logger.getLogger(NeutronSdnRedirectionApi.class);
+    private static final Logger LOG = Logger.getLogger(SampleSdnRedirectionApi.class);
 
     private VirtualizationConnectorElement vc;
     private String region;
@@ -48,10 +48,10 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
     private EntityManager em;
     private NSCUtils utils;
 
-    public NeutronSdnRedirectionApi() {
+    public SampleSdnRedirectionApi() {
     }
 
-    public NeutronSdnRedirectionApi(VirtualizationConnectorElement vc, String region, TransactionControl txControl,
+    public SampleSdnRedirectionApi(VirtualizationConnectorElement vc, String region, TransactionControl txControl,
             EntityManager em) {
         this.vc = vc;
         this.region = region;

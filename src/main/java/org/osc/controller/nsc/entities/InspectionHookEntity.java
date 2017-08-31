@@ -36,8 +36,7 @@ public class InspectionHookEntity implements InspectionHookElement {
     private Long tag;
 
     // "order" is a sql keyword. Avoid column named "order"
-    @Column(name = "hookOrder")
-    private Long order;
+    private Long hookOrder;
 
     @Enumerated(STRING)
     private TagEncapsulationType encType;
@@ -86,11 +85,11 @@ public class InspectionHookEntity implements InspectionHookElement {
 
     @Override
     public Long getOrder() {
-        return this.order;
+        return this.hookOrder;
     }
 
     public void setOrder(Long order) {
-        this.order = order;
+        this.hookOrder = order;
     }
 
     @Override
