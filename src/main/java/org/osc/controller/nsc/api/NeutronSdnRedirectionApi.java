@@ -16,7 +16,6 @@
  *******************************************************************************/
 package org.osc.controller.nsc.api;
 
-import java.util.Arrays;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -81,25 +80,32 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
             Long tag, TagEncapsulationType encType, Long order, FailurePolicyType failurePolicyType)
             throws NetworkPortNotFoundException, Exception {
 
-        NetworkElement inspected = null;
+
         if (inspectedPort != null && inspectedPort.size() > 0) {
-            inspected = inspectedPort.iterator().next();
-        }
+            String retVal = null;
 
-        InspectionHookEntity inspectionHookEntity = this.utils.makeInspectionHookEntity(inspected, inspectionPort, tag,
-                encType, order, failurePolicyType);
+            for (NetworkElement inspected : inspectedPort) {
+                retVal = this.txControl.required(() -> {
+                    InspectionHookEntity inspectionHookEntity = this.utils.findInspHookByInspectedAndPort(inspected, inspectionPort);
 
-        return this.txControl.required(() -> {
-            String hookId = inspectionHookEntity.getHookId();
-
-            if (hookId != null && this.em.find(InspectionHookEntity.class, hookId) != null) {
-                this.em.merge(inspectionHookEntity);
-            } else {
-                this.em.persist(inspectionHookEntity);
+                    if (inspectionHookEntity != null) {
+                        this.em.merge(inspectionHookEntity);
+                    } else {
+                        inspectionHookEntity = this.utils.makeInspectionHookEntity(inspected, inspectionPort, tag,
+                                encType, order, failurePolicyType);
+                        this.em.persist(inspectionHookEntity);
+                    }
+                    String hookId = inspectionHookEntity.getHookId();
+                    return hookId;
+                });
             }
 
-            return hookId;
-        });
+            return retVal;
+        } else {
+            LOG.error("Attempt to install inspection hook with no inspected or inspection port!");
+            return null;
+        }
+
     }
 
     @Override
@@ -118,7 +124,6 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
                 return null;
             });
         }
-
     }
 
     @Override
@@ -152,7 +157,7 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
 
         this.txControl.required(() -> {
             InspectionHookEntity entity = this.utils.findInspHookByInspectedAndPort(inspectedPort, inspectionPort);
-            String typeStr = failurePolicyType != null ? failurePolicyType.name() : null;
+            String typeStr = failurePolicyType != null ? failurePolicyType.toString() : null;
             entity.setFailurePolicyType(typeStr);
             return null;
         });
@@ -224,11 +229,6 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
             // must be within this transaction, because if the DB retrievals inside makeInspectionPortEntry
             // are inside the required() call themselves. That makes them a part of a separate transaction
             InspectionPortEntity entity = this.utils.makeOrGetInspectionPortEntity(inspectionPort);
-
-            if (entity.getId() == null) {
-                this.em.persist(entity);
-            }
-
             return this.utils.makeInspectionPortElement(entity);
         });
     }
@@ -258,14 +258,31 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
             return;
         }
 
-        installInspectionHook(Arrays.asList(existingInspectionHook.getInspectedPort()),
-                existingInspectionHook.getInspectionPort(), existingInspectionHook.getTag(),
-                existingInspectionHook.getEncType(), existingInspectionHook.getOrder(),
-                existingInspectionHook.getFailurePolicyType());
+        NetworkElement inspected = existingInspectionHook.getInspectedPort();
+        InspectionPortElement inspectionPort = existingInspectionHook.getInspectionPort();
+
+        Long tag = existingInspectionHook.getTag();
+        Long order = existingInspectionHook.getOrder();
+        FailurePolicyType failurePolicyType = existingInspectionHook.getFailurePolicyType();
+        TagEncapsulationType encType = existingInspectionHook.getEncType();
+
+        InspectionHookEntity inspectionHookEntity = this.utils.findInspHookByInspectedAndPort(inspected, inspectionPort);
+
+        if (inspectionHookEntity != null) {
+            this.txControl.required(() -> {
+                // TODO: wrong!
+                InspectionHookEntity updateEntity = this.utils.makeInspectionHookEntity(inspected, inspectionPort, tag,
+                                                                                    encType, order, failurePolicyType);
+                updateEntity.setHookId(inspectionHookEntity.getHookId());
+                this.em.merge(updateEntity);
+                return null;
+            });
+        }
     }
 
     @Override
     public void close() throws Exception {
+        LOG.info("Closing connection to the database");
         this.txControl.required(() -> {
             this.em.close();
             return null;

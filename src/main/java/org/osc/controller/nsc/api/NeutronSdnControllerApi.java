@@ -92,7 +92,7 @@ public class NeutronSdnControllerApi implements SdnControllerApi {
 
         Properties props = new Properties();
 
-        props.setProperty(JDBC_URL, DB_URL_PREFIX + vc.getName() + URL_OPTS);
+        props.setProperty(JDBC_URL, DB_URL_PREFIX + vc.getProviderIpAddress() + URL_OPTS);
 
         props.setProperty(JDBC_USER, DB_USER);
         props.setProperty(JDBC_PASSWORD, DB_PASSWORD);

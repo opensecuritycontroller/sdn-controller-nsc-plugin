@@ -87,13 +87,20 @@ public class NSCUtils {
         if (networkElement.getElementId() != null) {
             NetworkElementEntity found = this.txControl
                     .required(() -> this.em.find(NetworkElementEntity.class, networkElement.getElementId()));
+
             // TODO : what if networkElement has same Id, different other fields?
             if (found != null) {
                 return found;
             }
         }
 
-        return makeNetworkElementEntity(networkElement);
+        NetworkElementEntity newEntity = makeNetworkElementEntity(networkElement);
+
+        return this.txControl.required(() -> {
+            this.em.persist(newEntity);
+            return newEntity;
+        });
+
     }
 
     public InspectionPortEntity makeInspectionPortEntity(InspectionPortElement inspectionPortElement) {
@@ -124,41 +131,32 @@ public class NSCUtils {
             return null;
         }
 
-        InspectionPortEntity entity = makeInspectionPortEntity(inspectionPortElement);
-        NetworkElementEntity ingress = entity.getIngress();
-        NetworkElementEntity egress = entity.getEgress();
+        NetworkElement ingress = inspectionPortElement.getIngressPort();
+        NetworkElement egress = inspectionPortElement.getEgressPort();
 
-        if (inspectionPortElement.getElementId() != null) {
-            InspectionPortEntity found = this.txControl
-                    .required(() -> {
-                        InspectionPortEntity foundTmp = this.em.find(InspectionPortEntity.class, inspectionPortElement.getElementId());
-                if (foundTmp != null) {
+        InspectionPortEntity found = this.txControl
+                .required(() -> findInspPortByNetworkElements(ingress, egress));
 
-                    if (ingress != null) {
-                        foundTmp.setIngress(ingress);
-                        ingress.setIngressInspectionPort(foundTmp);
-                    }
-
-                    if (egress != null) {
-                        foundTmp.setEgress(egress);
-                        egress.setEgressInspectionPort(foundTmp);
-                    }
-
-                    return foundTmp;
-                }
-
-                return null;
-            });
-            entity = (found != null ? found : entity);
+        if (found != null) {
+            return found;
         }
 
-        return entity;
+        NetworkElementEntity ingressEntity = makeOrGetNetworkElementEntity(inspectionPortElement.getIngressPort());
+        NetworkElementEntity egressEntity = makeOrGetNetworkElementEntity(inspectionPortElement.getEgressPort());
+
+        InspectionPortEntity retVal = new InspectionPortEntity();
+        retVal.setIngress(ingressEntity);
+        retVal.setEgress(egressEntity);
+        ingressEntity.setIngressInspectionPort(retVal);
+        egressEntity.setEgressInspectionPort(retVal);
+
+        return retVal;
     }
 
     public InspectionHookEntity makeInspectionHookEntity(NetworkElement inspectedPort,
             InspectionPortElement inspectionPort, Long tag, TagEncapsulationType encType, Long order,
             FailurePolicyType failurePolicyType) {
-        InspectionPortEntity inspPortEntity = makeInspectionPortEntity(inspectionPort);
+        InspectionPortEntity inspectionPortEntity = makeOrGetInspectionPortEntity(inspectionPort);
         final String elementId = inspectedPort.getElementId();
 
         encType = (encType != null ? encType : VLAN);
@@ -168,13 +166,14 @@ public class NSCUtils {
         InspectionHookEntity retVal = new InspectionHookEntity();
 
         retVal.setInspectedPort(inspected);
-        retVal.setInspectionPort(inspPortEntity);
+        retVal.setInspectionPort(inspectionPortEntity);
         retVal.setHookOrder(order);
         retVal.setTag(tag);
-        retVal.setEncType(encType.name());
-        retVal.setFailurePolicyType(failurePolicyType.name());
+        retVal.setEncType(encType.toString());
+        retVal.setFailurePolicyType(failurePolicyType.toString());
 
-        inspPortEntity.setInspectionHook(retVal);
+        inspectionPortEntity.setInspectionHook(retVal);
+        inspected.setInspectionHook(retVal);
 
         return retVal;
     }
@@ -282,7 +281,7 @@ public class NSCUtils {
             if (ports == null || ports.size() == 0) {
                 LOG.warn(String.format("No Inspection ports by ingress %s and egress %s", ingressId, egressId));
                 return null;
-            } else if (ports.size() > 0) {
+            } else if (ports.size() > 1) {
                 LOG.warn(String.format("Multiple results! Inspection ports by ingress %s and egress %s", ingressId,
                         egressId));
             }
@@ -346,15 +345,15 @@ public class NSCUtils {
         q.setParameter("inspectionId", portId);
 
         try {
-            List<InspectionHookEntity> ports = q.getResultList();
-            if (ports == null || ports.size() == 0) {
+            List<InspectionHookEntity> inspectionHooks = q.getResultList();
+            if (inspectionHooks == null || inspectionHooks.size() == 0) {
                 LOG.warn(String.format("No Inspection hooks by inspected %s and port %d", inspectedId, portId));
                 return null;
-            } else if (ports.size() > 0) {
+            } else if (inspectionHooks.size() > 1) {
                 LOG.warn(String.format("Multiple results! Inspection hooks by inspected %s and port %d", inspectedId,
                         portId));
             }
-            return ports.get(0);
+            return inspectionHooks.get(0);
 
         } catch (Exception e) {
             LOG.error(String.format("Finding Inspection hooks by inspected %s and port %d", inspectedId, portId), e); // TODO
