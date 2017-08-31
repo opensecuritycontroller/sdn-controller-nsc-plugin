@@ -93,7 +93,7 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
                     } else {
                         inspectionHookEntity = this.utils.makeInspectionHookEntity(inspected, inspectionPort, tag,
                                 encType, order, failurePolicyType);
-                        this.em.persist(inspectionHookEntity);
+                        this.em.merge(inspectionHookEntity);
                     }
                     String hookId = inspectionHookEntity.getHookId();
                     return hookId;
@@ -228,8 +228,17 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
 
             // must be within this transaction, because if the DB retrievals inside makeInspectionPortEntry
             // are inside the required() call themselves. That makes them a part of a separate transaction
-            InspectionPortEntity entity = this.utils.makeOrGetInspectionPortEntity(inspectionPort);
-            return this.utils.makeInspectionPortElement(entity);
+
+            NetworkElement ingress = inspectionPort.getIngressPort();
+            NetworkElement egress = inspectionPort.getEgressPort();
+            InspectionPortEntity inspectionPortEntity = this.utils.findInspPortByNetworkElements(ingress, egress);
+
+            if (inspectionPortEntity == null) {
+                inspectionPortEntity = this.utils.makeInspectionPortEntity(inspectionPort);
+            }
+
+            inspectionPortEntity = this.em.merge(inspectionPortEntity);
+            return this.utils.makeInspectionPortElement(inspectionPortEntity);
         });
     }
 

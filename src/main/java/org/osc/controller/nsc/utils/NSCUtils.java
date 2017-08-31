@@ -4,6 +4,7 @@ import static java.util.stream.Collectors.toList;
 import static org.osc.sdk.controller.FailurePolicyType.NA;
 import static org.osc.sdk.controller.TagEncapsulationType.VLAN;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -55,7 +56,7 @@ public class NSCUtils {
         NetworkElementEntity retVal = new NetworkElementEntity();
 
         List<String> macAddrStrings = networkElement.getMacAddresses();
-        List<MacAddressEntity> macAddrEntities = null;
+        List<MacAddressEntity> macAddrEntities = new ArrayList<>();
         if (macAddrStrings != null) {
             macAddrEntities = macAddrStrings.stream().map(s -> makeMacAddressEntity(s)).collect(toList());
             macAddrEntities.stream().forEach(p -> {
@@ -64,7 +65,7 @@ public class NSCUtils {
         }
 
         List<String> portIpStrings = networkElement.getPortIPs();
-        List<PortIpEntity> portIpEntities = null;
+        List<PortIpEntity> portIpEntities = new ArrayList<>();
         if (portIpStrings != null) {
             portIpEntities = portIpStrings.stream().map(s -> makePortIpEntity(s)).collect(toList());
             portIpEntities.stream().forEach(p -> {
@@ -79,30 +80,6 @@ public class NSCUtils {
         return retVal;
     }
 
-    public NetworkElementEntity makeOrGetNetworkElementEntity(NetworkElement networkElement) {
-        if (networkElement == null) {
-            return null;
-        }
-
-        if (networkElement.getElementId() != null) {
-            NetworkElementEntity found = this.txControl
-                    .required(() -> this.em.find(NetworkElementEntity.class, networkElement.getElementId()));
-
-            // TODO : what if networkElement has same Id, different other fields?
-            if (found != null) {
-                return found;
-            }
-        }
-
-        NetworkElementEntity newEntity = makeNetworkElementEntity(networkElement);
-
-        return this.txControl.required(() -> {
-            this.em.persist(newEntity);
-            return newEntity;
-        });
-
-    }
-
     public InspectionPortEntity makeInspectionPortEntity(InspectionPortElement inspectionPortElement) {
 
         NetworkElementEntity ingressEntity = null;
@@ -110,7 +87,7 @@ public class NSCUtils {
 
         NetworkElement ingress = inspectionPortElement.getIngressPort();
         if (ingress != null) {
-            ingressEntity = makeOrGetNetworkElementEntity(ingress);
+            ingressEntity = makeNetworkElementEntity(ingress);
         }
 
         NetworkElement egress = inspectionPortElement.getEgressPort();
@@ -119,50 +96,24 @@ public class NSCUtils {
             if (ingressEntity != null && ingressEntity.getElementId().equals(egress.getElementId())) {
                 egressEntity = ingressEntity;
             } else {
-                egressEntity = makeOrGetNetworkElementEntity(egress);
+                egressEntity = makeNetworkElementEntity(egress);
             }
         }
 
         return new InspectionPortEntity(null, ingressEntity, egressEntity, null);
     }
 
-    public InspectionPortEntity makeOrGetInspectionPortEntity(InspectionPortElement inspectionPortElement) {
-        if (inspectionPortElement == null) {
-            return null;
-        }
-
-        NetworkElement ingress = inspectionPortElement.getIngressPort();
-        NetworkElement egress = inspectionPortElement.getEgressPort();
-
-        InspectionPortEntity found = this.txControl
-                .required(() -> findInspPortByNetworkElements(ingress, egress));
-
-        if (found != null) {
-            return found;
-        }
-
-        NetworkElementEntity ingressEntity = makeOrGetNetworkElementEntity(inspectionPortElement.getIngressPort());
-        NetworkElementEntity egressEntity = makeOrGetNetworkElementEntity(inspectionPortElement.getEgressPort());
-
-        InspectionPortEntity retVal = new InspectionPortEntity();
-        retVal.setIngress(ingressEntity);
-        retVal.setEgress(egressEntity);
-        ingressEntity.setIngressInspectionPort(retVal);
-        egressEntity.setEgressInspectionPort(retVal);
-
-        return retVal;
-    }
 
     public InspectionHookEntity makeInspectionHookEntity(NetworkElement inspectedPort,
             InspectionPortElement inspectionPort, Long tag, TagEncapsulationType encType, Long order,
             FailurePolicyType failurePolicyType) {
-        InspectionPortEntity inspectionPortEntity = makeOrGetInspectionPortEntity(inspectionPort);
+        InspectionPortEntity inspectionPortEntity = makeInspectionPortEntity(inspectionPort);
         final String elementId = inspectedPort.getElementId();
 
         encType = (encType != null ? encType : VLAN);
         failurePolicyType = (failurePolicyType != null ? failurePolicyType : NA);
 
-        NetworkElementEntity inspected = makeOrGetNetworkElementEntity(inspectedPort);
+        NetworkElementEntity inspected = makeNetworkElementEntity(inspectedPort);
         InspectionHookEntity retVal = new InspectionHookEntity();
 
         retVal.setInspectedPort(inspected);
