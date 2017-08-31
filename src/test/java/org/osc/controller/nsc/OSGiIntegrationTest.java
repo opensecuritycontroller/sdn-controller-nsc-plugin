@@ -25,8 +25,6 @@ import static org.osgi.service.jdbc.DataSourceFactory.*;
 
 import java.io.File;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
@@ -52,7 +50,6 @@ import org.osc.controller.nsc.entities.InspectionPortEntity;
 import org.osc.controller.nsc.entities.MacAddressEntity;
 import org.osc.controller.nsc.entities.NetworkElementEntity;
 import org.osc.controller.nsc.entities.PortIpEntity;
-import org.osc.controller.nsc.utils.InspectionPortElementImpl;
 import org.osc.controller.nsc.utils.NSCUtils;
 import org.osc.sdk.controller.api.SdnControllerApi;
 import org.osc.sdk.controller.element.InspectionPortElement;
@@ -443,7 +440,7 @@ public class OSGiIntegrationTest {
             InspectionPortEntity ipe = this.em.find(this.inspectionPort.getClass(), this.inspectionPort.getElementId());
             assertNotNull(ipe);
             NetworkElement ne = utils.makeNetworkElement(this.inspected);
-            InspectionPortElement prte = utils.makeInspectionPortElement(ipe);
+            InspectionPortElement prte = ipe;
             InspectionHookEntity ihe = utils.findInspHookByInspectedAndPort(ne, prte);
 
             assertNotNull(ihe);
@@ -464,10 +461,7 @@ public class OSGiIntegrationTest {
         NSCUtils utils = new NSCUtils(this.em, this.txControl);
         this.redirApi = new NeutronSdnRedirectionApi(null, "boogus", this.txControl, this.em);
 
-        NetworkElement ingrElt = utils.makeNetworkElement(OSGiIntegrationTest.this.ingress);
-        NetworkElement egrElt = utils.makeNetworkElement(OSGiIntegrationTest.this.egress);
-
-        InspectionPortElement inspectionPortElement = new InspectionPortElementImpl(ingrElt, egrElt, null, null);
+        InspectionPortElement inspectionPortElement = new InspectionPortEntity(null, this.ingress, this.egress, null);
         inspectionPortElement = (InspectionPortElement) this.redirApi.registerInspectionPort(inspectionPortElement);
 
         assertNotNull(inspectionPortElement.getIngressPort());
@@ -477,6 +471,7 @@ public class OSGiIntegrationTest {
             NetworkElementEntity elementEntity = utils
                     .networkElementEntityByElementId(inspectionPortElementTmp.getIngressPort().getElementId());
             utils.makeNetworkElement(elementEntity);
+            elementEntity.getIngressInspectionPort().getElementId();
             return elementEntity;
         });
 
@@ -509,92 +504,9 @@ public class OSGiIntegrationTest {
         });
 
         String parentId = OSGiIntegrationTest.this.inspectionHook.getElementId();
-        NetworkElement ingrElt = utils.makeNetworkElement(OSGiIntegrationTest.this.ingress);
-        NetworkElement egrElt = utils.makeNetworkElement(OSGiIntegrationTest.this.egress);
-        InspectionPortElement inspectionPortElement = new InspectionPortElementImpl(ingrElt, egrElt, null, null);
+        InspectionPortElement inspectionPortElement = new InspectionPortEntity(null, this.ingress, this.egress, null);
 
         // ... and the test
         inspectionPortElement = (InspectionPortElement) this.redirApi.registerInspectionPort(inspectionPortElement);
     }
-
-    // TODO REMOVE!!!!!!
-    @Test
-    public void testDummy01() {
-        MacAddressEntity ma1 = new MacAddressEntity();
-        MacAddressEntity ma2 = new MacAddressEntity();
-        ma1.setMacAddress(IMAC1_STR);
-        ma2.setMacAddress(IMAC2_STR);
-        List<MacAddressEntity> macAddrEntities = Arrays.asList(ma1, ma2);
-
-        PortIpEntity ip1 = new PortIpEntity();
-        PortIpEntity ip2 = new PortIpEntity();
-        ip1.setPortIp(IMAC1_STR);
-        ip2.setPortIp(IMAC2_STR);
-        List<PortIpEntity> portIpIentities= Arrays.asList(ip1, ip2);
-
-        NetworkElementEntity neOrig = new NetworkElementEntity();
-        neOrig.setMacAddressEntities(macAddrEntities);
-        neOrig.setElementId(this.ingress.getElementId());
-
-        this.txControl.required(() -> {
-            this.em.merge(neOrig);
-            return null;
-        });
-
-        NetworkElementEntity ne = this.txControl.required(() -> {
-            NetworkElementEntity tmp = this.em.find(NetworkElementEntity.class, neOrig.getElementId());
-            for (MacAddressEntity mae : tmp.getMacAddressEntities()) {
-                mae.getMacAddress();
-            };
-
-            tmp.getPortIpEntities();
-            return tmp;
-        });
-
-        assertNotNull(ne);
-        assertEquals(ne.getMacAddressEntities().size(), neOrig.getMacAddressEntities().size());
-
-
-        NetworkElementEntity neOrig2 = new NetworkElementEntity();
-        neOrig2.setElementId(ne.getElementId());
-        neOrig2.setPortIpEntities(portIpIentities);
-        neOrig2.setMacAddressEntities(new ArrayList<>());
-        this.txControl.required(() -> {
-            this.em.merge(neOrig2);
-            return null;
-        });
-
-        ne = this.txControl.required(() -> {
-            NetworkElementEntity tmp = this.em.find(NetworkElementEntity.class, neOrig.getElementId());
-            for (MacAddressEntity mae : tmp.getMacAddressEntities()) {
-                mae.getMacAddress();
-            };
-
-            for (PortIpEntity mae : tmp.getPortIpEntities()) {
-                mae.getPortIp();
-            };
-
-            tmp.getPortIpEntities();
-            return tmp;
-        });
-
-        assertNotNull(ne);
-        assertEquals(ne.getMacAddressEntities().size(), neOrig2.getMacAddressEntities().size());
-        assertEquals(ne.getPortIpEntities().size(), neOrig2.getPortIpEntities().size());
-    }
-
-    // TODO : REMOVE!!!!!!
-    @Test
-    public void testDummy02() {
-
-        InspectionPortEntity ipe = new InspectionPortEntity();
-
-        InspectionPortEntity ipe2 = this.txControl.required(() -> {
-            return this.em.merge(ipe);
-        });
-
-        assertNotNull(ipe2);
-        assertNotNull(ipe2.getElementId());
-    }
-
 }

@@ -131,28 +131,8 @@ public class NSCUtils {
 
     public NetworkElement makeNetworkElement(NetworkElementEntity netwkEntity) {
 
-        if (netwkEntity == null) {
-            return null;
-        }
-
-        InspectionPortEntity iPortEntity = netwkEntity.getIngressInspectionPort();
-        InspectionPortEntity ePortEntity = netwkEntity.getEgressInspectionPort();
-        InspectionHookEntity eHookEntity = netwkEntity.getInspectionHook();
-
-        String parentId = null;
-        if (iPortEntity != null) {
-            parentId = iPortEntity.getElementId() != null ? iPortEntity.getElementId().toString() : null;
-        } else if (ePortEntity != null) {
-            parentId = ePortEntity.getElementId() != null ? ePortEntity.getElementId().toString() : null;
-        } else if (eHookEntity != null) {
-            parentId = eHookEntity.getElementId() != null ? eHookEntity.getElementId() : null;
-        }
-
-        List<String> macAddresses = netwkEntity.getMacAddresses();
-        List<String> portIPs = netwkEntity.getPortIPs();
-        String elementId = netwkEntity.getElementId();
-
-        return new NetworkElementImpl(elementId, parentId, macAddresses, portIPs);
+        loadFullEntity(netwkEntity);
+        return netwkEntity;
     }
 
     public NetworkElement makeNetworkElement(List<MacAddressEntity> macAddrEntities, List<PortIpEntity> portIpEntities,
@@ -169,34 +149,15 @@ public class NSCUtils {
         return new NetworkElementImpl(elementIdStr, parentIdStr, macAddresses, portIPs);
     }
 
-    public InspectionPortElement makeInspectionPortElement(InspectionPortEntity entity) {
+    public InspectionPortElement makeInspectionPortElement(InspectionPortEntity inspectionPortEntity) {
 
-        if (entity == null) {
-            return null;
-        }
-
-        NetworkElement ingressPort = makeNetworkElement(entity.getIngressPort());
-        NetworkElement egressPort = makeNetworkElement(entity.getEgressPort());
-
-        String elementId = (entity.getElementId() != null ? entity.getElementId().toString() : null);
-
-        InspectionHookEntity inspectionHookEntity = entity.getInspectionHook();
-        String parentId = (inspectionHookEntity != null ? inspectionHookEntity.getElementId() : null);
-
-        return new InspectionPortElementImpl(ingressPort, egressPort, elementId, parentId);
+        loadFullEntity(inspectionPortEntity);
+        return inspectionPortEntity;
     }
 
-    public InspectionHookElement makeInspectionHookElement(final InspectionHookEntity entity) {
-
-        if (entity == null) {
-            return null;
-        }
-
-        InspectionPortElement inspectionPort = makeInspectionPortElement(entity.getInspectionPort());
-        NetworkElement inspected = makeNetworkElement(entity.getInspectedPort());
-
-        return new InspectionHookElementImpl(entity.getTag(), entity.getHookOrder(), inspectionPort, inspected,
-                entity.getElementId(), entity.getFailurePolicyType(), entity.getEncType());
+    public InspectionHookElement makeInspectionHookElement(final InspectionHookEntity inspectionHookEntity) {
+        loadFullEntity(inspectionHookEntity);
+        return inspectionHookEntity;
     };
 
     public NetworkElementEntity networkElementEntityByElementId(String elementId) {
@@ -314,6 +275,40 @@ public class NSCUtils {
     }
 
     private void loadFullEntity(InspectionHookEntity inspectionHookEntity) {
-        makeInspectionHookElement(inspectionHookEntity);
+        if (inspectionHookEntity == null) {
+            return;
+        }
+        inspectionHookEntity.getElementId();
+        inspectionHookEntity.getEncType();
+        inspectionHookEntity.getFailurePolicyType();
+        inspectionHookEntity.getHookOrder();
+
+        NetworkElementEntity inspected = inspectionHookEntity.getInspectedPort();
+        loadFullEntity(inspected);
+        InspectionPortEntity inspectionPort = inspectionHookEntity.getInspectionPort();
+        loadFullEntity(inspectionPort);
+    }
+
+    private void loadFullEntity(InspectionPortEntity inspectionPortEntity) {
+        if (inspectionPortEntity == null) {
+            return;
+        }
+        NetworkElementEntity ingress = inspectionPortEntity.getIngressPort();
+        NetworkElementEntity egress = inspectionPortEntity.getEgressPort();
+
+        loadFullEntity(ingress);
+        loadFullEntity(egress);
+        inspectionPortEntity.getParentId();
+    }
+
+    private void loadFullEntity(NetworkElementEntity networkElementEntity) {
+        if (networkElementEntity == null) {
+            return;
+        }
+        networkElementEntity.getElementId();
+        networkElementEntity.getParentId();
+        networkElementEntity.getPortIPs();
+        networkElementEntity.getMacAddresses();
+        networkElementEntity.getParentId();
     }
 }

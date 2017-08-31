@@ -1,7 +1,7 @@
 package org.osc.controller.nsc.entities;
 
 import static javax.persistence.EnumType.STRING;
-import static javax.persistence.FetchType.LAZY;
+import static javax.persistence.FetchType.EAGER;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -26,11 +26,11 @@ public class InspectionHookEntity implements InspectionHookElement {
     @Column(name = "elementId", unique = true)
     private String elementId;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = false, fetch = LAZY, optional = true)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = false, fetch = EAGER, optional = true)
     @JoinColumn(name = "inspectedPortId", nullable = true, updatable = true)
     private NetworkElementEntity inspectedPort;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = false, fetch = LAZY, optional = true)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = false, fetch = EAGER, optional = true)
     @JoinColumn(name = "inspectionPortId", nullable = true, updatable = true)
     private InspectionPortEntity inspectionPort;
     private Long tag;

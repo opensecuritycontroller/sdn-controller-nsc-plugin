@@ -65,7 +65,7 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
             throws Exception {
         try {
             InspectionHookEntity entity = this.utils.findInspHookByInspectedAndPort(inspectedPort, inspectionPort);
-            return this.utils.makeInspectionHookElement(entity);
+            return entity;
         } catch (Exception e) {
             String inspectedPortId = inspectedPort != null ? inspectedPort.getElementId() : null;
             String inspectionPortId = inspectionPort != null ? inspectionPort.getElementId() : null;
@@ -229,6 +229,7 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
             }
 
             inspectionPortEntity = this.em.merge(inspectionPortEntity);
+
             return this.utils.makeInspectionPortElement(inspectionPortEntity);
         });
     }
