@@ -1,5 +1,6 @@
 package org.osc.controller.nsc.entities;
 
+import static javax.persistence.FetchType.EAGER;
 import static javax.persistence.FetchType.LAZY;
 
 import javax.persistence.CascadeType;
@@ -22,11 +23,11 @@ public class InspectionPortEntity implements InspectionPortElement {
     @Column(name = "elementId", unique = true)
     private String elementId;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = false, fetch = LAZY, optional = true)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = false, fetch = EAGER, optional = true)
     @JoinColumn(name = "ingressId", nullable = true, updatable = true)
     private NetworkElementEntity ingressPort;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = false, fetch = LAZY, optional = true)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = false, fetch = EAGER, optional = true)
     @JoinColumn(name = "egressId", nullable = true, updatable = true)
     private NetworkElementEntity egressPort;
 

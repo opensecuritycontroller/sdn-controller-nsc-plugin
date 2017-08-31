@@ -21,11 +21,12 @@ import static java.util.Collections.singletonMap;
 import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.ops4j.pax.exam.CoreOptions.*;
+import static org.osc.sdk.controller.FailurePolicyType.NA;
+import static org.osc.sdk.controller.TagEncapsulationType.VLAN;
 import static org.osgi.service.jdbc.DataSourceFactory.*;
 
 import java.io.File;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
@@ -54,6 +55,7 @@ import org.osc.controller.nsc.entities.NetworkElementEntity;
 import org.osc.controller.nsc.entities.PortIpEntity;
 import org.osc.controller.nsc.utils.NSCUtils;
 import org.osc.sdk.controller.api.SdnControllerApi;
+import org.osc.sdk.controller.element.InspectionHookElement;
 import org.osc.sdk.controller.element.InspectionPortElement;
 import org.osc.sdk.controller.element.NetworkElement;
 import org.osgi.framework.BundleContext;
@@ -368,7 +370,7 @@ public class OSGiIntegrationTest {
         });
 
         InspectionHookEntity persistedHook = this.txControl.required(() -> {
-            InspectionHookEntity ph = this.em.find(InspectionHookEntity.class, this.inspectionHook.getElementId());
+            InspectionHookEntity ph = this.em.find(InspectionHookEntity.class, this.inspectionHook.getHookId());
             InspectionPortEntity iprt = this.em.find(InspectionPortEntity.class, this.inspectionPort.getElementId());
 
             assertNotNull(this.inspectionPort.getInspectionHook());
@@ -376,8 +378,8 @@ public class OSGiIntegrationTest {
             return ph;
         });
 
-        assertNotNull(this.inspectionHook.getElementId());
-        assertEquals(this.inspectionHook.getElementId(), persistedHook.getElementId());
+        assertNotNull(this.inspectionHook.getHookId());
+        assertEquals(this.inspectionHook.getHookId(), persistedHook.getHookId());
 
         InspectionPortEntity persistedPort = persistedHook.getInspectionPort();
 
@@ -396,9 +398,7 @@ public class OSGiIntegrationTest {
         // TODO : Separate the tests!
         NSCUtils utils = new NSCUtils(this.em, this.txControl);
 
-        NetworkElement ingressElement = utils.makeNetworkElement(this.ingress);
-        NetworkElement egressElement = utils.makeNetworkElement(this.egress);
-        InspectionPortEntity foundPort = utils.findInspPortByNetworkElements(ingressElement, egressElement);
+        InspectionPortEntity foundPort = utils.findInspPortByNetworkElements(this.ingress, this.egress);
 
         assertNotNull(foundPort);
         assertEquals(this.inspectionPort.getElementId(), foundPort.getElementId());
@@ -441,18 +441,20 @@ public class OSGiIntegrationTest {
         InspectionHookEntity foundIH = this.txControl.required(() -> {
             InspectionPortEntity ipe = this.em.find(this.inspectionPort.getClass(), this.inspectionPort.getElementId());
             assertNotNull(ipe);
-            NetworkElement ne = utils.makeNetworkElement(this.inspected);
+
+//            NetworkElement ne = utils.makeNetworkElement(this.inspected);
+            NetworkElement ne = this.inspected;
             InspectionPortElement prte = ipe;
             InspectionHookEntity ihe = utils.findInspHookByInspectedAndPort(ne, prte);
 
             assertNotNull(ihe);
-            assertEquals(this.inspectionHook.getElementId(), ihe.getElementId());
+            assertEquals(this.inspectionHook.getHookId(), ihe.getHookId());
             assertNotNull(ihe.getInspectionPort());
             assertEquals(ihe.getInspectionPort().getElementId(), ipe.getElementId());
             return ihe;
         });
 
-        assertEquals(foundIH.getElementId(), this.inspectionHook.getElementId());
+        assertEquals(foundIH.getHookId(), this.inspectionHook.getHookId());
         assertNotNull(foundIH.getInspectionPort());
         assertEquals(foundIH.getInspectionPort().getElementId(), this.inspectionPort.getElementId());
 
@@ -466,21 +468,38 @@ public class OSGiIntegrationTest {
         InspectionPortElement inspectionPortElement = new InspectionPortEntity(null, this.ingress, this.egress, null);
         inspectionPortElement = (InspectionPortElement) this.redirApi.registerInspectionPort(inspectionPortElement);
 
+        // Here we are mostly afraid of LazyInitializationException
+        assertNotNull(inspectionPortElement.getElementId());
+        inspectionPortElement.getParentId();
         assertNotNull(inspectionPortElement.getIngressPort());
+        assertNotNull(inspectionPortElement.getEgressPort());
+        assertNotNull(inspectionPortElement.getEgressPort().getMacAddresses());
+        assertNotNull(inspectionPortElement.getEgressPort().getElementId());
+        assertNotNull(inspectionPortElement.getIngressPort());
+        assertNotNull(inspectionPortElement.getIngressPort().getMacAddresses());
+        assertNotNull(inspectionPortElement.getIngressPort().getElementId());
+        inspectionPortElement.getIngressPort().getParentId();
+        inspectionPortElement.getEgressPort().getParentId();
 
         final InspectionPortElement inspectionPortElementTmp = inspectionPortElement;
         NetworkElementEntity foundIngress = this.txControl.required(() -> {
             NetworkElementEntity elementEntity = utils
                     .networkElementEntityByElementId(inspectionPortElementTmp.getIngressPort().getElementId());
-            utils.makeNetworkElement(elementEntity);
-            elementEntity.getIngressInspectionPort().getElementId();
+            elementEntity.getPortIPs(); // Lazy loaded! This fixes LazyInitializationException
             return elementEntity;
         });
 
         assertNotNull(foundIngress);
         assertEquals(inspectionPortElement.getIngressPort().getElementId(), foundIngress.getElementId());
         assertNotNull(foundIngress.getIngressInspectionPort());
-        assertEquals(inspectionPortElement.getElementId(), foundIngress.getIngressInspectionPort().getElementId() + "");
+        assertEquals(inspectionPortElement.getElementId(), foundIngress.getIngressInspectionPort().getElementId());
+
+        // Here we are afraid of lazyInitializationException
+        foundIngress.getEgressInspectionPort();
+        foundIngress.getMacAddresses();
+        foundIngress.getPortIPs();
+        foundIngress.getElementId();
+        foundIngress.getParentId();
 
         InspectionPortElement foundInspPortElement = this.redirApi.getInspectionPort(inspectionPortElement);
         assertEquals(inspectionPortElement.getIngressPort().getElementId(),
@@ -505,10 +524,45 @@ public class OSGiIntegrationTest {
             return null;
         });
 
-        String parentId = OSGiIntegrationTest.this.inspectionHook.getElementId();
+        String parentId = OSGiIntegrationTest.this.inspectionHook.getHookId();
         InspectionPortElement inspectionPortElement = new InspectionPortEntity(null, this.ingress, this.egress, null);
 
         // ... and the test
         inspectionPortElement = (InspectionPortElement) this.redirApi.registerInspectionPort(inspectionPortElement);
     }
+
+    @Test
+    public void testInstallInspectionHook() throws Exception {
+        NSCUtils utils = new NSCUtils(this.em, this.txControl);
+        this.redirApi = new NeutronSdnRedirectionApi(null, "boogus", this.txControl, this.em);
+
+        InspectionPortElement inspectionPortElement = new InspectionPortEntity(null, this.ingress, this.egress, null);
+        final String hookId = this.redirApi.installInspectionHook(Arrays.asList(this.inspected), inspectionPortElement,
+                                                                  0L, VLAN, 0L, NA);
+
+        assertNotNull(hookId);
+        InspectionHookElement inspectionHookElement = this.txControl.required(() -> {
+            InspectionHookElement tmp = this.em.find(InspectionHookEntity.class, hookId);
+            tmp.getInspectionPort().getIngressPort().getPortIPs();
+            tmp.getInspectionPort().getEgressPort().getPortIPs();
+            tmp.getInspectedPort().getPortIPs();
+            return tmp;
+        });
+
+        // Here we are mostly afraid of LazyInitializationException
+        assertNotNull(inspectionHookElement);
+        assertNotNull(inspectionHookElement.getHookId());
+        assertNotNull(inspectionHookElement.getInspectionPort());
+        assertNotNull(inspectionHookElement.getInspectionPort().getIngressPort());
+        assertNotNull(inspectionHookElement.getInspectionPort().getIngressPort().getMacAddresses());
+        assertNotNull(inspectionHookElement.getInspectionPort().getIngressPort().getPortIPs());
+        assertNotNull(inspectionHookElement.getInspectionPort().getEgressPort());
+        assertNotNull(inspectionHookElement.getInspectionPort().getEgressPort().getMacAddresses());
+        assertNotNull(inspectionHookElement.getInspectionPort().getEgressPort().getPortIPs());
+        assertNotNull(inspectionHookElement.getInspectionPort().getIngressPort());
+        assertNotNull(inspectionHookElement.getInspectionPort().getEgressPort());
+        assertNotNull(inspectionHookElement.getInspectedPort().getMacAddresses());
+        assertNotNull(inspectionHookElement.getInspectedPort().getPortIPs());
+    }
+
 }

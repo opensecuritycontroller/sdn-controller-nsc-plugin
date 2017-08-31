@@ -23,8 +23,8 @@ public class InspectionHookEntity implements InspectionHookElement {
     @Id
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")
-    @Column(name = "elementId", unique = true)
-    private String elementId;
+    @Column(name = "hookId", unique = true)
+    private String hookId;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = false, fetch = EAGER, optional = true)
     @JoinColumn(name = "inspectedPortId", nullable = true, updatable = true)
@@ -34,6 +34,9 @@ public class InspectionHookEntity implements InspectionHookElement {
     @JoinColumn(name = "inspectionPortId", nullable = true, updatable = true)
     private InspectionPortEntity inspectionPort;
     private Long tag;
+
+    // "order" is a sql keyword. Avoid column named "order"
+    @Column(name = "hookOrder")
     private Long order;
 
     @Enumerated(STRING)
@@ -46,12 +49,12 @@ public class InspectionHookEntity implements InspectionHookElement {
     }
 
     @Override
-    public String getElementId() {
-        return this.elementId;
+    public String getHookId() {
+        return this.hookId;
     }
 
-    public void setElementId(String elementId) {
-        this.elementId = elementId;
+    public void setHookId(String hookId) {
+        this.hookId = hookId;
     }
 
     @Override
@@ -81,6 +84,7 @@ public class InspectionHookEntity implements InspectionHookElement {
         this.tag = tag;
     }
 
+    @Override
     public Long getOrder() {
         return this.order;
     }

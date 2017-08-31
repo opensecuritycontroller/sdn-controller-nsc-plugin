@@ -93,9 +93,9 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
                     } else {
                         inspectionHookEntity = this.utils.makeInspectionHookEntity(inspected, inspectionPort, tag,
                                 encType, order, failurePolicyType);
-                        this.em.merge(inspectionHookEntity);
+                        inspectionHookEntity = this.em.merge(inspectionHookEntity);
                     }
-                    String hookId = inspectionHookEntity.getElementId();
+                    String hookId = inspectionHookEntity.getHookId();
                     return hookId;
                 });
             }
@@ -199,7 +199,7 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
 
             return this.txControl.required(() -> {
                 InspectionPortEntity ipEntity = this.utils.txInspectionPortEntityById(portId);
-                return this.utils.makeInspectionPortElement(ipEntity);
+                return ipEntity;
             });
         } catch (Exception e) {
             LOG.warn("Failed to retrieve inspectionPort by id! Trying by ingress and egress.");
@@ -209,7 +209,7 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
         NetworkElement egress = inspectionPort.getEgressPort();
 
         InspectionPortEntity ipEntity = this.utils.findInspPortByNetworkElements(ingress, egress);
-        return this.utils.makeInspectionPortElement(ipEntity);
+        return ipEntity;
     }
 
     @Override
@@ -230,7 +230,7 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
 
             inspectionPortEntity = this.em.merge(inspectionPortEntity);
 
-            return this.utils.makeInspectionPortElement(inspectionPortEntity);
+            return inspectionPortEntity;
         });
     }
 
@@ -274,7 +274,7 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
                 // TODO: wrong!
                 InspectionHookEntity updateEntity = this.utils.makeInspectionHookEntity(inspected, inspectionPort, tag,
                                                                                     encType, order, failurePolicyType);
-                updateEntity.setElementId(inspectionHookEntity.getElementId());
+                updateEntity.setHookId(inspectionHookEntity.getHookId());
                 this.em.merge(updateEntity);
                 return null;
             });

@@ -21,7 +21,6 @@ import org.osc.controller.nsc.entities.NetworkElementEntity;
 import org.osc.controller.nsc.entities.PortIpEntity;
 import org.osc.sdk.controller.FailurePolicyType;
 import org.osc.sdk.controller.TagEncapsulationType;
-import org.osc.sdk.controller.element.InspectionHookElement;
 import org.osc.sdk.controller.element.InspectionPortElement;
 import org.osc.sdk.controller.element.NetworkElement;
 import org.osgi.service.transaction.control.TransactionControl;
@@ -128,20 +127,20 @@ public class NSCUtils {
         return retVal;
     }
 
-    public NetworkElement makeNetworkElement(NetworkElementEntity netwkEntity) {
-        loadFullEntity(netwkEntity);
-        return netwkEntity;
-    }
-
-    public InspectionPortElement makeInspectionPortElement(InspectionPortEntity inspectionPortEntity) {
-        loadFullEntity(inspectionPortEntity);
-        return inspectionPortEntity;
-    }
-
-    public InspectionHookElement makeInspectionHookElement(final InspectionHookEntity inspectionHookEntity) {
-        loadFullEntity(inspectionHookEntity);
-        return inspectionHookEntity;
-    };
+//    public NetworkElement makeNetworkElement(NetworkElementEntity netwkEntity) {
+//        loadFullEntity(netwkEntity);
+//        return netwkEntity;
+//    }
+//
+//    public InspectionPortElement makeInspectionPortElement(InspectionPortEntity inspectionPortEntity) {
+//        loadFullEntity(inspectionPortEntity);
+//        return inspectionPortEntity;
+//    }
+//
+//    public InspectionHookElement makeInspectionHookElement(final InspectionHookEntity inspectionHookEntity) {
+//        loadFullEntity(inspectionHookEntity);
+//        return inspectionHookEntity;
+//    };
 
     public NetworkElementEntity networkElementEntityByElementId(String elementId) {
         CriteriaBuilder cb = this.em.getCriteriaBuilder();
@@ -261,7 +260,7 @@ public class NSCUtils {
         if (inspectionHookEntity == null) {
             return;
         }
-        inspectionHookEntity.getElementId();
+        inspectionHookEntity.getHookId();
         inspectionHookEntity.getEncType();
         inspectionHookEntity.getFailurePolicyType();
         inspectionHookEntity.getOrder();

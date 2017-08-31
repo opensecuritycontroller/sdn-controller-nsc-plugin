@@ -2,6 +2,7 @@ package org.osc.controller.nsc.entities;
 
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
+import static javax.persistence.FetchType.EAGER;
 import static javax.persistence.FetchType.LAZY;
 
 import java.util.List;
@@ -28,21 +29,23 @@ public class NetworkElementEntity implements NetworkElement {
     @Transient
     private String parentId;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = LAZY, mappedBy = "element")
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = EAGER, mappedBy = "element")
     private List<MacAddressEntity> macAddressEntities;
 
+    // Making this EAGER resulted in:
+    // org.hibernate.loader.MultipleBagFetchException: cannot simultaneously fetch multiple bags
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = LAZY, mappedBy = "element")
     private List<PortIpEntity> portIpEntities;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = false, fetch = LAZY, optional = true)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = false, fetch = EAGER, optional = true)
     @JoinColumn(name = "ingressPortId", nullable = true, updatable = true)
     private InspectionPortEntity ingressInspectionPort;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = false, fetch = LAZY, optional = true)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = false, fetch = EAGER, optional = true)
     @JoinColumn(name = "egressPortId", nullable = true, updatable = true)
     private InspectionPortEntity egressInspectionPort;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = false, fetch = LAZY, optional = true)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = false, fetch = EAGER, optional = true)
     @JoinColumn(name = "inspectionHookId", nullable = true, updatable = true)
     private InspectionHookEntity inspectionHook;
 
