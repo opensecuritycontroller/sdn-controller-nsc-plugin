@@ -25,6 +25,8 @@ import static org.osgi.service.jdbc.DataSourceFactory.*;
 
 import java.io.File;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
@@ -172,7 +174,8 @@ public class OSGiIntegrationTest {
                     mavenBundle("org.apache.directory.studio", "org.apache.commons.lang").versionAsInProject(),
 
                     // Uncomment this line to allow remote debugging
-                    // CoreOptions.vmOption("-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=1044"),
+
+//                    CoreOptions.vmOption("-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=1044"),
                     bootClasspathLibrary(mavenBundle("org.apache.geronimo.specs", "geronimo-jta_1.1_spec", "1.1.1"))
                             .beforeFramework(),
                     junitBundles());
@@ -287,8 +290,8 @@ public class OSGiIntegrationTest {
         this.egress.setEgressInspectionPort(this.inspectionPort);
         this.inspected.setInspectionHook(this.inspectionHook);
 
-        this.inspectionPort.setIngress(this.ingress);
-        this.inspectionPort.setEgress(this.egress);
+        this.inspectionPort.setIngressPort(this.ingress);
+        this.inspectionPort.setEgressPort(this.egress);
         this.inspectionHook.setInspectedPort(this.inspected);
 
         this.inspectionPort.setInspectionHook(this.inspectionHook);
@@ -309,22 +312,23 @@ public class OSGiIntegrationTest {
 
         File tracefile = new File(TEST_DB_FILENAME + ".trace.db");
 
-        if (!tracefile.delete()) {
+        if (tracefile.exists() &&  !tracefile.delete()) {
             throw new IllegalStateException("Failed to delete trace file : " + tracefile.getAbsolutePath());
+
         }
     }
 
     @Test
     public void verifyCorrectNumberOfMacsAdPortIps() throws Exception {
 
-        assertEquals(null, this.inspectionPort.getId());
+        assertEquals(null, this.inspectionPort.getElementId());
 
         InspectionHookEntity inspHookEntity = this.txControl.required(() -> {
             this.em.persist(this.inspectionHook);
             return this.inspectionHook;
         });
 
-        assertNotNull(this.inspectionPort.getId());
+        assertNotNull(this.inspectionPort.getElementId());
 
         List<MacAddressEntity> lsMacs;
 
@@ -365,21 +369,21 @@ public class OSGiIntegrationTest {
         });
 
         InspectionHookEntity persistedHook = this.txControl.required(() -> {
-            InspectionHookEntity ph = this.em.find(InspectionHookEntity.class, this.inspectionHook.getHookId());
-            InspectionPortEntity iprt = this.em.find(InspectionPortEntity.class, this.inspectionPort.getId());
+            InspectionHookEntity ph = this.em.find(InspectionHookEntity.class, this.inspectionHook.getElementId());
+            InspectionPortEntity iprt = this.em.find(InspectionPortEntity.class, this.inspectionPort.getElementId());
 
             assertNotNull(this.inspectionPort.getInspectionHook());
-            assertEquals(this.inspectionPort.getId(), iprt.getId());
+            assertEquals(this.inspectionPort.getElementId(), iprt.getElementId());
             return ph;
         });
 
-        assertNotNull(this.inspectionHook.getHookId());
-        assertEquals(this.inspectionHook.getHookId(), persistedHook.getHookId());
+        assertNotNull(this.inspectionHook.getElementId());
+        assertEquals(this.inspectionHook.getElementId(), persistedHook.getElementId());
 
         InspectionPortEntity persistedPort = persistedHook.getInspectionPort();
 
         assertNotNull(persistedPort);
-        assertEquals(this.inspectionHook.getInspectionPort().getId(), persistedPort.getId());
+        assertEquals(this.inspectionHook.getInspectionPort().getElementId(), persistedPort.getElementId());
     }
 
     @Test
@@ -398,7 +402,7 @@ public class OSGiIntegrationTest {
         InspectionPortEntity foundPort = utils.findInspPortByNetworkElements(ingressElement, egressElement);
 
         assertNotNull(foundPort);
-        assertEquals(this.inspectionPort.getId(), foundPort.getId());
+        assertEquals(this.inspectionPort.getElementId(), foundPort.getElementId());
 
     }
 
@@ -436,22 +440,22 @@ public class OSGiIntegrationTest {
         NSCUtils utils = new NSCUtils(this.em, this.txControl);
 
         InspectionHookEntity foundIH = this.txControl.required(() -> {
-            InspectionPortEntity ipe = this.em.find(this.inspectionPort.getClass(), this.inspectionPort.getId());
+            InspectionPortEntity ipe = this.em.find(this.inspectionPort.getClass(), this.inspectionPort.getElementId());
             assertNotNull(ipe);
             NetworkElement ne = utils.makeNetworkElement(this.inspected);
             InspectionPortElement prte = utils.makeInspectionPortElement(ipe);
             InspectionHookEntity ihe = utils.findInspHookByInspectedAndPort(ne, prte);
 
             assertNotNull(ihe);
-            assertEquals(this.inspectionHook.getHookId(), ihe.getHookId());
+            assertEquals(this.inspectionHook.getElementId(), ihe.getElementId());
             assertNotNull(ihe.getInspectionPort());
-            assertEquals(ihe.getInspectionPort().getId(), ipe.getId());
+            assertEquals(ihe.getInspectionPort().getElementId(), ipe.getElementId());
             return ihe;
         });
 
-        assertEquals(foundIH.getHookId(), this.inspectionHook.getHookId());
+        assertEquals(foundIH.getElementId(), this.inspectionHook.getElementId());
         assertNotNull(foundIH.getInspectionPort());
-        assertEquals(foundIH.getInspectionPort().getId(), this.inspectionPort.getId());
+        assertEquals(foundIH.getInspectionPort().getElementId(), this.inspectionPort.getElementId());
 
     }
 
@@ -479,7 +483,7 @@ public class OSGiIntegrationTest {
         assertNotNull(foundIngress);
         assertEquals(inspectionPortElement.getIngressPort().getElementId(), foundIngress.getElementId());
         assertNotNull(foundIngress.getIngressInspectionPort());
-        assertEquals(inspectionPortElement.getElementId(), foundIngress.getIngressInspectionPort().getId() + "");
+        assertEquals(inspectionPortElement.getElementId(), foundIngress.getIngressInspectionPort().getElementId() + "");
 
         InspectionPortElement foundInspPortElement = this.redirApi.getInspectionPort(inspectionPortElement);
         assertEquals(inspectionPortElement.getIngressPort().getElementId(),
@@ -504,7 +508,7 @@ public class OSGiIntegrationTest {
             return null;
         });
 
-        String parentId = OSGiIntegrationTest.this.inspectionHook.getHookId();
+        String parentId = OSGiIntegrationTest.this.inspectionHook.getElementId();
         NetworkElement ingrElt = utils.makeNetworkElement(OSGiIntegrationTest.this.ingress);
         NetworkElement egrElt = utils.makeNetworkElement(OSGiIntegrationTest.this.egress);
         InspectionPortElement inspectionPortElement = new InspectionPortElementImpl(ingrElt, egrElt, null, null);
@@ -512,4 +516,85 @@ public class OSGiIntegrationTest {
         // ... and the test
         inspectionPortElement = (InspectionPortElement) this.redirApi.registerInspectionPort(inspectionPortElement);
     }
+
+    // TODO REMOVE!!!!!!
+    @Test
+    public void testDummy01() {
+        MacAddressEntity ma1 = new MacAddressEntity();
+        MacAddressEntity ma2 = new MacAddressEntity();
+        ma1.setMacAddress(IMAC1_STR);
+        ma2.setMacAddress(IMAC2_STR);
+        List<MacAddressEntity> macAddrEntities = Arrays.asList(ma1, ma2);
+
+        PortIpEntity ip1 = new PortIpEntity();
+        PortIpEntity ip2 = new PortIpEntity();
+        ip1.setPortIp(IMAC1_STR);
+        ip2.setPortIp(IMAC2_STR);
+        List<PortIpEntity> portIpIentities= Arrays.asList(ip1, ip2);
+
+        NetworkElementEntity neOrig = new NetworkElementEntity();
+        neOrig.setMacAddressEntities(macAddrEntities);
+        neOrig.setElementId(this.ingress.getElementId());
+
+        this.txControl.required(() -> {
+            this.em.merge(neOrig);
+            return null;
+        });
+
+        NetworkElementEntity ne = this.txControl.required(() -> {
+            NetworkElementEntity tmp = this.em.find(NetworkElementEntity.class, neOrig.getElementId());
+            for (MacAddressEntity mae : tmp.getMacAddressEntities()) {
+                mae.getMacAddress();
+            };
+
+            tmp.getPortIpEntities();
+            return tmp;
+        });
+
+        assertNotNull(ne);
+        assertEquals(ne.getMacAddressEntities().size(), neOrig.getMacAddressEntities().size());
+
+
+        NetworkElementEntity neOrig2 = new NetworkElementEntity();
+        neOrig2.setElementId(ne.getElementId());
+        neOrig2.setPortIpEntities(portIpIentities);
+        neOrig2.setMacAddressEntities(new ArrayList<>());
+        this.txControl.required(() -> {
+            this.em.merge(neOrig2);
+            return null;
+        });
+
+        ne = this.txControl.required(() -> {
+            NetworkElementEntity tmp = this.em.find(NetworkElementEntity.class, neOrig.getElementId());
+            for (MacAddressEntity mae : tmp.getMacAddressEntities()) {
+                mae.getMacAddress();
+            };
+
+            for (PortIpEntity mae : tmp.getPortIpEntities()) {
+                mae.getPortIp();
+            };
+
+            tmp.getPortIpEntities();
+            return tmp;
+        });
+
+        assertNotNull(ne);
+        assertEquals(ne.getMacAddressEntities().size(), neOrig2.getMacAddressEntities().size());
+        assertEquals(ne.getPortIpEntities().size(), neOrig2.getPortIpEntities().size());
+    }
+
+    // TODO : REMOVE!!!!!!
+    @Test
+    public void testDummy02() {
+
+        InspectionPortEntity ipe = new InspectionPortEntity();
+
+        InspectionPortEntity ipe2 = this.txControl.required(() -> {
+            return this.em.merge(ipe);
+        });
+
+        assertNotNull(ipe2);
+        assertNotNull(ipe2.getElementId());
+    }
+
 }

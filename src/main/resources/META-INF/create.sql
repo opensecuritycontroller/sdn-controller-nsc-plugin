@@ -1,10 +1,10 @@
  
 create sequence if not exists hibernate_sequence start with 1 increment by 1;
 
-create table if not exists InspectionHookEntity (hookId varchar(255) not null, inspectedPortId varchar(255), inspectionPortId bigint, tag bigint, hookOrder bigint, encType varchar(255), failurePolicyType varchar(255), primary key (hookId) );
-create table if not exists InspectionPortEntity (id bigint not null, inspectionHookId varchar(255), ingressId varchar(255), egressId varchar(255), primary key (id) );
+create table if not exists InspectionHookEntity (elementId varchar(255) not null, inspectedPortId varchar(255), inspectionPortId varchar(255), tag bigint, hookOrder bigint, encType varchar(255), failurePolicyType varchar(255), primary key (elementId) );
+create table if not exists InspectionPortEntity (elementId varchar(255) not null, inspectionHookId varchar(255), ingressId varchar(255), egressId varchar(255), primary key (elementId) );
 
-create table if not exists NetworkElementEntity (elementId varchar(255) not null, inspectionHookId varchar(255), ingressPortId bigint, egressPortId bigint, primary key (elementId) );
+create table if not exists NetworkElementEntity (elementId varchar(255) not null, inspectionHookId varchar(255), ingressPortId varchar(255), egressPortId varchar(255), primary key (elementId) );
 create table if not exists MacAddressEntity (id bigint not null, elementId varchar(255), macAddress varchar(128), primary key (id) );
 create table if not exists PortIpEntity (id bigint not null, elementId varchar(255), portIp varchar(128), primary key (id) );
 

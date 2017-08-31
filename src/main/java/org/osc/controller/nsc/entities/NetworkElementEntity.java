@@ -15,8 +15,10 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 
+import org.osc.sdk.controller.element.NetworkElement;
+
 @Entity
-public class NetworkElementEntity {
+public class NetworkElementEntity implements NetworkElement {
 
     @Id
     @Column(name = "elementId", unique = true)
@@ -40,6 +42,7 @@ public class NetworkElementEntity {
     @JoinColumn(name = "inspectionHookId", nullable = true, updatable = true)
     private InspectionHookEntity inspectionHook;
 
+    @Override
     public String getElementId() {
         return this.elementId;
     }
@@ -104,15 +107,25 @@ public class NetworkElementEntity {
         this.inspectionHook = inspectionHook;
     }
 
+    @Override
     @Transient
-    public List<String> getPortIps() {
+    public List<String> getPortIPs() {
         return this.portIpEntities != null ? this.portIpEntities.stream().map(PortIpEntity::getPortIp).collect(toList())
                 : emptyList();
     }
 
+    @Override
     @Transient
     public List<String> getMacAddresses() {
         return this.macAddressEntities != null
                 ? this.macAddressEntities.stream().map(MacAddressEntity::getMacAddress).collect(toList()) : emptyList();
     }
+
+    @Override
+    public String getParentId() {
+        // TODO Implement for SFC story
+        return null;
+    }
+
+
 }

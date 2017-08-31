@@ -95,7 +95,7 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
                                 encType, order, failurePolicyType);
                         this.em.merge(inspectionHookEntity);
                     }
-                    String hookId = inspectionHookEntity.getHookId();
+                    String hookId = inspectionHookEntity.getElementId();
                     return hookId;
                 });
             }
@@ -157,8 +157,7 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
 
         this.txControl.required(() -> {
             InspectionHookEntity entity = this.utils.findInspHookByInspectedAndPort(inspectedPort, inspectionPort);
-            String typeStr = failurePolicyType != null ? failurePolicyType.toString() : null;
-            entity.setFailurePolicyType(typeStr);
+            entity.setFailurePolicyType(failurePolicyType);
             return null;
         });
     }
@@ -196,17 +195,9 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
         }
 
         try {
-            String portIdStr = inspectionPort.getElementId();
+            String portId = inspectionPort.getElementId();
 
             return this.txControl.required(() -> {
-                Long portId = null;
-                try {
-                    portId = Long.parseLong(portIdStr);
-                } catch (NumberFormatException nfe) {
-                    LOG.error("Inspection port id of non-numeric format passed to NSC controller " + portIdStr);
-                    return null;
-                }
-
                 InspectionPortEntity ipEntity = this.utils.txInspectionPortEntityById(portId);
                 return this.utils.makeInspectionPortElement(ipEntity);
             });
@@ -282,7 +273,7 @@ public class NeutronSdnRedirectionApi implements SdnRedirectionApi {
                 // TODO: wrong!
                 InspectionHookEntity updateEntity = this.utils.makeInspectionHookEntity(inspected, inspectionPort, tag,
                                                                                     encType, order, failurePolicyType);
-                updateEntity.setHookId(inspectionHookEntity.getHookId());
+                updateEntity.setElementId(inspectionHookEntity.getElementId());
                 this.em.merge(updateEntity);
                 return null;
             });

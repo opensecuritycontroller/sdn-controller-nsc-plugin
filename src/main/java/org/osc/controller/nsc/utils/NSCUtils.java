@@ -120,8 +120,8 @@ public class NSCUtils {
         retVal.setInspectionPort(inspectionPortEntity);
         retVal.setHookOrder(order);
         retVal.setTag(tag);
-        retVal.setEncType(encType.toString());
-        retVal.setFailurePolicyType(failurePolicyType.toString());
+        retVal.setEncType(encType);
+        retVal.setFailurePolicyType(failurePolicyType);
 
         inspectionPortEntity.setInspectionHook(retVal);
         inspected.setInspectionHook(retVal);
@@ -141,15 +141,15 @@ public class NSCUtils {
 
         String parentId = null;
         if (iPortEntity != null) {
-            parentId = iPortEntity.getId() != null ? iPortEntity.getId().toString() : null;
+            parentId = iPortEntity.getElementId() != null ? iPortEntity.getElementId().toString() : null;
         } else if (ePortEntity != null) {
-            parentId = ePortEntity.getId() != null ? ePortEntity.getId().toString() : null;
+            parentId = ePortEntity.getElementId() != null ? ePortEntity.getElementId().toString() : null;
         } else if (eHookEntity != null) {
-            parentId = eHookEntity.getHookId() != null ? eHookEntity.getHookId() : null;
+            parentId = eHookEntity.getElementId() != null ? eHookEntity.getElementId() : null;
         }
 
         List<String> macAddresses = netwkEntity.getMacAddresses();
-        List<String> portIPs = netwkEntity.getPortIps();
+        List<String> portIPs = netwkEntity.getPortIPs();
         String elementId = netwkEntity.getElementId();
 
         return new NetworkElementImpl(elementId, parentId, macAddresses, portIPs);
@@ -175,13 +175,13 @@ public class NSCUtils {
             return null;
         }
 
-        NetworkElement ingressPort = makeNetworkElement(entity.getIngress());
-        NetworkElement egressPort = makeNetworkElement(entity.getEgress());
+        NetworkElement ingressPort = makeNetworkElement(entity.getIngressPort());
+        NetworkElement egressPort = makeNetworkElement(entity.getEgressPort());
 
-        String elementId = (entity.getId() != null ? entity.getId().toString() : null);
+        String elementId = (entity.getElementId() != null ? entity.getElementId().toString() : null);
 
         InspectionHookEntity inspectionHookEntity = entity.getInspectionHook();
-        String parentId = (inspectionHookEntity != null ? inspectionHookEntity.getHookId() : null);
+        String parentId = (inspectionHookEntity != null ? inspectionHookEntity.getElementId() : null);
 
         return new InspectionPortElementImpl(ingressPort, egressPort, elementId, parentId);
     }
@@ -196,7 +196,7 @@ public class NSCUtils {
         NetworkElement inspected = makeNetworkElement(entity.getInspectedPort());
 
         return new InspectionHookElementImpl(entity.getTag(), entity.getHookOrder(), inspectionPort, inspected,
-                entity.getHookId(), entity.getFailurePolicyType(), entity.getEncType());
+                entity.getElementId(), entity.getFailurePolicyType(), entity.getEncType());
     };
 
     public NetworkElementEntity networkElementEntityByElementId(String elementId) {
@@ -254,7 +254,7 @@ public class NSCUtils {
         });
     }
 
-    public InspectionPortEntity txInspectionPortEntityById(Long id) {
+    public InspectionPortEntity txInspectionPortEntityById(String id) {
         return this.em.find(InspectionPortEntity.class, id);
     }
 
@@ -288,7 +288,7 @@ public class NSCUtils {
 
         InspectionPortEntity inspPort = findInspPortByNetworkElements(ingress, egress);
 
-        Long portId = inspPort != null ? inspPort.getId() : null;
+        String portId = inspPort != null ? inspPort.getElementId() : null;
 
         Query q = this.em.createQuery(
                 "FROM InspectionHookEntity WHERE inspectedPortId = :inspectedId AND inspectionPortId = :inspectionId ");

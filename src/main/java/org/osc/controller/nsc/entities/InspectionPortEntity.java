@@ -3,26 +3,32 @@ package org.osc.controller.nsc.entities;
 import static javax.persistence.FetchType.LAZY;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 
+import org.hibernate.annotations.GenericGenerator;
+import org.osc.sdk.controller.element.InspectionPortElement;
+
 @Entity
-public class InspectionPortEntity {
+public class InspectionPortEntity implements InspectionPortElement {
 
     @Id
-    @GeneratedValue
-    private Long id;
+    @GeneratedValue(generator = "uuid")
+    @GenericGenerator(name = "uuid", strategy = "uuid2")
+    @Column(name = "elementId", unique = true)
+    private String elementId;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = false, fetch = LAZY, optional = true)
     @JoinColumn(name = "ingressId", nullable = true, updatable = true)
-    private NetworkElementEntity ingress;
+    private NetworkElementEntity ingressPort;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = false, fetch = LAZY, optional = true)
     @JoinColumn(name = "egressId", nullable = true, updatable = true)
-    private NetworkElementEntity egress;
+    private NetworkElementEntity egressPort;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = false, fetch = LAZY, optional = true)
     @JoinColumn(name = "inspectionHookId", nullable = true, updatable = true)
@@ -31,11 +37,11 @@ public class InspectionPortEntity {
     public InspectionPortEntity() {
     }
 
-    public InspectionPortEntity(Long id, NetworkElementEntity ingress, NetworkElementEntity egress,
+    public InspectionPortEntity(String elementId, NetworkElementEntity ingress, NetworkElementEntity egress,
             InspectionHookEntity inspectionHook) {
-        this.id = id;
-        this.ingress = ingress;
-        this.egress = egress;
+        this.elementId = elementId;
+        this.ingressPort = ingress;
+        this.egressPort = egress;
         this.inspectionHook = inspectionHook;
 
         if (ingress != null) {
@@ -47,28 +53,31 @@ public class InspectionPortEntity {
         }
     }
 
-    public Long getId() {
-        return this.id;
+    @Override
+    public String getElementId() {
+        return this.elementId;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setId(String elementId) {
+        this.elementId = elementId;
     }
 
-    public NetworkElementEntity getIngress() {
-        return this.ingress;
+    @Override
+    public NetworkElementEntity getIngressPort() {
+        return this.ingressPort;
     }
 
-    public void setIngress(NetworkElementEntity ingress) {
-        this.ingress = ingress;
+    public void setIngressPort(NetworkElementEntity ingressPort) {
+        this.ingressPort = ingressPort;
     }
 
-    public NetworkElementEntity getEgress() {
-        return this.egress;
+    @Override
+    public NetworkElementEntity getEgressPort() {
+        return this.egressPort;
     }
 
-    public void setEgress(NetworkElementEntity egress) {
-        this.egress = egress;
+    public void setEgressPort(NetworkElementEntity egressPort) {
+        this.egressPort = egressPort;
     }
 
     public InspectionHookEntity getInspectionHook() {
@@ -77,5 +86,11 @@ public class InspectionPortEntity {
 
     public void setInspectionHook(InspectionHookEntity inspectionHook) {
         this.inspectionHook = inspectionHook;
+    }
+
+    @Override
+    public String getParentId() {
+        // TODO Implement for SFC
+        return null;
     }
 }

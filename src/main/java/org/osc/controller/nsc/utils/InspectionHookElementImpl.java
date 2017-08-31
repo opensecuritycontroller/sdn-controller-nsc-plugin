@@ -76,7 +76,7 @@ public class InspectionHookElementImpl implements InspectionHookElement {
     }
 
     @Override
-    public String getHookId() {
+    public String getElementId() {
         return this.hookId;
     }
 
