@@ -26,6 +26,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 
 import org.hibernate.annotations.GenericGenerator;
@@ -46,9 +47,10 @@ public class InspectionHookEntity implements InspectionHookElement {
     @JoinColumn(name = "inspectedPortId", nullable = true, updatable = true)
     private NetworkElementEntity inspectedPort;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = false, fetch = EAGER, optional = true)
+    @ManyToOne(cascade = CascadeType.ALL, fetch = EAGER, optional = true)
     @JoinColumn(name = "inspectionPortId", nullable = true, updatable = true)
     private InspectionPortEntity inspectionPort;
+
     private Long tag;
 
     // "order" is a sql keyword. Avoid column named "order"

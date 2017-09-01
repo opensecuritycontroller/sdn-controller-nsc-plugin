@@ -246,7 +246,6 @@ public class OSGiIntegrationTest {
         this.inspectionPort.setEgressPort(this.egress);
         this.inspectionHook.setInspectedPort(this.inspected);
 
-        this.inspectionPort.setInspectionHook(this.inspectionHook);
         this.inspectionHook.setInspectionPort(this.inspectionPort);
     }
 
@@ -314,7 +313,6 @@ public class OSGiIntegrationTest {
             InspectionHookEntity ph = this.em.find(InspectionHookEntity.class, this.inspectionHook.getHookId());
             InspectionPortEntity iprt = this.em.find(InspectionPortEntity.class, this.inspectionPort.getElementId());
 
-            assertNotNull(this.inspectionPort.getInspectionHook());
             assertEquals(this.inspectionPort.getElementId(), iprt.getElementId());
             return ph;
         });
@@ -406,7 +404,7 @@ public class OSGiIntegrationTest {
         NSCUtils utils = new NSCUtils(this.em, this.txControl);
         this.redirApi = new SampleSdnRedirectionApi(this.txControl, this.em);
 
-        InspectionPortElement inspectionPortElement = new InspectionPortEntity(null, this.ingress, this.egress, null);
+        InspectionPortElement inspectionPortElement = new InspectionPortEntity(null, this.ingress, this.egress);
         inspectionPortElement = (InspectionPortElement) this.redirApi.registerInspectionPort(inspectionPortElement);
 
         // Here we are mostly afraid of LazyInitializationException
@@ -466,7 +464,7 @@ public class OSGiIntegrationTest {
         });
 
         String parentId = OSGiIntegrationTest.this.inspectionHook.getHookId();
-        InspectionPortElement inspectionPortElement = new InspectionPortEntity(null, this.ingress, this.egress, null);
+        InspectionPortElement inspectionPortElement = new InspectionPortEntity(null, this.ingress, this.egress);
 
         // ... and the test
         inspectionPortElement = (InspectionPortElement) this.redirApi.registerInspectionPort(inspectionPortElement);
@@ -477,7 +475,7 @@ public class OSGiIntegrationTest {
         NSCUtils utils = new NSCUtils(this.em, this.txControl);
         this.redirApi = new SampleSdnRedirectionApi(this.txControl, this.em);
 
-        InspectionPortElement inspectionPortElement = new InspectionPortEntity(null, this.ingress, this.egress, null);
+        InspectionPortElement inspectionPortElement = new InspectionPortEntity(null, this.ingress, this.egress);
         this.redirApi.registerInspectionPort(inspectionPortElement); // expected before installInspectionHook
         final String hookId = this.redirApi.installInspectionHook(Arrays.asList(this.inspected), inspectionPortElement,
                                                                   0L, VLAN, 0L, NA);

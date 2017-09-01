@@ -88,7 +88,7 @@ public class NSCUtils {
             }
         }
 
-        return new InspectionPortEntity(inspectionPortElement.getElementId(), ingressEntity, egressEntity, null);
+        return new InspectionPortEntity(inspectionPortElement.getElementId(), ingressEntity, egressEntity);
     }
 
 
@@ -111,7 +111,6 @@ public class NSCUtils {
         retVal.setEncType(encType);
         retVal.setFailurePolicyType(failurePolicyType);
 
-        inspectionPortEntity.setInspectionHook(retVal);
         inspected.setInspectionHook(retVal);
 
         return retVal;
@@ -186,7 +185,6 @@ public class NSCUtils {
             InspectionPortEntity inspectionPortEntity = inspectionHookEntity.getInspectionPort();
 
             inspectionHookEntity.setInspectionPort(null);
-            inspectionPortEntity.setInspectionHook(null);
             inspectionHookEntity.setInspectedPort(null);
             networkElementEntity.setInspectionHook(null);
             this.em.remove(inspectionHookEntity);

@@ -17,7 +17,9 @@
 package org.osc.controller.nsc.entities;
 
 import static javax.persistence.FetchType.EAGER;
-import static javax.persistence.FetchType.LAZY;
+
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -25,6 +27,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
 import org.hibernate.annotations.GenericGenerator;
@@ -47,19 +50,17 @@ public class InspectionPortEntity implements InspectionPortElement {
     @JoinColumn(name = "egressId", nullable = true, updatable = true)
     private NetworkElementEntity egressPort;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = false, fetch = LAZY, optional = true)
-    @JoinColumn(name = "inspectionHookId", nullable = true, updatable = true)
-    private InspectionHookEntity inspectionHook;
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = false, fetch = EAGER, mappedBy="inspectionPort")
+    private Set<InspectionHookEntity> inspectionHooks;
 
     public InspectionPortEntity() {
     }
 
-    public InspectionPortEntity(String elementId, NetworkElementEntity ingress, NetworkElementEntity egress,
-            InspectionHookEntity inspectionHook) {
+    public InspectionPortEntity(String elementId, NetworkElementEntity ingress, NetworkElementEntity egress) {
         this.elementId = elementId;
         this.ingressPort = ingress;
         this.egressPort = egress;
-        this.inspectionHook = inspectionHook;
+        this.inspectionHooks = new HashSet<>();
 
         if (ingress != null) {
             ingress.setIngressInspectionPort(this);
@@ -97,12 +98,8 @@ public class InspectionPortEntity implements InspectionPortElement {
         this.egressPort = egressPort;
     }
 
-    public InspectionHookEntity getInspectionHook() {
-        return this.inspectionHook;
-    }
-
-    public void setInspectionHook(InspectionHookEntity inspectionHook) {
-        this.inspectionHook = inspectionHook;
+    public Set<InspectionHookEntity> getInspectionHooks() {
+        return this.inspectionHooks;
     }
 
     @Override
