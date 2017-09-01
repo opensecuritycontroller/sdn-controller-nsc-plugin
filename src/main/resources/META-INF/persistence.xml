@@ -8,8 +8,6 @@
     
     <properties>
         <property name="javax.persistence.schema-generation.database.action" value="create"/>
-        <property name="javax.persistence.schema-generation.create-source" value="script"/>
-        <property name="javax.persistence.schema-generation.create-script-source" value="META-INF/create.sql"/>
         <property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect"/>
     </properties>
   </persistence-unit>

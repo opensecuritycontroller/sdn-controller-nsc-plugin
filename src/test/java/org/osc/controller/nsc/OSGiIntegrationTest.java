@@ -33,9 +33,6 @@ import java.util.Properties;
 
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 import javax.sql.DataSource;
 
 import org.junit.After;
@@ -50,9 +47,7 @@ import org.ops4j.pax.exam.util.PathUtils;
 import org.osc.controller.nsc.api.SampleSdnRedirectionApi;
 import org.osc.controller.nsc.entities.InspectionHookEntity;
 import org.osc.controller.nsc.entities.InspectionPortEntity;
-import org.osc.controller.nsc.entities.MacAddressEntity;
 import org.osc.controller.nsc.entities.NetworkElementEntity;
-import org.osc.controller.nsc.entities.PortIpEntity;
 import org.osc.controller.nsc.utils.NSCUtils;
 import org.osc.sdk.controller.api.SdnControllerApi;
 import org.osc.sdk.controller.element.InspectionHookElement;
@@ -115,17 +110,6 @@ public class OSGiIntegrationTest {
     private NetworkElementEntity ingress;
     private NetworkElementEntity egress;
     private NetworkElementEntity inspected;
-
-    private MacAddressEntity iMac1;
-    private MacAddressEntity iMac2;
-    private MacAddressEntity eMac1;
-    private MacAddressEntity eMac2;
-    private MacAddressEntity inspMac;
-
-    private PortIpEntity iPort1;
-    private PortIpEntity iPort2;
-    private PortIpEntity ePort1;
-    private PortIpEntity ePort2;
 
     private SampleSdnRedirectionApi redirApi;
 
@@ -242,50 +226,17 @@ public class OSGiIntegrationTest {
         this.egress = new NetworkElementEntity();
         this.inspected = new NetworkElementEntity();
 
-        this.iMac1 = new MacAddressEntity();
-        this.iMac2 = new MacAddressEntity();
-        this.eMac1 = new MacAddressEntity();
-        this.eMac2 = new MacAddressEntity();
-        this.inspMac = new MacAddressEntity();
-
-        this.iPort1 = new PortIpEntity();
-        this.iPort2 = new PortIpEntity();
-        this.ePort1 = new PortIpEntity();
-        this.ePort2 = new PortIpEntity();
-
         this.ingress.setElementId(IMAC1_STR + IMAC1_STR);
         this.egress.setElementId(EMAC1_STR + EMAC1_STR);
         this.inspected.setElementId("iNsPeCtEdPoRt");
 
-        this.iMac1.setMacAddress(IMAC1_STR);
-        this.iMac2.setMacAddress(IMAC2_STR);
-        this.eMac1.setMacAddress(EMAC1_STR);
-        this.eMac2.setMacAddress(EMAC2_STR);
+        this.ingress.setMacAddresses(asList(IMAC1_STR, IMAC2_STR));
+        this.ingress.setPortIPs(asList(IADDR1_STR, IADDR2_STR));
 
-        this.inspMac.setMacAddress(INSPMAC1_STR);
+        this.egress.setMacAddresses(asList(EMAC1_STR, EMAC2_STR));
+        this.egress.setPortIPs(asList(EADDR1_STR, EADDR2_STR));
 
-        this.iPort1.setPortIp(IADDR1_STR);
-        this.iPort2.setPortIp(IADDR2_STR);
-        this.ePort1.setPortIp(EADDR1_STR);
-        this.ePort2.setPortIp(EADDR2_STR);
-
-        this.iPort1.setElement(this.ingress);
-        this.iPort2.setElement(this.ingress);
-        this.ePort1.setElement(this.egress);
-        this.ePort2.setElement(this.egress);
-
-        this.iMac1.setElement(this.ingress);
-        this.iMac2.setElement(this.ingress);
-        this.eMac1.setElement(this.egress);
-        this.eMac2.setElement(this.egress);
-
-        this.ingress.setMacAddressEntities(asList(this.iMac1, this.iMac2));
-        this.ingress.setPortIpEntities(asList(this.iPort1, this.iPort2));
-
-        this.egress.setMacAddressEntities(asList(this.eMac1, this.eMac2));
-        this.egress.setPortIpEntities(asList(this.ePort1, this.ePort2));
-
-        this.inspected.setMacAddressEntities(asList(this.inspMac));
+        this.inspected.setMacAddresses(asList(INSPMAC1_STR));
 
         this.ingress.setIngressInspectionPort(this.inspectionPort);
         this.egress.setEgressInspectionPort(this.inspectionPort);
@@ -331,33 +282,23 @@ public class OSGiIntegrationTest {
 
         assertNotNull(this.inspectionPort.getElementId());
 
-        List<MacAddressEntity> lsMacs;
+        List<String> lsMacs;
 
         lsMacs = this.txControl.requiresNew(() -> {
-            CriteriaBuilder cb = this.em.getCriteriaBuilder();
-
-            CriteriaQuery<MacAddressEntity> query = cb.createQuery(MacAddressEntity.class);
-            Root<MacAddressEntity> from = query.from(MacAddressEntity.class);
-            query = query.select(from).distinct(true);
-            return this.em.createQuery(query).getResultList();
-
+            InspectionPortEntity tmp = this.em.find(InspectionPortEntity.class, this.inspectionPort.getElementId());
+            return tmp.getIngressPort().getMacAddresses();
         });
 
-        assertEquals(5, lsMacs.size());
+        assertEquals(2, lsMacs.size());
 
-        List<PortIpEntity> lsPorts;
+        List<String> lsPorts = this.txControl.requiresNew(() -> {
+            InspectionPortEntity tmp = this.em.find(InspectionPortEntity.class, this.inspectionPort.getElementId());
 
-        lsPorts = this.txControl.requiresNew(() -> {
-            CriteriaBuilder cb = this.em.getCriteriaBuilder();
-
-            CriteriaQuery<PortIpEntity> query = cb.createQuery(PortIpEntity.class);
-            Root<PortIpEntity> from = query.from(PortIpEntity.class);
-            query = query.select(from).distinct(true);
-            return this.em.createQuery(query).getResultList();
-
+            tmp.getEgressPort().getPortIPs().stream().forEach(s -> {});
+            return tmp.getEgressPort().getPortIPs();
         });
 
-        assertEquals(4, lsPorts.size());
+        assertEquals(2, lsPorts.size());
 
     }
 
@@ -418,13 +359,13 @@ public class OSGiIntegrationTest {
 
         NetworkElementEntity foundNE = this.txControl.required(() -> {
             NetworkElementEntity e = utils.networkElementEntityByElementId(this.inspected.getElementId());
-            e.getMacAddressEntities().size();
+            e.getMacAddresses().size();
             return e;
         });
 
         assertNotNull(foundNE);
-        assertNotNull(foundNE.getMacAddressEntities());
-        assertEquals(1, foundNE.getMacAddressEntities().size());
+        assertNotNull(foundNE.getMacAddresses());
+        assertEquals(1, foundNE.getMacAddresses().size());
 
     }
 
@@ -463,7 +404,7 @@ public class OSGiIntegrationTest {
     @Test
     public void testRegisterInspectionPort() throws Exception {
         NSCUtils utils = new NSCUtils(this.em, this.txControl);
-        this.redirApi = new SampleSdnRedirectionApi(null, "boogus", this.txControl, this.em);
+        this.redirApi = new SampleSdnRedirectionApi(this.txControl, this.em);
 
         InspectionPortElement inspectionPortElement = new InspectionPortEntity(null, this.ingress, this.egress, null);
         inspectionPortElement = (InspectionPortElement) this.redirApi.registerInspectionPort(inspectionPortElement);
@@ -516,7 +457,7 @@ public class OSGiIntegrationTest {
     @Test
     public void testRegisterInspectionPortWithNetworkElementsAlreadyPersisted() throws Exception {
         NSCUtils utils = new NSCUtils(this.em, this.txControl);
-        this.redirApi = new SampleSdnRedirectionApi(null, "boogus", this.txControl, this.em);
+        this.redirApi = new SampleSdnRedirectionApi(this.txControl, this.em);
 
         this.txControl.required(() -> {
             this.em.persist(this.ingress);
@@ -534,7 +475,7 @@ public class OSGiIntegrationTest {
     @Test
     public void testInstallInspectionHook() throws Exception {
         NSCUtils utils = new NSCUtils(this.em, this.txControl);
-        this.redirApi = new SampleSdnRedirectionApi(null, "boogus", this.txControl, this.em);
+        this.redirApi = new SampleSdnRedirectionApi(this.txControl, this.em);
 
         InspectionPortElement inspectionPortElement = new InspectionPortEntity(null, this.ingress, this.egress, null);
         final String hookId = this.redirApi.installInspectionHook(Arrays.asList(this.inspected), inspectionPortElement,

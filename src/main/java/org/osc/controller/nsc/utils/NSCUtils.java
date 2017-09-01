@@ -1,10 +1,8 @@
 package org.osc.controller.nsc.utils;
 
-import static java.util.stream.Collectors.toList;
 import static org.osc.sdk.controller.FailurePolicyType.NA;
 import static org.osc.sdk.controller.TagEncapsulationType.VLAN;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -16,9 +14,7 @@ import javax.persistence.criteria.Root;
 import org.apache.log4j.Logger;
 import org.osc.controller.nsc.entities.InspectionHookEntity;
 import org.osc.controller.nsc.entities.InspectionPortEntity;
-import org.osc.controller.nsc.entities.MacAddressEntity;
 import org.osc.controller.nsc.entities.NetworkElementEntity;
-import org.osc.controller.nsc.entities.PortIpEntity;
 import org.osc.sdk.controller.FailurePolicyType;
 import org.osc.sdk.controller.TagEncapsulationType;
 import org.osc.sdk.controller.element.InspectionPortElement;
@@ -37,14 +33,6 @@ public class NSCUtils {
         this.txControl = txControl;
     }
 
-    public static MacAddressEntity makeMacAddressEntity(String macAddressStr) {
-        return new MacAddressEntity(null, macAddressStr, null);
-    }
-
-    public PortIpEntity makePortIpEntity(String portIpStr) {
-        return new PortIpEntity(null, portIpStr, null);
-    }
-
     public NetworkElementEntity makeNetworkElementEntity(NetworkElement networkElement) {
 
         if (networkElement == null) {
@@ -53,27 +41,9 @@ public class NSCUtils {
 
         NetworkElementEntity retVal = new NetworkElementEntity();
 
-        List<String> macAddrStrings = networkElement.getMacAddresses();
-        List<MacAddressEntity> macAddrEntities = new ArrayList<>();
-        if (macAddrStrings != null) {
-            macAddrEntities = macAddrStrings.stream().map(s -> makeMacAddressEntity(s)).collect(toList());
-            macAddrEntities.stream().forEach(p -> {
-                p.setElement(retVal);
-            });
-        }
-
-        List<String> portIpStrings = networkElement.getPortIPs();
-        List<PortIpEntity> portIpEntities = new ArrayList<>();
-        if (portIpStrings != null) {
-            portIpEntities = portIpStrings.stream().map(s -> makePortIpEntity(s)).collect(toList());
-            portIpEntities.stream().forEach(p -> {
-                p.setElement(retVal);
-            });
-        }
-
         retVal.setElementId(networkElement.getElementId());
-        retVal.setMacAddressEntities(macAddrEntities);
-        retVal.setPortIpEntities(portIpEntities);
+        retVal.setMacAddresses(networkElement.getMacAddresses());
+        retVal.setPortIPs(networkElement.getMacAddresses());
 
         return retVal;
     }
@@ -234,7 +204,7 @@ public class NSCUtils {
             return inspectionHooks.get(0);
 
         } catch (Exception e) {
-            LOG.error(String.format("Finding Inspection hooks by inspected %s and port %s", inspectedId, portId), e); // TODO
+            LOG.error(String.format("Finding Inspection hooks by inspected %s and port %s", inspectedId, portId), e);
             return null;
         }
 

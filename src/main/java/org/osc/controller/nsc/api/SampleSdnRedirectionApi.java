@@ -33,16 +33,12 @@ import org.osc.sdk.controller.element.Element;
 import org.osc.sdk.controller.element.InspectionHookElement;
 import org.osc.sdk.controller.element.InspectionPortElement;
 import org.osc.sdk.controller.element.NetworkElement;
-import org.osc.sdk.controller.element.VirtualizationConnectorElement;
 import org.osc.sdk.controller.exception.NetworkPortNotFoundException;
 import org.osgi.service.transaction.control.TransactionControl;
 
 public class SampleSdnRedirectionApi implements SdnRedirectionApi {
 
     private static final Logger LOG = Logger.getLogger(SampleSdnRedirectionApi.class);
-
-    private VirtualizationConnectorElement vc;
-    private String region;
 
     private TransactionControl txControl;
     private EntityManager em;
@@ -51,10 +47,8 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
     public SampleSdnRedirectionApi() {
     }
 
-    public SampleSdnRedirectionApi(VirtualizationConnectorElement vc, String region, TransactionControl txControl,
+    public SampleSdnRedirectionApi(TransactionControl txControl,
             EntityManager em) {
-        this.vc = vc;
-        this.region = region;
         this.txControl = txControl;
         this.em = em;
         this.utils = new NSCUtils(em, txControl);
@@ -76,36 +70,35 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
     }
 
     @Override
-    public String installInspectionHook(List<NetworkElement> inspectedPort, InspectionPortElement inspectionPort,
+    public String installInspectionHook(List<NetworkElement> inspectedPorts, InspectionPortElement inspectionPort,
             Long tag, TagEncapsulationType encType, Long order, FailurePolicyType failurePolicyType)
             throws NetworkPortNotFoundException, Exception {
 
+        if (inspectedPorts != null && inspectedPorts.size() > 0) {
 
-        if (inspectedPort != null && inspectedPort.size() > 0) {
+            // TODO : must loop through the engire list
+            NetworkElement inspected = inspectedPorts.get(0);
             String retVal = null;
 
-            for (NetworkElement inspected : inspectedPort) {
-                retVal = this.txControl.required(() -> {
-                    InspectionHookEntity inspectionHookEntity = this.utils.findInspHookByInspectedAndPort(inspected, inspectionPort);
+            retVal = this.txControl.required(() -> {
+                InspectionHookEntity inspectionHookEntity = this.utils.findInspHookByInspectedAndPort(inspected, inspectionPort);
 
-                    if (inspectionHookEntity != null) {
-                        this.em.merge(inspectionHookEntity);
-                    } else {
-                        inspectionHookEntity = this.utils.makeInspectionHookEntity(inspected, inspectionPort, tag,
-                                encType, order, failurePolicyType);
-                        inspectionHookEntity = this.em.merge(inspectionHookEntity);
-                    }
-                    String hookId = inspectionHookEntity.getHookId();
-                    return hookId;
-                });
-            }
+                if (inspectionHookEntity != null) {
+                    this.em.merge(inspectionHookEntity);
+                } else {
+                    inspectionHookEntity = this.utils.makeInspectionHookEntity(inspected, inspectionPort, tag,
+                            encType, order, failurePolicyType);
+                    inspectionHookEntity = this.em.merge(inspectionHookEntity);
+                }
+                String hookId = inspectionHookEntity.getHookId();
+                return hookId;
+            });
 
             return retVal;
         } else {
             LOG.error("Attempt to install inspection hook with no inspected or inspection port!");
             return null;
         }
-
     }
 
     @Override
@@ -170,6 +163,7 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
             String portId = (inspectedPort != null ? inspectedPort.getElementId() : null);
             q.setParameter("portId", portId);
 
+            @SuppressWarnings("unchecked")
             List<InspectionHookEntity> results = q.getResultList();
 
             for (InspectionHookEntity inspectionHookEntity : results) {

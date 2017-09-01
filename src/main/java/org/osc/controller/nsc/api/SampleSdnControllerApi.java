@@ -79,7 +79,6 @@ public class SampleSdnControllerApi implements SdnControllerApi {
 
     @Override
     public Status getStatus(VirtualizationConnectorElement vc, String region) throws Exception {
-
         return new Status(NAME, VERSION, true);
     }
 
@@ -110,7 +109,7 @@ public class SampleSdnControllerApi implements SdnControllerApi {
                 .getResource(this.txControl);
 
 
-        return new SampleSdnRedirectionApi(vc, region, this.txControl, em);
+        return new SampleSdnRedirectionApi(this.txControl, em);
     }
 
     @Override
