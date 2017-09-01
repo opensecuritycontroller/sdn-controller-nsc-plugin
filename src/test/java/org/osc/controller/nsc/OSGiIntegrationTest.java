@@ -478,6 +478,7 @@ public class OSGiIntegrationTest {
         this.redirApi = new SampleSdnRedirectionApi(this.txControl, this.em);
 
         InspectionPortElement inspectionPortElement = new InspectionPortEntity(null, this.ingress, this.egress, null);
+        this.redirApi.registerInspectionPort(inspectionPortElement); // expected before installInspectionHook
         final String hookId = this.redirApi.installInspectionHook(Arrays.asList(this.inspected), inspectionPortElement,
                                                                   0L, VLAN, 0L, NA);
 
@@ -505,5 +506,4 @@ public class OSGiIntegrationTest {
         assertNotNull(inspectionHookElement.getInspectedPort().getMacAddresses());
         assertNotNull(inspectionHookElement.getInspectedPort().getPortIPs());
     }
-
 }

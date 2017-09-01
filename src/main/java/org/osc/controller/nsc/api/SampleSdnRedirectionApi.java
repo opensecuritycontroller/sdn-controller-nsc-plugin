@@ -16,6 +16,8 @@
  *******************************************************************************/
 package org.osc.controller.nsc.api;
 
+import static java.util.Arrays.asList;
+
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -81,15 +83,23 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
             String retVal = null;
 
             retVal = this.txControl.required(() -> {
-                InspectionHookEntity inspectionHookEntity = this.utils.findInspHookByInspectedAndPort(inspected, inspectionPort);
 
-                if (inspectionHookEntity != null) {
-                    this.em.merge(inspectionHookEntity);
-                } else {
-                    inspectionHookEntity = this.utils.makeInspectionHookEntity(inspected, inspectionPort, tag,
-                            encType, order, failurePolicyType);
-                    inspectionHookEntity = this.em.merge(inspectionHookEntity);
+                NetworkElement ingress = inspectionPort.getIngressPort();
+                NetworkElement egress = inspectionPort.getEgressPort();
+                InspectionPortEntity inspectionPortTmp = this.utils.findInspPortByNetworkElements(ingress, egress);
+                InspectionHookEntity inspectionHookEntity = this.utils.findInspHookByInspectedAndPort(inspected, inspectionPortTmp);
+
+                if (inspectionHookEntity == null) {
+                    // TODO : should we also merge egress and ingress?
+                    if (inspectionPortTmp == null) {
+                        LOG.warn("InspectionPort not found creating InspectionHook!");
+                    }
+
+                    inspectionHookEntity = this.utils.makeInspectionHookEntity(inspected, inspectionPortTmp, tag,
+                                                    encType, order, failurePolicyType);
                 }
+
+                inspectionHookEntity = this.em.merge(inspectionHookEntity);
                 String hookId = inspectionHookEntity.getHookId();
                 return hookId;
             });
@@ -258,21 +268,10 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
 
         Long tag = existingInspectionHook.getTag();
         Long order = existingInspectionHook.getOrder();
-        FailurePolicyType failurePolicyType = existingInspectionHook.getFailurePolicyType();
         TagEncapsulationType encType = existingInspectionHook.getEncType();
+        FailurePolicyType failurePolicyType = existingInspectionHook.getFailurePolicyType();
 
-        InspectionHookEntity inspectionHookEntity = this.utils.findInspHookByInspectedAndPort(inspected, inspectionPort);
-
-        if (inspectionHookEntity != null) {
-            this.txControl.required(() -> {
-                // TODO: wrong!
-                InspectionHookEntity updateEntity = this.utils.makeInspectionHookEntity(inspected, inspectionPort, tag,
-                                                                                    encType, order, failurePolicyType);
-                updateEntity.setHookId(inspectionHookEntity.getHookId());
-                this.em.merge(updateEntity);
-                return null;
-            });
-        }
+        installInspectionHook(asList(inspected), inspectionPort, tag, encType, order, failurePolicyType);
     }
 
     @Override

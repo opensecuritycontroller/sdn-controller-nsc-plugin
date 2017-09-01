@@ -1,3 +1,19 @@
+/*******************************************************************************
+ * Copyright (c) Intel Corporation
+ * Copyright (c) 2017
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package org.osc.controller.nsc.utils;
 
 import static org.osc.sdk.controller.FailurePolicyType.NA;
@@ -50,6 +66,10 @@ public class NSCUtils {
 
     public InspectionPortEntity makeInspectionPortEntity(InspectionPortElement inspectionPortElement) {
 
+        if (inspectionPortElement == null) {
+            return null;
+        }
+
         NetworkElementEntity ingressEntity = null;
         NetworkElementEntity egressEntity = null;
 
@@ -68,7 +88,7 @@ public class NSCUtils {
             }
         }
 
-        return new InspectionPortEntity(null, ingressEntity, egressEntity, null);
+        return new InspectionPortEntity(inspectionPortElement.getElementId(), ingressEntity, egressEntity, null);
     }
 
 
