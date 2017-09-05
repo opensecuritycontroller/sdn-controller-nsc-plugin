@@ -468,11 +468,14 @@ public class OSGiIntegrationTest {
 
     @Test
     public void testInstallInspectionHook() throws Exception {
-        RedirectionApiUtils utils = new RedirectionApiUtils(this.em, this.txControl);
         this.redirApi = new SampleSdnRedirectionApi(this.txControl, this.em);
 
-        InspectionPortElement inspectionPortElement = new InspectionPortEntity(null, this.ingress, this.egress);
-        this.redirApi.registerInspectionPort(inspectionPortElement); // expected before installInspectionHook
+        InspectionPortEntity inspectionPortElement = new InspectionPortEntity(null, this.ingress, this.egress);
+        this.ingress.setIngressInspectionPort(inspectionPortElement);
+        this.egress.setEgressInspectionPort(inspectionPortElement);
+
+        // expected before installInspectionHook
+        this.redirApi.registerInspectionPort(inspectionPortElement);
         final String hookId = this.redirApi.installInspectionHook(Arrays.asList(this.inspected), inspectionPortElement,
                                                                   0L, VLAN, 0L, NA);
 

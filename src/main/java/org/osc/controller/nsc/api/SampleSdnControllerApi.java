@@ -100,7 +100,7 @@ public class SampleSdnControllerApi implements SdnControllerApi {
         try {
             ds = this.jdbcFactory.createDataSource(props);
         } catch (SQLException e) {
-            this.LOG.error(e);
+            LOG.error(e);
             throw new IllegalStateException(e.getMessage(), e);
         }
 

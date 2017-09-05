@@ -83,14 +83,8 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
 
         NetworkElement inspected = inspectedPorts.get(0);
 
-        String retVal = null;
         InspectionHookEntity retValEntity = this.txControl.required(() -> {
-
-            NetworkElement ingress = inspectionPort.getIngressPort();
-            NetworkElement egress = inspectionPort.getEgressPort();
-            inspectionPort.getEgressPort();
-
-            InspectionPortEntity inspectionPortTmp = this.utils.findInspPortByNetworkElements(ingress, egress);
+            InspectionPortEntity inspectionPortTmp =(InspectionPortEntity) getInspectionPort(inspectionPort);
             throwExceptionIfNullEntity(inspectionPortTmp, inspectionPort);
 
             InspectionHookEntity inspectionHookEntity = this.utils.findInspHookByInspectedAndPort(inspected, inspectionPortTmp);
@@ -208,10 +202,12 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
         try {
             String portId = inspectionPort.getElementId();
 
-            return this.txControl.required(() -> {
-                InspectionPortEntity ipEntity = this.utils.txInspectionPortEntityById(portId);
-                return ipEntity;
-            });
+            if (portId != null) {
+                return this.txControl.required(() -> {
+                    InspectionPortEntity ipEntity = this.utils.txInspectionPortEntityById(portId);
+                    return ipEntity;
+                });
+            }
         } catch (Exception e) {
             LOG.warn("Failed to retrieve inspectionPort by id! Trying by ingress and egress.");
         }
