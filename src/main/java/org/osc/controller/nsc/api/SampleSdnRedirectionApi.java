@@ -60,8 +60,8 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
     public InspectionHookElement getInspectionHook(NetworkElement inspectedPort, InspectionPortElement inspectionPort)
             throws Exception {
         try {
-            InspectionHookEntity entity = this.utils.findInspHookByInspectedAndPort(inspectedPort, inspectionPort);
-            return entity;
+            InspectionHookEntity inspectionHook = this.utils.findInspHookByInspectedAndPort(inspectedPort, inspectionPort);
+            return inspectionHook;
         } catch (Exception e) {
             LOG.error(String.format("Exception finding network Element (inspected %s ; inspectionPort %s) :", "" + inspectedPort,
                     "" + inspectionPort), e);
@@ -153,7 +153,7 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
     @Override
     public FailurePolicyType getInspectionHookFailurePolicy(NetworkElement inspectedPort,
             InspectionPortElement inspectionPort) throws Exception {
-        InspectionHookElement inspectionHook = this.utils.findInspHookByInspectedAndPort(inspectedPort, inspectionPort);
+        InspectionHookEntity inspectionHook = this.utils.findInspHookByInspectedAndPort(inspectedPort, inspectionPort);
         return inspectionHook == null ? null : inspectionHook.getFailurePolicyType();
     }
 
@@ -245,9 +245,9 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
             throws Exception {
 
         this.txControl.required(() -> {
-            InspectionHookEntity entity = this.utils.findInspHookByInspectedAndPort(inspectedPort, inspectionPort);
-            if (entity != null) {
-                entity.setOrder(order);
+            InspectionHookEntity inspectionHook = this.utils.findInspHookByInspectedAndPort(inspectedPort, inspectionPort);
+            if (inspectionHook != null) {
+                inspectionHook.setOrder(order);
             }
 
             return null;
@@ -257,7 +257,7 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
     @Override
     public Long getInspectionHookOrder(NetworkElement inspectedPort, InspectionPortElement inspectionPort)
             throws Exception {
-        InspectionHookElement inspectionHook = this.utils.findInspHookByInspectedAndPort(inspectedPort, inspectionPort);
+        InspectionHookEntity inspectionHook = this.utils.findInspHookByInspectedAndPort(inspectedPort, inspectionPort);
         return inspectionHook == null ? null : inspectionHook.getOrder();
     }
 
