@@ -64,7 +64,7 @@ public class SampleSdnControllerApi implements SdnControllerApi {
     @Reference(target = "(osgi.local.enabled=true)")
     private JPAEntityManagerProviderFactory resourceFactory;
 
-    Logger log = Logger.getLogger(SampleSdnControllerApi.class);
+    static Logger LOG = Logger.getLogger(SampleSdnControllerApi.class);
 
     private final static String VERSION = "0.1";
     private final static String NAME = "NSC";
@@ -100,7 +100,7 @@ public class SampleSdnControllerApi implements SdnControllerApi {
         try {
             ds = this.jdbcFactory.createDataSource(props);
         } catch (SQLException e) {
-            this.log.error(e);
+            this.LOG.error(e);
             throw new IllegalStateException(e.getMessage(), e);
         }
 

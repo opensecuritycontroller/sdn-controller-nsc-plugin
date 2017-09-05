@@ -27,7 +27,7 @@ import org.apache.commons.lang.NotImplementedException;
 import org.apache.log4j.Logger;
 import org.osc.controller.nsc.entities.InspectionHookEntity;
 import org.osc.controller.nsc.entities.InspectionPortEntity;
-import org.osc.controller.nsc.utils.NSCUtils;
+import org.osc.controller.nsc.utils.RedirectionApiUtils;
 import org.osc.sdk.controller.FailurePolicyType;
 import org.osc.sdk.controller.TagEncapsulationType;
 import org.osc.sdk.controller.api.SdnRedirectionApi;
@@ -44,7 +44,7 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
 
     private TransactionControl txControl;
     private EntityManager em;
-    private NSCUtils utils;
+    private RedirectionApiUtils utils;
 
     public SampleSdnRedirectionApi() {
     }
@@ -53,7 +53,7 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
             EntityManager em) {
         this.txControl = txControl;
         this.em = em;
-        this.utils = new NSCUtils(em, txControl);
+        this.utils = new RedirectionApiUtils(em, txControl);
     }
 
     @Override
@@ -63,10 +63,8 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
             InspectionHookEntity entity = this.utils.findInspHookByInspectedAndPort(inspectedPort, inspectionPort);
             return entity;
         } catch (Exception e) {
-            String inspectedPortId = inspectedPort != null ? inspectedPort.getElementId() : null;
-            String inspectionPortId = inspectionPort != null ? inspectionPort.getElementId() : null;
-            LOG.error(String.format("Finding Network Element (inspected %s ; inspectnPort %s) :", inspectedPortId,
-                    inspectionPortId), e); // TODO
+            LOG.error(String.format("Exception finding network Element (inspected %s ; inspectionPort %s) :", "" + inspectedPort,
+                    "" + inspectionPort), e);
             return null;
         }
     }
@@ -76,38 +74,47 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
             Long tag, TagEncapsulationType encType, Long order, FailurePolicyType failurePolicyType)
             throws NetworkPortNotFoundException, Exception {
 
-        if (inspectedPorts != null && inspectedPorts.size() > 0) {
+        if (inspectedPorts == null || inspectedPorts.size() == 0) {
+            throw new IllegalArgumentException("Attempt to install an InspectionHook with no InspectedPort. ");
+        }
+        if (inspectionPort == null) {
+            throw new IllegalArgumentException("Attempt to install an InspectionHook with no InspectionPort. ");
+        }
 
-            // TODO : must loop through the engire list
-            NetworkElement inspected = inspectedPorts.get(0);
-            String retVal = null;
+        NetworkElement inspected = inspectedPorts.get(0);
 
-            retVal = this.txControl.required(() -> {
+        String retVal = null;
+        InspectionHookEntity retValEntity = this.txControl.required(() -> {
 
-                NetworkElement ingress = inspectionPort.getIngressPort();
-                NetworkElement egress = inspectionPort.getEgressPort();
-                InspectionPortEntity inspectionPortTmp = this.utils.findInspPortByNetworkElements(ingress, egress);
-                InspectionHookEntity inspectionHookEntity = this.utils.findInspHookByInspectedAndPort(inspected, inspectionPortTmp);
+            NetworkElement ingress = inspectionPort.getIngressPort();
+            NetworkElement egress = inspectionPort.getEgressPort();
+            inspectionPort.getEgressPort();
 
-                if (inspectionHookEntity == null) {
-                    // TODO : should we also merge egress and ingress?
-                    if (inspectionPortTmp == null) {
-                        LOG.warn("InspectionPort not found creating InspectionHook!");
-                    }
+            InspectionPortEntity inspectionPortTmp = this.utils.findInspPortByNetworkElements(ingress, egress);
+            throwExceptionIfNullEntity(inspectionPortTmp, inspectionPort);
 
-                    inspectionHookEntity = this.utils.makeInspectionHookEntity(inspected, inspectionPortTmp, tag,
-                                                    encType, order, failurePolicyType);
-                }
+            InspectionHookEntity inspectionHookEntity = this.utils.findInspHookByInspectedAndPort(inspected, inspectionPortTmp);
 
-                inspectionHookEntity = this.em.merge(inspectionHookEntity);
-                String hookId = inspectionHookEntity.getHookId();
-                return hookId;
-            });
+            if (inspectionHookEntity == null) {
 
-            return retVal;
-        } else {
-            LOG.error("Attempt to install inspection hook with no inspected or inspection port!");
-            return null;
+                inspectionHookEntity = this.utils.makeInspectionHookEntity(inspected, inspectionPortTmp, tag,
+                                                                           encType, order, failurePolicyType);
+            }
+
+            return this.em.merge(inspectionHookEntity);
+        });
+
+        return retValEntity.getHookId();
+    }
+
+    private void throwExceptionIfNullEntity(InspectionPortEntity inspectionPortTmp, InspectionPortElement inspectionPort)
+        throws IllegalArgumentException {
+        if (inspectionPortTmp == null) {
+            String ingressId = inspectionPort.getIngressPort() != null ? inspectionPort.getIngressPort().getElementId() : null;
+            String egressId = inspectionPort.getEgressPort() != null ? inspectionPort.getEgressPort().getElementId() : null;
+            String msg = String.format("Cannot find inspection port for inspection hook "
+                    + "id: %s; ingressId: %s; egressId: %s\n", inspectionPort.getElementId(), ingressId, egressId);
+            throw new IllegalArgumentException(msg);
         }
     }
 
@@ -119,7 +126,7 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
 
             NetworkElement inspected = inspectedPort.get(0);
 
-            this.txControl.requiresNew(() -> {
+            this.txControl.required(() -> {
                 InspectionHookEntity entity = this.utils.findInspHookByInspectedAndPort(inspected, inspectionPort);
                 if (entity != null) {
                     this.utils.removeSingleInspectionHook(entity);

@@ -127,4 +127,11 @@ public class InspectionHookEntity implements InspectionHookElement {
     public void setFailurePolicyType(FailurePolicyType failurePolicyType) {
         this.failurePolicyType = failurePolicyType;
     }
+
+    @Override
+    public String toString() {
+        return "InspectionHookEntity [hookId=" + this.hookId + ", inspectedPort=" + this.inspectedPort + ", inspectionPort="
+                + this.inspectionPort + ", tag=" + this.tag + ", hookOrder=" + this.hookOrder + ", encType=" + this.encType
+                + ", failurePolicyType=" + this.failurePolicyType + "]";
+    }
 }

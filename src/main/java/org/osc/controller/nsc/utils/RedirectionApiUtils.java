@@ -37,14 +37,14 @@ import org.osc.sdk.controller.element.InspectionPortElement;
 import org.osc.sdk.controller.element.NetworkElement;
 import org.osgi.service.transaction.control.TransactionControl;
 
-public class NSCUtils {
+public class RedirectionApiUtils {
 
-    private static final Logger LOG = Logger.getLogger(NSCUtils.class);
+    private static final Logger LOG = Logger.getLogger(RedirectionApiUtils.class);
 
     private TransactionControl txControl;
     private EntityManager em;
 
-    public NSCUtils(EntityManager em, TransactionControl txControl) {
+    public RedirectionApiUtils(EntityManager em, TransactionControl txControl) {
         this.em = em;
         this.txControl = txControl;
     }
@@ -111,6 +111,8 @@ public class NSCUtils {
         retVal.setEncType(encType);
         retVal.setFailurePolicyType(failurePolicyType);
 
+
+        inspectionPortEntity.getInspectionHooks().add(retVal);
         inspected.setInspectionHook(retVal);
 
         return retVal;
@@ -126,7 +128,7 @@ public class NSCUtils {
         try {
             return this.em.createQuery(q).getSingleResult();
         } catch (Exception e) {
-            LOG.error(String.format("Finding Network Element %s ", elementId), e); // TODO
+            LOG.error(String.format("Finding Network Element %s ", elementId), e);
             return null;
         }
     }
@@ -157,7 +159,7 @@ public class NSCUtils {
 
         } catch (Exception e) {
             LOG.error(String.format("Finding Inspection ports by ingress %s and egress %s", ingress.getElementId(),
-                    egress.getElementId()), e); // TODO
+                    egress.getElementId()), e);
             return null;
         }
     }

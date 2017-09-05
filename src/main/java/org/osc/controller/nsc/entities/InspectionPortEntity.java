@@ -18,6 +18,7 @@ package org.osc.controller.nsc.entities;
 
 import static javax.persistence.FetchType.EAGER;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -102,9 +103,19 @@ public class InspectionPortEntity implements InspectionPortElement {
         return this.inspectionHooks;
     }
 
+    public void setInspectionHooks(Collection<InspectionHookEntity> inspectionHooks) {
+        this.inspectionHooks = new HashSet<>(inspectionHooks);
+    }
+
     @Override
     public String getParentId() {
         // TODO Implement for SFC
         return null;
+    }
+
+    @Override
+    public String toString() {
+        return "InspectionPortEntity [elementId=" + this.elementId + ", ingressPort=" + this.ingressPort + ", egressPort="
+                + this.egressPort + ", inspectionHooks=" + this.inspectionHooks + "]";
     }
 }

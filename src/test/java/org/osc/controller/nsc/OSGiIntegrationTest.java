@@ -48,7 +48,7 @@ import org.osc.controller.nsc.api.SampleSdnRedirectionApi;
 import org.osc.controller.nsc.entities.InspectionHookEntity;
 import org.osc.controller.nsc.entities.InspectionPortEntity;
 import org.osc.controller.nsc.entities.NetworkElementEntity;
-import org.osc.controller.nsc.utils.NSCUtils;
+import org.osc.controller.nsc.utils.RedirectionApiUtils;
 import org.osc.sdk.controller.api.SdnControllerApi;
 import org.osc.sdk.controller.element.InspectionHookElement;
 import org.osc.sdk.controller.element.InspectionPortElement;
@@ -262,7 +262,6 @@ public class OSGiIntegrationTest {
         }
 
         File tracefile = new File(TEST_DB_FILENAME + ".trace.db");
-
         if (tracefile.exists() &&  !tracefile.delete()) {
             throw new IllegalStateException("Failed to delete trace file : " + tracefile.getAbsolutePath());
 
@@ -334,8 +333,7 @@ public class OSGiIntegrationTest {
             return this.inspectionHook;
         });
 
-        // TODO : Separate the tests!
-        NSCUtils utils = new NSCUtils(this.em, this.txControl);
+        RedirectionApiUtils utils = new RedirectionApiUtils(this.em, this.txControl);
 
         InspectionPortEntity foundPort = utils.findInspPortByNetworkElements(this.ingress, this.egress);
 
@@ -352,8 +350,7 @@ public class OSGiIntegrationTest {
             return this.inspectionHook;
         });
 
-        // TODO : Separate the tests!
-        NSCUtils utils = new NSCUtils(this.em, this.txControl);
+        RedirectionApiUtils utils = new RedirectionApiUtils(this.em, this.txControl);
 
         NetworkElementEntity foundNE = this.txControl.required(() -> {
             NetworkElementEntity e = utils.networkElementEntityByElementId(this.inspected.getElementId());
@@ -374,8 +371,7 @@ public class OSGiIntegrationTest {
             return this.inspectionHook;
         });
 
-        // TODO : Separate the tests!
-        NSCUtils utils = new NSCUtils(this.em, this.txControl);
+        RedirectionApiUtils utils = new RedirectionApiUtils(this.em, this.txControl);
 
         InspectionHookEntity foundIH = this.txControl.required(() -> {
             InspectionPortEntity ipe = this.em.find(this.inspectionPort.getClass(), this.inspectionPort.getElementId());
@@ -401,7 +397,7 @@ public class OSGiIntegrationTest {
 
     @Test
     public void testRegisterInspectionPort() throws Exception {
-        NSCUtils utils = new NSCUtils(this.em, this.txControl);
+        RedirectionApiUtils utils = new RedirectionApiUtils(this.em, this.txControl);
         this.redirApi = new SampleSdnRedirectionApi(this.txControl, this.em);
 
         InspectionPortElement inspectionPortElement = new InspectionPortEntity(null, this.ingress, this.egress);
@@ -454,7 +450,7 @@ public class OSGiIntegrationTest {
 
     @Test
     public void testRegisterInspectionPortWithNetworkElementsAlreadyPersisted() throws Exception {
-        NSCUtils utils = new NSCUtils(this.em, this.txControl);
+        RedirectionApiUtils utils = new RedirectionApiUtils(this.em, this.txControl);
         this.redirApi = new SampleSdnRedirectionApi(this.txControl, this.em);
 
         this.txControl.required(() -> {
@@ -472,7 +468,7 @@ public class OSGiIntegrationTest {
 
     @Test
     public void testInstallInspectionHook() throws Exception {
-        NSCUtils utils = new NSCUtils(this.em, this.txControl);
+        RedirectionApiUtils utils = new RedirectionApiUtils(this.em, this.txControl);
         this.redirApi = new SampleSdnRedirectionApi(this.txControl, this.em);
 
         InspectionPortElement inspectionPortElement = new InspectionPortEntity(null, this.ingress, this.egress);
@@ -481,8 +477,11 @@ public class OSGiIntegrationTest {
                                                                   0L, VLAN, 0L, NA);
 
         assertNotNull(hookId);
+
         InspectionHookElement inspectionHookElement = this.txControl.required(() -> {
             InspectionHookElement tmp = this.em.find(InspectionHookEntity.class, hookId);
+            assertNotNull(tmp);
+            assertNotNull(tmp.getInspectionPort());
             tmp.getInspectionPort().getIngressPort().getPortIPs();
             tmp.getInspectionPort().getEgressPort().getPortIPs();
             tmp.getInspectedPort().getPortIPs();
