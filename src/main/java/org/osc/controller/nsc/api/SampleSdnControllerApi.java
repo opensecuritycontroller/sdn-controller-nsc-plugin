@@ -72,7 +72,7 @@ public class SampleSdnControllerApi implements SdnControllerApi {
     private static final String DB_URL_PREFIX = "jdbc:h2:./nscPlugin_";
     private static final String DB_USER = "admin";
     private static final String DB_PASSWORD = "admin123";
-    private static final String URL_OPTS = ";MVCC\\=FALSE;LOCK_TIMEOUT\\=10000;MV_STORE=FALSE;";
+    private static final String URL_OPTS = ";MVCC\\=TRUE;LOCK_TIMEOUT\\=10000;MV_STORE=FALSE;";
 
     public SampleSdnControllerApi() {
     }

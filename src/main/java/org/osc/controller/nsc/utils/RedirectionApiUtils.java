@@ -96,7 +96,6 @@ public class RedirectionApiUtils {
             InspectionPortElement inspectionPort, Long tag, TagEncapsulationType encType, Long order,
             FailurePolicyType failurePolicyType) {
         InspectionPortEntity inspectionPortEntity = makeInspectionPortEntity(inspectionPort);
-        final String elementId = inspectedPort.getElementId();
 
         encType = (encType != null ? encType : VLAN);
         failurePolicyType = (failurePolicyType != null ? failurePolicyType : NA);
@@ -184,7 +183,6 @@ public class RedirectionApiUtils {
 
         this.txControl.required(() -> {
             NetworkElementEntity networkElementEntity = inspectionHookEntity.getInspectedPort();
-            InspectionPortEntity inspectionPortEntity = inspectionHookEntity.getInspectionPort();
 
             inspectionHookEntity.setInspectionPort(null);
             inspectionHookEntity.setInspectedPort(null);
@@ -195,7 +193,6 @@ public class RedirectionApiUtils {
     }
 
     private InspectionHookEntity txInspHookByInspectedAndPort(NetworkElement inspected, InspectionPortElement element) {
-        CriteriaBuilder cb = this.em.getCriteriaBuilder();
 
         // Paranoid
         NetworkElement ingress = element != null ? element.getIngressPort() : null;
