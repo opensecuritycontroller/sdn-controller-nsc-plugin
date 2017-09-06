@@ -1,0 +1,12 @@
+Meta-Persistence: META-INF/persistence.xml
+
+#These are needed due to a bug in Hibernate
+
+Import-Package: org.hibernate.proxy,javassist.util.proxy,*
+
+#Exporting entities and utils so that PaxExam in OSGiIntegrationTest works.
+#TODO: There must be a betteer way to ensure testability.
+Export-Package: \
+	org.osc.controller.nsc.api, \
+	org.osc.controller.nsc.entities, \
+	org.osc.controller.nsc.utils
