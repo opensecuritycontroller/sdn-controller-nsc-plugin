@@ -50,11 +50,6 @@ public class RedirectionApiUtils {
     }
 
     public NetworkElementEntity makeNetworkElementEntity(NetworkElement networkElement) {
-
-        if (networkElement == null) {
-            return null;
-        }
-
         NetworkElementEntity retVal = new NetworkElementEntity();
 
         retVal.setElementId(networkElement.getElementId());
@@ -65,36 +60,31 @@ public class RedirectionApiUtils {
     }
 
     public InspectionPortEntity makeInspectionPortEntity(InspectionPortElement inspectionPortElement) {
-
-        if (inspectionPortElement == null) {
-            return null;
-        }
-
-        NetworkElementEntity ingressEntity = null;
-        NetworkElementEntity egressEntity = null;
+        throwExceptionIfNullElement(inspectionPortElement);
 
         NetworkElement ingress = inspectionPortElement.getIngressPort();
-        if (ingress != null) {
-            ingressEntity = makeNetworkElementEntity(ingress);
-        }
+        throwExceptionIfNullElement(ingress, "Null ingress element.");
+        NetworkElementEntity ingressEntity = makeNetworkElementEntity(ingress);
 
         NetworkElement egress = inspectionPortElement.getEgressPort();
+        NetworkElementEntity egressEntity = null;
+        throwExceptionIfNullElement(egress, "Null egeress element.");
 
-        if (egress != null) {
-            if (ingressEntity != null && ingressEntity.getElementId().equals(egress.getElementId())) {
-                egressEntity = ingressEntity;
-            } else {
-                egressEntity = makeNetworkElementEntity(egress);
-            }
+        if (ingressEntity != null && ingressEntity.getElementId().equals(egress.getElementId())) {
+            egressEntity = ingressEntity;
+        } else {
+            egressEntity = makeNetworkElementEntity(egress);
         }
 
         return new InspectionPortEntity(inspectionPortElement.getElementId(), ingressEntity, egressEntity);
     }
 
-
     public InspectionHookEntity makeInspectionHookEntity(NetworkElement inspectedPort,
             InspectionPortElement inspectionPort, Long tag, TagEncapsulationType encType, Long order,
             FailurePolicyType failurePolicyType) {
+
+        throwExceptionIfNullElement(inspectedPort, "Null inspected port!");
+
         InspectionPortEntity inspectionPortEntity = makeInspectionPortEntity(inspectionPort);
 
         encType = (encType != null ? encType : VLAN);
@@ -109,7 +99,6 @@ public class RedirectionApiUtils {
         retVal.setTag(tag);
         retVal.setEncType(encType);
         retVal.setFailurePolicyType(failurePolicyType);
-
 
         inspectionPortEntity.getInspectionHooks().add(retVal);
         inspected.setInspectionHook(retVal);
@@ -180,7 +169,6 @@ public class RedirectionApiUtils {
     }
 
     public void removeSingleInspectionHook(InspectionHookEntity inspectionHookEntity) {
-
         this.txControl.required(() -> {
             NetworkElementEntity networkElementEntity = inspectionHookEntity.getInspectedPort();
 
@@ -193,7 +181,6 @@ public class RedirectionApiUtils {
     }
 
     private InspectionHookEntity txInspHookByInspectedAndPort(NetworkElement inspected, InspectionPortElement element) {
-
         // Paranoid
         NetworkElement ingress = element != null ? element.getIngressPort() : null;
         NetworkElement egress = element != null ? element.getEgressPort() : null;
@@ -224,7 +211,35 @@ public class RedirectionApiUtils {
             LOG.error(String.format("Finding Inspection hooks by inspected %s and port %s", inspectedId, portId), e);
             return null;
         }
-
     }
 
+    public void throwExceptionIfNullEntity(InspectionPortEntity inspectionPortTmp, InspectionPortElement inspectionPort)
+            throws IllegalArgumentException {
+        if (inspectionPortTmp == null) {
+            String ingressId = inspectionPort.getIngressPort() != null ? inspectionPort.getIngressPort().getElementId()
+                    : null;
+            String egressId = inspectionPort.getEgressPort() != null ? inspectionPort.getEgressPort().getElementId()
+                    : null;
+            String msg = String.format(
+                    "Cannot find inspection port for inspection hook " + "id: %s; ingressId: %s; egressId: %s\n",
+                    inspectionPort.getElementId(), ingressId, egressId);
+            throw new IllegalArgumentException(msg);
+        }
+    }
+
+    private void throwExceptionIfNullElement(NetworkElement networkElement, String msg) {
+        if (networkElement == null) {
+            msg = (msg != null ? msg : "null passed for Network Element argument!");
+            LOG.error(msg);
+            throw new IllegalArgumentException(msg);
+        }
+    }
+
+    private void throwExceptionIfNullElement(InspectionPortElement networkElement) {
+        if (networkElement == null) {
+            String msg = "null passed for Inspection Port argument!";
+            LOG.error(msg);
+            throw new IllegalArgumentException(msg);
+        }
+    }
 }

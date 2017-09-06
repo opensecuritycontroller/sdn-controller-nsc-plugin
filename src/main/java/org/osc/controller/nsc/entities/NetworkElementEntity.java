@@ -141,7 +141,6 @@ public class NetworkElementEntity implements NetworkElement {
     @Override
     public String toString() {
         return "NetworkElementEntity [elementId=" + this.elementId + ", parentId=" + this.parentId + ", macAddresses="
-                + this.macAddresses + ", portIPs=" + this.portIPs + ", ingressInspectionPort=" + this.ingressInspectionPort
-                + ", egressInspectionPort=" + this.egressInspectionPort + ", inspectionHook=" + this.inspectionHook + "]";
+                + this.macAddresses + ", portIPs=" + this.portIPs + "]";
     }
 }

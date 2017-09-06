@@ -130,8 +130,8 @@ public class InspectionHookEntity implements InspectionHookElement {
 
     @Override
     public String toString() {
-        return "InspectionHookEntity [hookId=" + this.hookId + ", inspectedPort=" + this.inspectedPort + ", inspectionPort="
-                + this.inspectionPort + ", tag=" + this.tag + ", hookOrder=" + this.hookOrder + ", encType=" + this.encType
-                + ", failurePolicyType=" + this.failurePolicyType + "]";
+        return "InspectionHookEntity [hookId=" + this.hookId + ", inspectedPort=" + this.inspectedPort +
+               ", tag=" + this.tag + ", hookOrder=" + this.hookOrder + ", encType=" + this.encType
+               + ", failurePolicyType=" + this.failurePolicyType + "]";
     }
 }

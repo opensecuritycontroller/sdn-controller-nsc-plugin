@@ -86,9 +86,13 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
 
         NetworkElement inspected = inspectedPorts.get(0);
 
+        LOG.info(String.format("Installing inspection hook for inspected port %s\n inspection port %s", inspected,
+                                inspectionPort));
+        LOG.info(String.format("Tag: %d; EncType: %s; Order: %d, Fail Policy: %s", tag, encType, order, failurePolicyType));
+
         InspectionHookEntity retValEntity = this.txControl.required(() -> {
             InspectionPortEntity dbInspectionPort =(InspectionPortEntity) getInspectionPort(inspectionPort);
-            throwExceptionIfNullEntity(dbInspectionPort, inspectionPort);
+            this.utils.throwExceptionIfNullEntity(dbInspectionPort, inspectionPort);
 
             InspectionHookEntity inspectionHookEntity = this.utils.findInspHookByInspectedAndPort(inspected, dbInspectionPort);
 
@@ -101,17 +105,6 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
         });
 
         return retValEntity.getHookId();
-    }
-
-    private void throwExceptionIfNullEntity(InspectionPortEntity inspectionPortTmp, InspectionPortElement inspectionPort)
-        throws IllegalArgumentException {
-        if (inspectionPortTmp == null) {
-            String ingressId = inspectionPort.getIngressPort() != null ? inspectionPort.getIngressPort().getElementId() : null;
-            String egressId = inspectionPort.getEgressPort() != null ? inspectionPort.getEgressPort().getElementId() : null;
-            String msg = String.format("Cannot find inspection port for inspection hook "
-                    + "id: %s; ingressId: %s; egressId: %s\n", inspectionPort.getElementId(), ingressId, egressId);
-            throw new IllegalArgumentException(msg);
-        }
     }
 
     @Override
