@@ -78,19 +78,22 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
             throw new IllegalArgumentException("Attempt to install an InspectionHook with no InspectedPort. ");
         }
         if (inspectionPort == null) {
-            throw new IllegalArgumentException("Attempt to install an InspectionHook with no InspectionPort. ");
+            throw new IllegalArgumentException("Attempt to install an InspectionHook with null InspectionPort. ");
+        }
+        if (inspectedPorts.size() > 1) {
+            throw new IllegalArgumentException("Attempt to install an InspectionHook with multiple inspected ports. ");
         }
 
         NetworkElement inspected = inspectedPorts.get(0);
 
         InspectionHookEntity retValEntity = this.txControl.required(() -> {
-            InspectionPortEntity inspectionPortTmp =(InspectionPortEntity) getInspectionPort(inspectionPort);
-            throwExceptionIfNullEntity(inspectionPortTmp, inspectionPort);
+            InspectionPortEntity dbInspectionPort =(InspectionPortEntity) getInspectionPort(inspectionPort);
+            throwExceptionIfNullEntity(dbInspectionPort, inspectionPort);
 
-            InspectionHookEntity inspectionHookEntity = this.utils.findInspHookByInspectedAndPort(inspected, inspectionPortTmp);
+            InspectionHookEntity inspectionHookEntity = this.utils.findInspHookByInspectedAndPort(inspected, dbInspectionPort);
 
             if (inspectionHookEntity == null) {
-                inspectionHookEntity = this.utils.makeInspectionHookEntity(inspected, inspectionPortTmp, tag,
+                inspectionHookEntity = this.utils.makeInspectionHookEntity(inspected, dbInspectionPort, tag,
                                                                            encType, order, failurePolicyType);
             }
 
@@ -112,18 +115,22 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
     }
 
     @Override
-    public void removeInspectionHook(List<NetworkElement> inspectedPort, InspectionPortElement inspectionPort)
+    public void removeInspectionHook(List<NetworkElement> inspectedPorts, InspectionPortElement inspectionPort)
             throws Exception {
 
-        if (inspectedPort != null && inspectedPort.size() > 0) {
+        if (inspectedPorts != null && inspectedPorts.size() > 0) {
 
-            NetworkElement inspected = inspectedPort.get(0);
+            NetworkElement inspectedPort = inspectedPorts.get(0);
 
             this.txControl.required(() -> {
-                InspectionHookEntity inspectionHook = this.utils.findInspHookByInspectedAndPort(inspected, inspectionPort);
+                InspectionHookEntity inspectionHook = this.utils.findInspHookByInspectedAndPort(inspectedPort, inspectionPort);
                 if (inspectionHook != null) {
                     this.utils.removeSingleInspectionHook(inspectionHook);
+                } else {
+                    LOG.warn(String.format("Attempt to remove nonexistent inspection hook for inspected port %s and inspection port %s",
+                            inspectedPort, inspectionPort));
                 }
+
                 return null;
             });
         }
@@ -144,6 +151,9 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
             InspectionHookEntity inspectionHook = this.utils.findInspHookByInspectedAndPort(inspectedPort, inspectionPort);
             if (inspectionHook != null) {
                 inspectionHook.setTag(tag);
+            } else {
+                LOG.warn(String.format("Attempt to modify nonexistent inspection hook for inspected port %s and inspection port %s",
+                        inspectedPort, inspectionPort));
             }
 
             return null;
@@ -165,7 +175,11 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
             InspectionHookEntity inspectionHook = this.utils.findInspHookByInspectedAndPort(inspectedPort, inspectionPort);
             if (inspectionHook != null) {
                 inspectionHook.setFailurePolicyType(failurePolicyType);
+            }  else {
+                LOG.warn(String.format("Attempt to modify nonexistent inspection hook for inspected port %s and inspection port %s",
+                        inspectedPort, inspectionPort));
             }
+
 
             return null;
         });
@@ -248,6 +262,9 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
             InspectionHookEntity inspectionHook = this.utils.findInspHookByInspectedAndPort(inspectedPort, inspectionPort);
             if (inspectionHook != null) {
                 inspectionHook.setOrder(order);
+            } else {
+                LOG.warn(String.format("Attempt to modify nonexistent inspection hook for inspected port %s and inspection port %s",
+                        inspectedPort, inspectionPort));
             }
 
             return null;
