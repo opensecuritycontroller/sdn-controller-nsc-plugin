@@ -16,13 +16,13 @@
  *******************************************************************************/
 package org.osc.controller.nsc;
 
-import static java.util.Arrays.*;
-import static java.util.Collections.*;
-import static junit.framework.Assert.assertEquals;
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonMap;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.ops4j.pax.exam.CoreOptions.*;
-import static org.osc.sdk.controller.FailurePolicyType.*;
-import static org.osc.sdk.controller.TagEncapsulationType.*;
+import static org.osc.sdk.controller.FailurePolicyType.NA;
+import static org.osc.sdk.controller.TagEncapsulationType.VLAN;
 import static org.osgi.service.jdbc.DataSourceFactory.*;
 
 import java.io.File;
@@ -36,6 +36,7 @@ import javax.persistence.EntityManager;
 import javax.sql.DataSource;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -59,8 +60,6 @@ import org.osgi.service.jdbc.DataSourceFactory;
 import org.osgi.service.jpa.EntityManagerFactoryBuilder;
 import org.osgi.service.transaction.control.TransactionControl;
 import org.osgi.service.transaction.control.jpa.JPAEntityManagerProviderFactory;
-
-import junit.framework.Assert;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
@@ -88,8 +87,6 @@ public class OSGiIntegrationTest {
     private static final String IMAC2_STR = "ff:ff:aa:bb:cc:02";
 
     private static final String INSPMAC1_STR = "aa:aa:aa:bb:cc:01";
-
-    private static final String HOOK_ID = "TEST_INSP_HOOK";
 
     @Inject
     BundleContext context;
@@ -270,7 +267,7 @@ public class OSGiIntegrationTest {
 
         assertEquals(null, this.inspectionPort.getElementId());
 
-        InspectionHookEntity inspHookEntity = this.txControl.required(() -> {
+        this.txControl.required(() -> {
             this.em.persist(this.inspectionHook);
             return this.inspectionHook;
         });
@@ -300,7 +297,7 @@ public class OSGiIntegrationTest {
     @Test
     public void verifyHookAndPortPersistedAfterSingleHookPersistenceWithObjectGraphSetUp() {
 
-        InspectionHookEntity inspHookEntity = this.txControl.required(() -> {
+        this.txControl.required(() -> {
             this.em.persist(this.inspectionHook);
             return this.inspectionHook;
         });
@@ -325,7 +322,7 @@ public class OSGiIntegrationTest {
     @Test
     public void testUtilsInspPortByNetworkElements() throws Exception {
 
-        InspectionHookEntity inspHookEntity = this.txControl.required(() -> {
+        this.txControl.required(() -> {
             this.em.persist(this.inspectionHook);
             return this.inspectionHook;
         });
@@ -342,7 +339,7 @@ public class OSGiIntegrationTest {
     @Test
     public void testUtilsNetworkElementEntityByElementId() throws Exception {
 
-        InspectionHookEntity inspHookEntity = this.txControl.required(() -> {
+        this.txControl.required(() -> {
             this.em.persist(this.inspectionHook);
             return this.inspectionHook;
         });
@@ -363,7 +360,7 @@ public class OSGiIntegrationTest {
 
     @Test
     public void testUtilsInspHookByInspectedAndPort() throws Exception {
-        InspectionHookEntity inspHookEntity = this.txControl.required(() -> {
+        this.txControl.required(() -> {
             this.em.persist(this.inspectionHook);
             return this.inspectionHook;
         });
@@ -442,7 +439,6 @@ public class OSGiIntegrationTest {
 
     @Test
     public void testRegisterInspectionPortWithNetworkElementsAlreadyPersisted() throws Exception {
-        RedirectionApiUtils utils = new RedirectionApiUtils(this.em, this.txControl);
         this.redirApi = new SampleSdnRedirectionApi(this.txControl, this.em);
 
         this.txControl.required(() -> {
@@ -451,7 +447,6 @@ public class OSGiIntegrationTest {
             return null;
         });
 
-        String parentId = OSGiIntegrationTest.this.inspectionHook.getHookId();
         InspectionPortElement inspectionPortElement = new InspectionPortEntity(null, this.ingress, this.egress);
 
         // ... and the test
