@@ -16,13 +16,13 @@
  *******************************************************************************/
 package org.osc.controller.nsc;
 
-import static java.util.Arrays.asList;
-import static java.util.Collections.singletonMap;
+import static java.util.Arrays.*;
+import static java.util.Collections.*;
 import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.ops4j.pax.exam.CoreOptions.*;
-import static org.osc.sdk.controller.FailurePolicyType.NA;
-import static org.osc.sdk.controller.TagEncapsulationType.VLAN;
+import static org.osc.sdk.controller.FailurePolicyType.*;
+import static org.osc.sdk.controller.TagEncapsulationType.*;
 import static org.osgi.service.jdbc.DataSourceFactory.*;
 
 import java.io.File;
@@ -42,7 +42,7 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
-import org.ops4j.pax.exam.spi.reactors.PerMethod;
+import org.ops4j.pax.exam.spi.reactors.PerClass;
 import org.ops4j.pax.exam.util.PathUtils;
 import org.osc.controller.nsc.api.SampleSdnRedirectionApi;
 import org.osc.controller.nsc.entities.InspectionHookEntity;
@@ -63,7 +63,7 @@ import org.osgi.service.transaction.control.jpa.JPAEntityManagerProviderFactory;
 import junit.framework.Assert;
 
 @RunWith(PaxExam.class)
-@ExamReactorStrategy(PerMethod.class)
+@ExamReactorStrategy(PerClass.class)
 public class OSGiIntegrationTest {
 
     private static final String TEST_DB_URL_PREFIX = "jdbc:h2:";
