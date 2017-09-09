@@ -62,14 +62,6 @@ public class InspectionPortEntity implements InspectionPortElement {
         this.ingressPort = ingress;
         this.egressPort = egress;
         this.inspectionHooks = new HashSet<>();
-
-        if (ingress != null) {
-            ingress.setIngressInspectionPort(this);
-        }
-
-        if (egress != null) {
-            egress.setEgressInspectionPort(this);
-        }
     }
 
     @Override

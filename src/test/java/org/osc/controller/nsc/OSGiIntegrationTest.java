@@ -159,8 +159,8 @@ public class OSGiIntegrationTest {
                     mavenBundle("org.apache.directory.studio", "org.apache.commons.lang").versionAsInProject(),
 
                     // Uncomment this line to allow remote debugging
-
 //                    CoreOptions.vmOption("-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=1044"),
+
                     bootClasspathLibrary(mavenBundle("org.apache.geronimo.specs", "geronimo-jta_1.1_spec", "1.1.1"))
                             .beforeFramework(),
                     junitBundles());
@@ -238,8 +238,6 @@ public class OSGiIntegrationTest {
 
         this.inspected.setMacAddresses(asList(INSPMAC1_STR));
 
-        this.ingress.setIngressInspectionPort(this.inspectionPort);
-        this.egress.setEgressInspectionPort(this.inspectionPort);
         this.inspected.setInspectionHook(this.inspectionHook);
 
         this.inspectionPort.setIngressPort(this.ingress);
@@ -264,7 +262,6 @@ public class OSGiIntegrationTest {
         File tracefile = new File(TEST_DB_FILENAME + ".trace.db");
         if (tracefile.exists() &&  !tracefile.delete()) {
             throw new IllegalStateException("Failed to delete trace file : " + tracefile.getAbsolutePath());
-
         }
     }
 
@@ -377,7 +374,6 @@ public class OSGiIntegrationTest {
             InspectionPortEntity ipe = this.em.find(this.inspectionPort.getClass(), this.inspectionPort.getElementId());
             assertNotNull(ipe);
 
-//            NetworkElement ne = utils.makeNetworkElement(this.inspected);
             NetworkElement ne = this.inspected;
             InspectionPortElement prte = ipe;
             InspectionHookEntity ihe = utils.findInspHookByInspectedAndPort(ne, prte);
@@ -426,11 +422,8 @@ public class OSGiIntegrationTest {
 
         assertNotNull(foundIngress);
         assertEquals(inspectionPortElement.getIngressPort().getElementId(), foundIngress.getElementId());
-        assertNotNull(foundIngress.getIngressInspectionPort());
-        assertEquals(inspectionPortElement.getElementId(), foundIngress.getIngressInspectionPort().getElementId());
 
         // Here we are afraid of lazyInitializationException
-        foundIngress.getEgressInspectionPort();
         foundIngress.getMacAddresses();
         foundIngress.getPortIPs();
         foundIngress.getElementId();
@@ -445,7 +438,6 @@ public class OSGiIntegrationTest {
 
         assertEquals(null, inspectionPortElement.getParentId());
         assertEquals(null, foundInspPortElement.getParentId());
-
     }
 
     @Test
@@ -471,8 +463,6 @@ public class OSGiIntegrationTest {
         this.redirApi = new SampleSdnRedirectionApi(this.txControl, this.em);
 
         InspectionPortEntity inspectionPortElement = new InspectionPortEntity(null, this.ingress, this.egress);
-        this.ingress.setIngressInspectionPort(inspectionPortElement);
-        this.egress.setEgressInspectionPort(inspectionPortElement);
 
         // expected before installInspectionHook
         this.redirApi.registerInspectionPort(inspectionPortElement);

@@ -58,14 +58,6 @@ public class NetworkElementEntity implements NetworkElement {
     private List<String> portIPs;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = false, fetch = EAGER, optional = true)
-    @JoinColumn(name = "ingressPortId", nullable = true, updatable = true)
-    private InspectionPortEntity ingressInspectionPort;
-
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = false, fetch = EAGER, optional = true)
-    @JoinColumn(name = "egressPortId", nullable = true, updatable = true)
-    private InspectionPortEntity egressInspectionPort;
-
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = false, fetch = EAGER, optional = true)
     @JoinColumn(name = "inspectionHookId", nullable = true, updatable = true)
     private InspectionHookEntity inspectionHook;
 
@@ -89,22 +81,6 @@ public class NetworkElementEntity implements NetworkElement {
 
     public void setElementId(String elementId) {
         this.elementId = elementId;
-    }
-
-    public InspectionPortEntity getIngressInspectionPort() {
-        return this.ingressInspectionPort;
-    }
-
-    public void setIngressInspectionPort(InspectionPortEntity inspectionPort) {
-        this.ingressInspectionPort = inspectionPort;
-    }
-
-    public InspectionPortEntity getEgressInspectionPort() {
-        return this.egressInspectionPort;
-    }
-
-    public void setEgressInspectionPort(InspectionPortEntity inspectionPort) {
-        this.egressInspectionPort = inspectionPort;
     }
 
     public InspectionHookEntity getInspectionHook() {
