@@ -49,18 +49,18 @@ public class NetworkElementEntity implements NetworkElement {
 
     @ElementCollection(fetch = EAGER)
     @CollectionTable(name = "NETWORK_ELEMENT_MACADDRESSES",
-            joinColumns = @JoinColumn(name = "NETWORK_ELEMENT_ELEMENTID"),
-            foreignKey = @ForeignKey(name = "NETWORK_ELEMENT_MACADDRESSES_NETWORK_ELEMENT"))
+            joinColumns = @JoinColumn(name = "network_element_fk"),
+            foreignKey = @ForeignKey(name = "FK_NETWORK_ELEMENT_MACADDRESSES_NETWORK_ELEMENT"))
     private List<String> macAddresses;
 
     @ElementCollection(fetch = LAZY)
     @CollectionTable(name = "NETWORK_ELEMENT_PORTIPS",
-            joinColumns = @JoinColumn(name = "NETWORK_ELEMENT_ELEMENTID"),
-            foreignKey = @ForeignKey(name = "NETWORK_ELEMENT_PORTIPS_NETWORK_ELEMENT"))
+            joinColumns = @JoinColumn(name = "network_element_fk"),
+            foreignKey = @ForeignKey(name = "FK_NETWORK_ELEMENT_PORTIPS_NETWORK_ELEMENT"))
     private List<String> portIPs;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = false, fetch = EAGER, optional = true)
-    @JoinColumn(name = "inspection_hook_id", nullable = true, updatable = true)
+    @JoinColumn(name = "inspection_hook_fk", nullable = true, updatable = true)
     private InspectionHookEntity inspectionHook;
 
     public NetworkElementEntity() {

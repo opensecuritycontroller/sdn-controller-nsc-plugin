@@ -46,11 +46,11 @@ public class InspectionPortEntity implements InspectionPortElement {
     private String elementId;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = false, fetch = EAGER, optional = true)
-    @JoinColumn(name = "ingress_id", nullable = true, updatable = true)
+    @JoinColumn(name = "ingress_fk", nullable = true, updatable = true)
     private NetworkElementEntity ingressPort;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = false, fetch = EAGER, optional = true)
-    @JoinColumn(name = "egress_id", nullable = true, updatable = true)
+    @JoinColumn(name = "egress_fk", nullable = true, updatable = true)
     private NetworkElementEntity egressPort;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = false, fetch = EAGER, mappedBy="inspectionPort")

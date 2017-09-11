@@ -46,11 +46,11 @@ public class InspectionHookEntity implements InspectionHookElement {
     private String hookId;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = false, fetch = EAGER, optional = true)
-    @JoinColumn(name = "inspected_port_id", nullable = true, updatable = true)
+    @JoinColumn(name = "inspected_port_fk", nullable = true, updatable = true)
     private NetworkElementEntity inspectedPort;
 
     @ManyToOne(cascade = CascadeType.ALL, fetch = EAGER, optional = true)
-    @JoinColumn(name = "inspection_port_id", nullable = true, updatable = true)
+    @JoinColumn(name = "inspection_port_fk", nullable = true, updatable = true)
     private InspectionPortEntity inspectionPort;
 
     private Long tag;
