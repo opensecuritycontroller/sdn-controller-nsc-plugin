@@ -28,7 +28,6 @@ import static org.osgi.service.jdbc.DataSourceFactory.*;
 import java.io.File;
 import java.sql.SQLException;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Properties;
 
 import javax.inject.Inject;
@@ -274,20 +273,14 @@ public class OSGiIntegrationTest {
 
         assertNotNull(this.inspectionPort.getElementId());
 
-        List<String> lsMacs = this.txControl.requiresNew(() -> {
-            InspectionPortEntity tmp = this.em.find(InspectionPortEntity.class, this.inspectionPort.getElementId());
-            return tmp.getEgressPort().getMacAddresses();
+        InspectionPortEntity tmp = this.txControl.requiresNew(() -> {
+             return this.em.find(InspectionPortEntity.class, this.inspectionPort.getElementId());
         });
 
-        assertEquals(2, lsMacs.size());
-
-        List<String> lsPorts = this.txControl.requiresNew(() -> {
-            InspectionPortEntity tmp = this.em.find(InspectionPortEntity.class, this.inspectionPort.getElementId());
-
-            return tmp.getEgressPort().getPortIPs();
-        });
-
-        assertEquals(2, lsPorts.size());
+        assertEquals(2, tmp.getEgressPort().getMacAddresses().size());
+        assertEquals(2, tmp.getEgressPort().getPortIPs().size());
+        assertEquals(2, tmp.getIngressPort().getMacAddresses().size());
+        assertEquals(2, tmp.getIngressPort().getPortIPs().size());
     }
 
     @Test
