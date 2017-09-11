@@ -47,13 +47,13 @@ public class NetworkElementEntity implements NetworkElement {
     @Transient
     private String parentId;
 
-    @ElementCollection(fetch = EAGER)
+    @ElementCollection(fetch = LAZY)
     @CollectionTable(name = "NETWORK_ELEMENT_MACADDRESSES",
             joinColumns = @JoinColumn(name = "network_element_fk"),
             foreignKey = @ForeignKey(name = "FK_NETWORK_ELEMENT_MACADDRESSES_NETWORK_ELEMENT"))
     private List<String> macAddresses;
 
-    @ElementCollection(fetch = LAZY)
+    @ElementCollection(fetch = EAGER)
     @CollectionTable(name = "NETWORK_ELEMENT_PORTIPS",
             joinColumns = @JoinColumn(name = "network_element_fk"),
             foreignKey = @ForeignKey(name = "FK_NETWORK_ELEMENT_PORTIPS_NETWORK_ELEMENT"))

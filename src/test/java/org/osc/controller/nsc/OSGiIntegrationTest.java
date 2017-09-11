@@ -274,11 +274,11 @@ public class OSGiIntegrationTest {
 
         assertNotNull(this.inspectionPort.getElementId());
 
-        List<String> lsMacs;
-
-        lsMacs = this.txControl.requiresNew(() -> {
+        List<String> lsMacs = this.txControl.requiresNew(() -> {
             InspectionPortEntity tmp = this.em.find(InspectionPortEntity.class, this.inspectionPort.getElementId());
-            return tmp.getIngressPort().getMacAddresses();
+            List<String> retVal = tmp.getEgressPort().getMacAddresses();
+            retVal.stream().forEach(s -> { s.length(); }); // Force lazy loaded collection
+            return retVal;
         });
 
         assertEquals(2, lsMacs.size());
@@ -291,7 +291,6 @@ public class OSGiIntegrationTest {
         });
 
         assertEquals(2, lsPorts.size());
-
     }
 
     @Test
