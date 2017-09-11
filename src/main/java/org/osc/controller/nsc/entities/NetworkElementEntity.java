@@ -17,7 +17,6 @@
 package org.osc.controller.nsc.entities;
 
 import static javax.persistence.FetchType.EAGER;
-import static javax.persistence.FetchType.LAZY;
 
 import java.util.List;
 
@@ -30,15 +29,19 @@ import javax.persistence.ForeignKey;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
+import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.osc.sdk.controller.element.NetworkElement;
 
 @Entity
+@Table(name = "NETWORK_ELEMENT")
 public class NetworkElementEntity implements NetworkElement {
 
     @Id
-    @Column(name = "elementId", unique = true)
+    @Column(name = "element_id", unique = true)
     private String elementId;
 
     // TODO : for SFC functionality
@@ -46,41 +49,33 @@ public class NetworkElementEntity implements NetworkElement {
     private String parentId;
 
     @ElementCollection(fetch = EAGER)
-    @CollectionTable(name = "NETWORKELEMENTENTITY_MACADDRESSES",
-            joinColumns = @JoinColumn(name = "NETWORKELEMENTENTITY_ELEMENTID"),
-            foreignKey = @ForeignKey(name = "NETWORKELEMENTENTITY_MACADDRESSES_NETWORKELEMENTENTITY"))
+    @Fetch(FetchMode.SELECT)
+    @CollectionTable(name = "NETWORK_ELEMENT_MACADDRESSES",
+            joinColumns = @JoinColumn(name = "network_element_fk"),
+            foreignKey = @ForeignKey(name = "FK_NETWORK_ELEMENT_MACADDRESSES_NETWORK_ELEMENT"))
     private List<String> macAddresses;
 
-    @ElementCollection(fetch = LAZY)
-    @CollectionTable(name = "NETWORKELEMENTENTITY_PORTIPS",
-            joinColumns = @JoinColumn(name = "NETWORKELEMENTENTITY_ELEMENTID"),
-            foreignKey = @ForeignKey(name = "NETWORKELEMENTENTITY_PORTIPS_NETWORKELEMENTENTITY"))
+    @ElementCollection(fetch = EAGER)
+    @CollectionTable(name = "NETWORK_ELEMENT_PORTIPS",
+            joinColumns = @JoinColumn(name = "network_element_fk"),
+            foreignKey = @ForeignKey(name = "FK_NETWORK_ELEMENT_PORTIPS_NETWORK_ELEMENT"))
     private List<String> portIPs;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = false, fetch = EAGER, optional = true)
-    @JoinColumn(name = "ingressPortId", nullable = true, updatable = true)
-    private InspectionPortEntity ingressInspectionPort;
-
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = false, fetch = EAGER, optional = true)
-    @JoinColumn(name = "egressPortId", nullable = true, updatable = true)
-    private InspectionPortEntity egressInspectionPort;
-
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = false, fetch = EAGER, optional = true)
-    @JoinColumn(name = "inspectionHookId", nullable = true, updatable = true)
+    @JoinColumn(name = "inspection_hook_fk", nullable = true, updatable = true)
     private InspectionHookEntity inspectionHook;
 
     public NetworkElementEntity() {
     }
 
-    public NetworkElementEntity(String elementId, List<String> macAddressEntities,
-            List<String> portIpEntities, String parentId) {
+    public NetworkElementEntity(String elementId, List<String> macAddressEntities, List<String> portIpEntities,
+            String parentId) {
         super();
         this.elementId = elementId;
         this.parentId = parentId;
         this.macAddresses = macAddressEntities;
         this.portIPs = portIpEntities;
     }
-
 
     @Override
     public String getElementId() {
@@ -89,22 +84,6 @@ public class NetworkElementEntity implements NetworkElement {
 
     public void setElementId(String elementId) {
         this.elementId = elementId;
-    }
-
-    public InspectionPortEntity getIngressInspectionPort() {
-        return this.ingressInspectionPort;
-    }
-
-    public void setIngressInspectionPort(InspectionPortEntity inspectionPort) {
-        this.ingressInspectionPort = inspectionPort;
-    }
-
-    public InspectionPortEntity getEgressInspectionPort() {
-        return this.egressInspectionPort;
-    }
-
-    public void setEgressInspectionPort(InspectionPortEntity inspectionPort) {
-        this.egressInspectionPort = inspectionPort;
     }
 
     public InspectionHookEntity getInspectionHook() {

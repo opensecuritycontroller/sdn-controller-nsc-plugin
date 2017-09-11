@@ -30,25 +30,27 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.Table;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.osc.sdk.controller.element.InspectionPortElement;
 
 @Entity
+@Table(name = "INSPECTION_PORT")
 public class InspectionPortEntity implements InspectionPortElement {
 
     @Id
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")
-    @Column(name = "elementId", unique = true)
+    @Column(name = "element_id", unique = true)
     private String elementId;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = false, fetch = EAGER, optional = true)
-    @JoinColumn(name = "ingressId", nullable = true, updatable = true)
+    @JoinColumn(name = "ingress_fk", nullable = true, updatable = true)
     private NetworkElementEntity ingressPort;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = false, fetch = EAGER, optional = true)
-    @JoinColumn(name = "egressId", nullable = true, updatable = true)
+    @JoinColumn(name = "egress_fk", nullable = true, updatable = true)
     private NetworkElementEntity egressPort;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = false, fetch = EAGER, mappedBy="inspectionPort")
@@ -62,14 +64,6 @@ public class InspectionPortEntity implements InspectionPortElement {
         this.ingressPort = ingress;
         this.egressPort = egress;
         this.inspectionHooks = new HashSet<>();
-
-        if (ingress != null) {
-            ingress.setIngressInspectionPort(this);
-        }
-
-        if (egress != null) {
-            egress.setEgressInspectionPort(this);
-        }
     }
 
     @Override

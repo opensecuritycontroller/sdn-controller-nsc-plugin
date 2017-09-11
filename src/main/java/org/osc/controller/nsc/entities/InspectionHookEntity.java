@@ -28,6 +28,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
+import javax.persistence.Table;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.osc.sdk.controller.FailurePolicyType;
@@ -35,31 +36,35 @@ import org.osc.sdk.controller.TagEncapsulationType;
 import org.osc.sdk.controller.element.InspectionHookElement;
 
 @Entity
+@Table(name = "INSPECTION_HOOK")
 public class InspectionHookEntity implements InspectionHookElement {
 
     @Id
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")
-    @Column(name = "hookId", unique = true)
+    @Column(name = "hook_id", unique = true)
     private String hookId;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = false, fetch = EAGER, optional = true)
-    @JoinColumn(name = "inspectedPortId", nullable = true, updatable = true)
+    @JoinColumn(name = "inspected_port_fk", nullable = true, updatable = true)
     private NetworkElementEntity inspectedPort;
 
     @ManyToOne(cascade = CascadeType.ALL, fetch = EAGER, optional = true)
-    @JoinColumn(name = "inspectionPortId", nullable = true, updatable = true)
+    @JoinColumn(name = "inspection_port_fk", nullable = true, updatable = true)
     private InspectionPortEntity inspectionPort;
 
     private Long tag;
 
     // "order" is a sql keyword. Avoid column named "order"
+    @Column(name = "hook_order")
     private Long hookOrder;
 
     @Enumerated(STRING)
+    @Column(name = "enc_type")
     private TagEncapsulationType encType;
 
     @Enumerated(STRING)
+    @Column(name = "failure_policy_type")
     private FailurePolicyType failurePolicyType;
 
     public InspectionHookEntity() {

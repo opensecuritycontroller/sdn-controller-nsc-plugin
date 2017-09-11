@@ -16,19 +16,18 @@
  *******************************************************************************/
 package org.osc.controller.nsc;
 
-import static java.util.Arrays.*;
-import static java.util.Collections.*;
-import static junit.framework.Assert.assertEquals;
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonMap;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.ops4j.pax.exam.CoreOptions.*;
-import static org.osc.sdk.controller.FailurePolicyType.*;
-import static org.osc.sdk.controller.TagEncapsulationType.*;
+import static org.osc.sdk.controller.FailurePolicyType.NA;
+import static org.osc.sdk.controller.TagEncapsulationType.VLAN;
 import static org.osgi.service.jdbc.DataSourceFactory.*;
 
 import java.io.File;
 import java.sql.SQLException;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Properties;
 
 import javax.inject.Inject;
@@ -36,6 +35,7 @@ import javax.persistence.EntityManager;
 import javax.sql.DataSource;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -59,8 +59,6 @@ import org.osgi.service.jdbc.DataSourceFactory;
 import org.osgi.service.jpa.EntityManagerFactoryBuilder;
 import org.osgi.service.transaction.control.TransactionControl;
 import org.osgi.service.transaction.control.jpa.JPAEntityManagerProviderFactory;
-
-import junit.framework.Assert;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
@@ -88,8 +86,6 @@ public class OSGiIntegrationTest {
     private static final String IMAC2_STR = "ff:ff:aa:bb:cc:02";
 
     private static final String INSPMAC1_STR = "aa:aa:aa:bb:cc:01";
-
-    private static final String HOOK_ID = "TEST_INSP_HOOK";
 
     @Inject
     BundleContext context;
@@ -159,8 +155,8 @@ public class OSGiIntegrationTest {
                     mavenBundle("org.apache.directory.studio", "org.apache.commons.lang").versionAsInProject(),
 
                     // Uncomment this line to allow remote debugging
-
 //                    CoreOptions.vmOption("-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=1044"),
+
                     bootClasspathLibrary(mavenBundle("org.apache.geronimo.specs", "geronimo-jta_1.1_spec", "1.1.1"))
                             .beforeFramework(),
                     junitBundles());
@@ -238,8 +234,6 @@ public class OSGiIntegrationTest {
 
         this.inspected.setMacAddresses(asList(INSPMAC1_STR));
 
-        this.ingress.setIngressInspectionPort(this.inspectionPort);
-        this.egress.setEgressInspectionPort(this.inspectionPort);
         this.inspected.setInspectionHook(this.inspectionHook);
 
         this.inspectionPort.setIngressPort(this.ingress);
@@ -264,7 +258,6 @@ public class OSGiIntegrationTest {
         File tracefile = new File(TEST_DB_FILENAME + ".trace.db");
         if (tracefile.exists() &&  !tracefile.delete()) {
             throw new IllegalStateException("Failed to delete trace file : " + tracefile.getAbsolutePath());
-
         }
     }
 
@@ -273,37 +266,27 @@ public class OSGiIntegrationTest {
 
         assertEquals(null, this.inspectionPort.getElementId());
 
-        InspectionHookEntity inspHookEntity = this.txControl.required(() -> {
+        this.txControl.required(() -> {
             this.em.persist(this.inspectionHook);
             return this.inspectionHook;
         });
 
         assertNotNull(this.inspectionPort.getElementId());
 
-        List<String> lsMacs;
-
-        lsMacs = this.txControl.requiresNew(() -> {
-            InspectionPortEntity tmp = this.em.find(InspectionPortEntity.class, this.inspectionPort.getElementId());
-            return tmp.getIngressPort().getMacAddresses();
+        InspectionPortEntity tmp = this.txControl.requiresNew(() -> {
+             return this.em.find(InspectionPortEntity.class, this.inspectionPort.getElementId());
         });
 
-        assertEquals(2, lsMacs.size());
-
-        List<String> lsPorts = this.txControl.requiresNew(() -> {
-            InspectionPortEntity tmp = this.em.find(InspectionPortEntity.class, this.inspectionPort.getElementId());
-
-            tmp.getEgressPort().getPortIPs().stream().forEach(s -> {});
-            return tmp.getEgressPort().getPortIPs();
-        });
-
-        assertEquals(2, lsPorts.size());
-
+        assertEquals(2, tmp.getEgressPort().getMacAddresses().size());
+        assertEquals(2, tmp.getEgressPort().getPortIPs().size());
+        assertEquals(2, tmp.getIngressPort().getMacAddresses().size());
+        assertEquals(2, tmp.getIngressPort().getPortIPs().size());
     }
 
     @Test
     public void verifyHookAndPortPersistedAfterSingleHookPersistenceWithObjectGraphSetUp() {
 
-        InspectionHookEntity inspHookEntity = this.txControl.required(() -> {
+        this.txControl.required(() -> {
             this.em.persist(this.inspectionHook);
             return this.inspectionHook;
         });
@@ -328,7 +311,7 @@ public class OSGiIntegrationTest {
     @Test
     public void testUtilsInspPortByNetworkElements() throws Exception {
 
-        InspectionHookEntity inspHookEntity = this.txControl.required(() -> {
+        this.txControl.required(() -> {
             this.em.persist(this.inspectionHook);
             return this.inspectionHook;
         });
@@ -345,7 +328,7 @@ public class OSGiIntegrationTest {
     @Test
     public void testUtilsNetworkElementEntityByElementId() throws Exception {
 
-        InspectionHookEntity inspHookEntity = this.txControl.required(() -> {
+        this.txControl.required(() -> {
             this.em.persist(this.inspectionHook);
             return this.inspectionHook;
         });
@@ -354,7 +337,6 @@ public class OSGiIntegrationTest {
 
         NetworkElementEntity foundNE = this.txControl.required(() -> {
             NetworkElementEntity e = utils.networkElementEntityByElementId(this.inspected.getElementId());
-            e.getMacAddresses().size();
             return e;
         });
 
@@ -366,7 +348,7 @@ public class OSGiIntegrationTest {
 
     @Test
     public void testUtilsInspHookByInspectedAndPort() throws Exception {
-        InspectionHookEntity inspHookEntity = this.txControl.required(() -> {
+        this.txControl.required(() -> {
             this.em.persist(this.inspectionHook);
             return this.inspectionHook;
         });
@@ -377,15 +359,14 @@ public class OSGiIntegrationTest {
             InspectionPortEntity ipe = this.em.find(this.inspectionPort.getClass(), this.inspectionPort.getElementId());
             assertNotNull(ipe);
 
-//            NetworkElement ne = utils.makeNetworkElement(this.inspected);
             NetworkElement ne = this.inspected;
             InspectionPortElement prte = ipe;
             InspectionHookEntity ihe = utils.findInspHookByInspectedAndPort(ne, prte);
 
             assertNotNull(ihe);
             assertEquals(this.inspectionHook.getHookId(), ihe.getHookId());
-            assertNotNull(ihe.getInspectionPort());
-            assertEquals(ihe.getInspectionPort().getElementId(), ipe.getElementId());
+//            assertNotNull(ihe.getInspectionPort());
+//            assertEquals(ihe.getInspectionPort().getElementId(), ipe.getElementId());
             return ihe;
         });
 
@@ -420,17 +401,13 @@ public class OSGiIntegrationTest {
         NetworkElementEntity foundIngress = this.txControl.required(() -> {
             NetworkElementEntity elementEntity = utils
                     .networkElementEntityByElementId(inspectionPortElementTmp.getIngressPort().getElementId());
-            elementEntity.getPortIPs(); // Lazy loaded! This fixes LazyInitializationException
             return elementEntity;
         });
 
         assertNotNull(foundIngress);
         assertEquals(inspectionPortElement.getIngressPort().getElementId(), foundIngress.getElementId());
-        assertNotNull(foundIngress.getIngressInspectionPort());
-        assertEquals(inspectionPortElement.getElementId(), foundIngress.getIngressInspectionPort().getElementId());
 
         // Here we are afraid of lazyInitializationException
-        foundIngress.getEgressInspectionPort();
         foundIngress.getMacAddresses();
         foundIngress.getPortIPs();
         foundIngress.getElementId();
@@ -445,12 +422,10 @@ public class OSGiIntegrationTest {
 
         assertEquals(null, inspectionPortElement.getParentId());
         assertEquals(null, foundInspPortElement.getParentId());
-
     }
 
     @Test
     public void testRegisterInspectionPortWithNetworkElementsAlreadyPersisted() throws Exception {
-        RedirectionApiUtils utils = new RedirectionApiUtils(this.em, this.txControl);
         this.redirApi = new SampleSdnRedirectionApi(this.txControl, this.em);
 
         this.txControl.required(() -> {
@@ -459,7 +434,6 @@ public class OSGiIntegrationTest {
             return null;
         });
 
-        String parentId = OSGiIntegrationTest.this.inspectionHook.getHookId();
         InspectionPortElement inspectionPortElement = new InspectionPortEntity(null, this.ingress, this.egress);
 
         // ... and the test
@@ -471,8 +445,6 @@ public class OSGiIntegrationTest {
         this.redirApi = new SampleSdnRedirectionApi(this.txControl, this.em);
 
         InspectionPortEntity inspectionPortElement = new InspectionPortEntity(null, this.ingress, this.egress);
-        this.ingress.setIngressInspectionPort(inspectionPortElement);
-        this.egress.setEgressInspectionPort(inspectionPortElement);
 
         // expected before installInspectionHook
         this.redirApi.registerInspectionPort(inspectionPortElement);
@@ -485,9 +457,6 @@ public class OSGiIntegrationTest {
             InspectionHookElement tmp = this.em.find(InspectionHookEntity.class, hookId);
             assertNotNull(tmp);
             assertNotNull(tmp.getInspectionPort());
-            tmp.getInspectionPort().getIngressPort().getPortIPs();
-            tmp.getInspectionPort().getEgressPort().getPortIPs();
-            tmp.getInspectedPort().getPortIPs();
             return tmp;
         });
 
