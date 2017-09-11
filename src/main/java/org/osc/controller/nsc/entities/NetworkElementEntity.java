@@ -30,15 +30,17 @@ import javax.persistence.ForeignKey;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
+import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.osc.sdk.controller.element.NetworkElement;
 
 @Entity
+@Table(name = "NETWORK_ELEMENT")
 public class NetworkElementEntity implements NetworkElement {
 
     @Id
-    @Column(name = "elementId", unique = true)
+    @Column(name = "element_id", unique = true)
     private String elementId;
 
     // TODO : for SFC functionality
@@ -46,19 +48,19 @@ public class NetworkElementEntity implements NetworkElement {
     private String parentId;
 
     @ElementCollection(fetch = EAGER)
-    @CollectionTable(name = "NETWORKELEMENTENTITY_MACADDRESSES",
-            joinColumns = @JoinColumn(name = "NETWORKELEMENTENTITY_ELEMENTID"),
-            foreignKey = @ForeignKey(name = "NETWORKELEMENTENTITY_MACADDRESSES_NETWORKELEMENTENTITY"))
+    @CollectionTable(name = "NETWORK_ELEMENT_MACADDRESSES",
+            joinColumns = @JoinColumn(name = "NETWORK_ELEMENT_ELEMENTID"),
+            foreignKey = @ForeignKey(name = "NETWORK_ELEMENT_MACADDRESSES_NETWORK_ELEMENT"))
     private List<String> macAddresses;
 
     @ElementCollection(fetch = LAZY)
-    @CollectionTable(name = "NETWORKELEMENTENTITY_PORTIPS",
-            joinColumns = @JoinColumn(name = "NETWORKELEMENTENTITY_ELEMENTID"),
-            foreignKey = @ForeignKey(name = "NETWORKELEMENTENTITY_PORTIPS_NETWORKELEMENTENTITY"))
+    @CollectionTable(name = "NETWORK_ELEMENT_PORTIPS",
+            joinColumns = @JoinColumn(name = "NETWORK_ELEMENT_ELEMENTID"),
+            foreignKey = @ForeignKey(name = "NETWORK_ELEMENT_PORTIPS_NETWORK_ELEMENT"))
     private List<String> portIPs;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = false, fetch = EAGER, optional = true)
-    @JoinColumn(name = "inspectionHookId", nullable = true, updatable = true)
+    @JoinColumn(name = "inspection_hook_id", nullable = true, updatable = true)
     private InspectionHookEntity inspectionHook;
 
     public NetworkElementEntity() {

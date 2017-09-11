@@ -129,7 +129,7 @@ public class RedirectionApiUtils {
         String ingressId = ingress != null ? ingress.getElementId() : null;
         String egressId = ingress != null ? egress.getElementId() : null;
 
-        Query q = this.em.createQuery("FROM InspectionPortEntity WHERE ingressId = :ingId AND egressId = :egId ");
+        Query q = this.em.createQuery("FROM InspectionPortEntity WHERE ingress_id = :ingId AND egress_id = :egId ");
         q.setParameter("ingId", ingressId);
         q.setParameter("egId", egressId);
 
@@ -192,7 +192,7 @@ public class RedirectionApiUtils {
         String portId = inspPort != null ? inspPort.getElementId() : null;
 
         Query q = this.em.createQuery(
-                "FROM InspectionHookEntity WHERE inspectedPortId = :inspectedId AND inspectionPortId = :inspectionId ");
+                "FROM InspectionHookEntity WHERE inspected_port_id = :inspectedId AND inspection_port_id = :inspectionId ");
         q.setParameter("inspectedId", inspectedId);
         q.setParameter("inspectionId", portId);
 
