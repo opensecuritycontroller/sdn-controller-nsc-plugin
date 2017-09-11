@@ -17,7 +17,6 @@
 package org.osc.controller.nsc.entities;
 
 import static javax.persistence.FetchType.EAGER;
-import static javax.persistence.FetchType.LAZY;
 
 import java.util.List;
 
@@ -33,6 +32,8 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.osc.sdk.controller.element.NetworkElement;
 
 @Entity
@@ -47,7 +48,8 @@ public class NetworkElementEntity implements NetworkElement {
     @Transient
     private String parentId;
 
-    @ElementCollection(fetch = LAZY)
+    @ElementCollection(fetch = EAGER)
+    @Fetch(FetchMode.SELECT)
     @CollectionTable(name = "NETWORK_ELEMENT_MACADDRESSES",
             joinColumns = @JoinColumn(name = "network_element_fk"),
             foreignKey = @ForeignKey(name = "FK_NETWORK_ELEMENT_MACADDRESSES_NETWORK_ELEMENT"))
@@ -66,15 +68,14 @@ public class NetworkElementEntity implements NetworkElement {
     public NetworkElementEntity() {
     }
 
-    public NetworkElementEntity(String elementId, List<String> macAddressEntities,
-            List<String> portIpEntities, String parentId) {
+    public NetworkElementEntity(String elementId, List<String> macAddressEntities, List<String> portIpEntities,
+            String parentId) {
         super();
         this.elementId = elementId;
         this.parentId = parentId;
         this.macAddresses = macAddressEntities;
         this.portIPs = portIpEntities;
     }
-
 
     @Override
     public String getElementId() {

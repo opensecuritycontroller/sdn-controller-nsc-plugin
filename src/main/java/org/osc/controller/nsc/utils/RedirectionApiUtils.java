@@ -114,7 +114,7 @@ public class RedirectionApiUtils {
         q.where(cb.equal(r.get("elementId"), elementId));
 
         try {
-            return loadEntity(this.em.createQuery(q).getSingleResult());
+            return this.em.createQuery(q).getSingleResult();
         } catch (Exception e) {
             LOG.error(String.format("Finding Network Element %s ", elementId), e);
             return null;
@@ -143,7 +143,7 @@ public class RedirectionApiUtils {
                 LOG.warn(String.format("Multiple results! Inspection ports by ingress %s and egress %s", ingressId,
                         egressId));
             }
-            return loadEntity(ports.get(0));
+            return ports.get(0);
 
         } catch (Exception e) {
             LOG.error(String.format("Finding Inspection ports by ingress %s and egress %s", ingress.getElementId(),
@@ -161,11 +161,11 @@ public class RedirectionApiUtils {
     }
 
     public InspectionPortEntity txInspectionPortEntityById(String id) {
-        return loadEntity(this.em.find(InspectionPortEntity.class, id));
+        return this.em.find(InspectionPortEntity.class, id);
     }
 
     public NetworkElementEntity txNetworkElementEntityById(Long id) {
-        return loadEntity(this.em.find(NetworkElementEntity.class, id));
+        return this.em.find(NetworkElementEntity.class, id);
     }
 
     public void removeSingleInspectionHook(InspectionHookEntity inspectionHookEntity) {
@@ -205,7 +205,7 @@ public class RedirectionApiUtils {
                 LOG.warn(String.format("Multiple results! Inspection hooks by inspected %s and port %s", inspectedId,
                         portId));
             }
-            return loadEntity(inspectionHooks.get(0));
+            return inspectionHooks.get(0);
 
         } catch (Exception e) {
             LOG.error(String.format("Finding Inspection hooks by inspected %s and port %s", inspectedId, portId), e);
@@ -242,31 +242,4 @@ public class RedirectionApiUtils {
             throw new IllegalArgumentException(msg);
         }
     }
-
-    // TODO : doing this because cannot simultaneously eager-fetch two properties!
-    // MacAddresses are lazily fetched.
-    private NetworkElementEntity loadEntity(NetworkElementEntity networkElementEntity) {
-        if (networkElementEntity != null) {
-            List<String> macAddresses = networkElementEntity.getMacAddresses();
-            macAddresses.stream().forEach(s -> { s.length(); });
-        }
-        return networkElementEntity;
-    }
-
-    private InspectionPortEntity loadEntity(InspectionPortEntity inspectionPortEntity) {
-        if (inspectionPortEntity != null) {
-            loadEntity(inspectionPortEntity.getEgressPort());
-            loadEntity(inspectionPortEntity.getIngressPort());
-        }
-        return inspectionPortEntity;
-    }
-
-    private InspectionHookEntity loadEntity(InspectionHookEntity inspectionHookEntity) {
-        if (inspectionHookEntity != null) {
-            loadEntity(inspectionHookEntity.getInspectedPort());
-            loadEntity(inspectionHookEntity.getInspectionPort());
-        }
-        return inspectionHookEntity;
-    }
 }
-
