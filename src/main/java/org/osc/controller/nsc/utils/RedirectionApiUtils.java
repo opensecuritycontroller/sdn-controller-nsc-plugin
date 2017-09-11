@@ -54,7 +54,7 @@ public class RedirectionApiUtils {
 
         retVal.setElementId(networkElement.getElementId());
         retVal.setMacAddresses(networkElement.getMacAddresses());
-        retVal.setPortIPs(networkElement.getMacAddresses());
+        retVal.setPortIPs(networkElement.getPortIPs());
 
         return retVal;
     }
