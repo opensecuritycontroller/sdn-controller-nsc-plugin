@@ -661,7 +661,8 @@ public class OSGiIntegrationTest {
 
         assertEquals(elementId, foundInspectionPort.getElementId());
 
-        this.redirApi.removeInspectionPort(foundInspectionPort);
+        // The inspectionPortElement does not have an id. Should still work.
+        this.redirApi.removeInspectionPort(inspectionPortElement);
         foundInspectionPort = this.txControl.required(() -> {
             return this.em.find(InspectionPortEntity.class, elementId);
         });

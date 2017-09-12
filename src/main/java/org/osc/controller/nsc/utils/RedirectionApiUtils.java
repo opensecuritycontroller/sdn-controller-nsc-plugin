@@ -199,9 +199,11 @@ public class RedirectionApiUtils {
 
     public void removeSingleInspectionPort(String inspectionPortId) {
         this.txControl.required(() -> {
-          InspectionPortEntity dbInspectionPort  = this.em.find(InspectionPortEntity.class, inspectionPortId);
-            this.em.remove(dbInspectionPort);
-            return null;
+
+          Query q = this.em.createQuery("DELETE FROM InspectionPortEntity WHERE element_id = :id");
+          q.setParameter("id", inspectionPortId);
+          q.executeUpdate();
+          return null;
         });
     }
 
@@ -222,6 +224,7 @@ public class RedirectionApiUtils {
         q.setParameter("inspectionId", portId);
 
         try {
+            @SuppressWarnings("unchecked")
             List<InspectionHookEntity> inspectionHooks = q.getResultList();
             if (inspectionHooks == null || inspectionHooks.size() == 0) {
                 LOG.warn(String.format("No Inspection hooks by inspected %s and port %s", inspectedId, portId));

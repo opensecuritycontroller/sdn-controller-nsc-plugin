@@ -329,7 +329,8 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
             throw new IllegalArgumentException("Attempt to delete null inspection port!");
         }
 
-        this.utils.removeSingleInspectionPort(inspectionPort.getElementId());
+        InspectionPortElement foundInspectionPort = getInspectionPort(inspectionPort);
+        this.utils.removeSingleInspectionPort(foundInspectionPort.getElementId());
     }
 
     @Override
