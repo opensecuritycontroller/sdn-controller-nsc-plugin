@@ -168,14 +168,39 @@ public class RedirectionApiUtils {
         return this.em.find(NetworkElementEntity.class, id);
     }
 
-    public void removeSingleInspectionHook(InspectionHookEntity inspectionHookEntity) {
-        this.txControl.required(() -> {
-            NetworkElementEntity networkElementEntity = inspectionHookEntity.getInspectedPort();
+    public void removeSingleInspectionHook(String hookId) {
+        InspectionHookEntity inspectionHook = this.txControl.required(() -> {
+            return this.em.find(InspectionHookEntity.class, hookId);
+        });
 
-            inspectionHookEntity.setInspectionPort(null);
-            inspectionHookEntity.setInspectedPort(null);
-            networkElementEntity.setInspectionHook(null);
-            this.em.remove(inspectionHookEntity);
+        NetworkElementEntity inspected = inspectionHook.getInspectedPort();
+
+        this.txControl.required(() -> {
+            InspectionHookEntity dbInspectionHook  =
+            this.em.find(InspectionHookEntity.class, hookId);
+            NetworkElementEntity dbInspectedPort = dbInspectionHook.getInspectedPort();
+
+            dbInspectedPort.setInspectionHook(null);
+            dbInspectionHook.setInspectedPort(null);
+            return null;
+        });
+
+        this.txControl.required(() -> {
+            NetworkElementEntity tmpNE = this.em.find(NetworkElementEntity.class, inspected.getElementId());
+
+            this.em.remove(tmpNE);
+
+            Query q = this.em.createQuery("DELETE FROM InspectionHookEntity WHERE hook_id = :id");
+            q.setParameter("id", hookId);
+            q.executeUpdate();
+            return null;
+        });
+    }
+
+    public void removeSingleInspectionPort(String inspectionPortId) {
+        this.txControl.required(() -> {
+          InspectionPortEntity dbInspectionPort  = this.em.find(InspectionPortEntity.class, inspectionPortId);
+            this.em.remove(dbInspectionPort);
             return null;
         });
     }

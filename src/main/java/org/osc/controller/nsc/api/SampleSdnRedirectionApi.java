@@ -118,7 +118,7 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
             this.txControl.required(() -> {
                 InspectionHookEntity inspectionHook = this.utils.findInspHookByInspectedAndPort(inspectedPort, inspectionPort);
                 if (inspectionHook != null) {
-                    this.utils.removeSingleInspectionHook(inspectionHook);
+                    this.em.remove(inspectionHook);
                 } else {
                     LOG.warn(String.format("Attempt to remove nonexistent inspection hook for inspected port %s and inspection port %s",
                             inspectedPort, inspectionPort));
@@ -182,7 +182,7 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
     public void removeAllInspectionHooks(NetworkElement inspectedPort) throws Exception {
 
         this.txControl.required(() -> {
-            Query q = this.em.createQuery("FROM InspectionHookEntity WHERE inspectedPortId = :portId");
+            Query q = this.em.createQuery("FROM InspectionHookEntity WHERE inspected_port_fk = :portId");
             String portId = (inspectedPort != null ? inspectedPort.getElementId() : null);
             q.setParameter("portId", portId);
 
@@ -190,7 +190,7 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
             List<InspectionHookEntity> results = q.getResultList();
 
             for (InspectionHookEntity inspectionHookEntity : results) {
-                this.utils.removeSingleInspectionHook(inspectionHookEntity);
+                this.utils.removeSingleInspectionHook(inspectionHookEntity.getHookId());
             }
 
             return null;
@@ -324,14 +324,17 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
     public void removeInspectionPort(InspectionPortElement inspectionPort)
             throws NetworkPortNotFoundException, Exception {
         // no-op
+
+        if (inspectionPort == null) {
+            throw new IllegalArgumentException("Attempt to delete null inspection port!");
+        }
+
+        this.utils.removeSingleInspectionPort(inspectionPort.getElementId());
     }
 
     @Override
     public void removeInspectionHook(String inspectionHookId) throws Exception {
-        // TODO emanoel: Currently not needed but should be implemented also for
-        // NSC.
-        throw new NotImplementedException("Not expected to be called for NSC. "
-                + "Currently only called for SDN controllers that support port group.");
+        this.utils.removeSingleInspectionHook(inspectionHookId);
     }
 
     @Override
