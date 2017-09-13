@@ -323,14 +323,23 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
     @Override
     public void removeInspectionPort(InspectionPortElement inspectionPort)
             throws NetworkPortNotFoundException, Exception {
-        // no-op
-
         if (inspectionPort == null) {
             throw new IllegalArgumentException("Attempt to delete null inspection port!");
         }
 
         InspectionPortElement foundInspectionPort = getInspectionPort(inspectionPort);
-        this.utils.removeSingleInspectionPort(foundInspectionPort.getElementId());
+
+        if (foundInspectionPort != null) {
+            this.utils.removeSingleInspectionPort(foundInspectionPort.getElementId());
+        } else {
+            NetworkElement ingress = inspectionPort.getIngressPort();
+            NetworkElement egress = inspectionPort.getEgressPort();
+            String ingressId = ingress != null ? ingress.getElementId() : null;
+            String egressId = ingress != null ? egress.getElementId() : null;
+
+            LOG.warn(String.format("Attempt to remove nonexistent inspection port for ingress %s and egress %s",
+                                   ingressId, egressId));
+        }
     }
 
     @Override

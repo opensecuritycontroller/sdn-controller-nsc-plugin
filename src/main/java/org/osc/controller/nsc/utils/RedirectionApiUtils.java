@@ -169,6 +169,10 @@ public class RedirectionApiUtils {
     }
 
     public void removeSingleInspectionHook(String hookId) {
+        if (hookId == null) {
+            return;
+        }
+
         InspectionHookEntity inspectionHook = this.txControl.required(() -> {
             return this.em.find(InspectionHookEntity.class, hookId);
         });
@@ -176,7 +180,7 @@ public class RedirectionApiUtils {
         NetworkElementEntity inspected = inspectionHook.getInspectedPort();
 
         this.txControl.required(() -> {
-            InspectionHookEntity dbInspectionHook  =
+            InspectionHookEntity dbInspectionHook =
             this.em.find(InspectionHookEntity.class, hookId);
             NetworkElementEntity dbInspectedPort = dbInspectionHook.getInspectedPort();
 
