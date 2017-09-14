@@ -49,7 +49,7 @@ public class InspectionHookEntity implements InspectionHookElement {
     @JoinColumn(name = "inspected_port_fk", nullable = true, updatable = true)
     private NetworkElementEntity inspectedPort;
 
-    @ManyToOne(cascade = CascadeType.ALL, fetch = EAGER, optional = true)
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH}, fetch = EAGER, optional = true)
     @JoinColumn(name = "inspection_port_fk", nullable = true, updatable = true)
     private InspectionPortEntity inspectionPort;
 
