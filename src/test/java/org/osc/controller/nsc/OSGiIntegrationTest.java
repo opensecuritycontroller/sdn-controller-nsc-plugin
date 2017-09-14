@@ -337,7 +337,7 @@ public class OSGiIntegrationTest {
         RedirectionApiUtils utils = new RedirectionApiUtils(this.em, this.txControl);
 
         NetworkElementEntity foundNE = this.txControl.required(() -> {
-            NetworkElementEntity e = utils.networkElementEntityByElementId(this.inspected.getElementId());
+            NetworkElementEntity e = utils.txNetworkElementEntityByElementId(this.inspected.getElementId());
             return e;
         });
 
@@ -378,107 +378,7 @@ public class OSGiIntegrationTest {
     }
 
     @Test
-    public void testRegisterInspectionPort() throws Exception {
-        RedirectionApiUtils utils = new RedirectionApiUtils(this.em, this.txControl);
-        this.redirApi = new SampleSdnRedirectionApi(this.txControl, this.em);
-
-        InspectionPortElement inspectionPortElement = new InspectionPortEntity(null, this.ingress, this.egress);
-        inspectionPortElement = (InspectionPortElement) this.redirApi.registerInspectionPort(inspectionPortElement);
-
-        // Here we are mostly afraid of LazyInitializationException
-        assertNotNull(inspectionPortElement.getElementId());
-        inspectionPortElement.getParentId();
-        assertNotNull(inspectionPortElement.getIngressPort());
-        assertNotNull(inspectionPortElement.getEgressPort());
-        assertNotNull(inspectionPortElement.getEgressPort().getMacAddresses());
-        assertNotNull(inspectionPortElement.getEgressPort().getElementId());
-        assertNotNull(inspectionPortElement.getIngressPort());
-        assertNotNull(inspectionPortElement.getIngressPort().getMacAddresses());
-        assertNotNull(inspectionPortElement.getIngressPort().getElementId());
-        inspectionPortElement.getIngressPort().getParentId();
-        inspectionPortElement.getEgressPort().getParentId();
-
-        final InspectionPortElement inspectionPortElementTmp = inspectionPortElement;
-        NetworkElementEntity foundIngress = this.txControl.required(() -> {
-            NetworkElementEntity elementEntity = utils
-                    .networkElementEntityByElementId(inspectionPortElementTmp.getIngressPort().getElementId());
-            return elementEntity;
-        });
-
-        assertNotNull(foundIngress);
-        assertEquals(inspectionPortElement.getIngressPort().getElementId(), foundIngress.getElementId());
-
-        // Here we are afraid of lazyInitializationException
-        foundIngress.getMacAddresses();
-        foundIngress.getPortIPs();
-        foundIngress.getElementId();
-        foundIngress.getParentId();
-
-        InspectionPortElement foundInspPortElement = this.redirApi.getInspectionPort(inspectionPortElement);
-        assertEquals(inspectionPortElement.getIngressPort().getElementId(),
-                foundInspPortElement.getIngressPort().getElementId());
-        assertEquals(inspectionPortElement.getEgressPort().getElementId(),
-                foundInspPortElement.getEgressPort().getElementId());
-        assertEquals(inspectionPortElement.getElementId(), foundInspPortElement.getElementId());
-
-        assertEquals(null, inspectionPortElement.getParentId());
-        assertEquals(null, foundInspPortElement.getParentId());
-    }
-
-    @Test
-    public void testRegisterInspectionPortWithNetworkElementsAlreadyPersisted() throws Exception {
-        this.redirApi = new SampleSdnRedirectionApi(this.txControl, this.em);
-
-        this.txControl.required(() -> {
-            this.em.persist(this.ingress);
-            this.em.persist(this.egress);
-            return null;
-        });
-
-        InspectionPortElement inspectionPortElement = new InspectionPortEntity(null, this.ingress, this.egress);
-
-        // ... and the test
-        inspectionPortElement = (InspectionPortElement) this.redirApi.registerInspectionPort(inspectionPortElement);
-    }
-
-    @Test
-    public void testInstallInspectionHook() throws Exception {
-        this.redirApi = new SampleSdnRedirectionApi(this.txControl, this.em);
-
-        InspectionPortEntity inspectionPortElement = new InspectionPortEntity(null, this.ingress, this.egress);
-
-        // expected before installInspectionHook
-        this.redirApi.registerInspectionPort(inspectionPortElement);
-        final String hookId = this.redirApi.installInspectionHook(Arrays.asList(this.inspected), inspectionPortElement,
-                                                                  0L, VLAN, 0L, NA);
-
-        assertNotNull(hookId);
-
-        InspectionHookElement inspectionHookElement = this.txControl.required(() -> {
-            InspectionHookElement tmp = this.em.find(InspectionHookEntity.class, hookId);
-            assertNotNull(tmp);
-            assertNotNull(tmp.getInspectionPort());
-            return tmp;
-        });
-
-        // Here we are mostly afraid of LazyInitializationException
-        assertNotNull(inspectionHookElement);
-        assertNotNull(inspectionHookElement.getHookId());
-        assertNotNull(inspectionHookElement.getInspectionPort());
-        assertNotNull(inspectionHookElement.getInspectionPort().getIngressPort());
-        assertNotNull(inspectionHookElement.getInspectionPort().getIngressPort().getMacAddresses());
-        assertNotNull(inspectionHookElement.getInspectionPort().getIngressPort().getPortIPs());
-        assertNotNull(inspectionHookElement.getInspectionPort().getEgressPort());
-        assertNotNull(inspectionHookElement.getInspectionPort().getEgressPort().getMacAddresses());
-        assertNotNull(inspectionHookElement.getInspectionPort().getEgressPort().getPortIPs());
-        assertNotNull(inspectionHookElement.getInspectionPort().getIngressPort());
-        assertNotNull(inspectionHookElement.getInspectionPort().getEgressPort());
-        assertNotNull(inspectionHookElement.getInspectedPort().getMacAddresses());
-        assertNotNull(inspectionHookElement.getInspectedPort().getPortIPs());
-    }
-
-    @Test
-    public void testUtilRemoveSingleInspectionHook() throws Exception {
+    public void testUtilsRemoveSingleInspectionHook() throws Exception {
         this.redirApi = new SampleSdnRedirectionApi(this.txControl, this.em);
 
         InspectionPortEntity inspectionPortElement = new InspectionPortEntity(null, this.ingress, this.egress);
@@ -515,7 +415,209 @@ public class OSGiIntegrationTest {
     }
 
     @Test
-    public void testRemoveAllInspectionHooks_InspectionHookDisappears() throws Exception {
+    public void testApiRegisterInspectionPort() throws Exception {
+        RedirectionApiUtils utils = new RedirectionApiUtils(this.em, this.txControl);
+        this.redirApi = new SampleSdnRedirectionApi(this.txControl, this.em);
+
+        InspectionPortElement inspectionPortElement = new InspectionPortEntity(null, this.ingress, this.egress);
+        inspectionPortElement = (InspectionPortElement) this.redirApi.registerInspectionPort(inspectionPortElement);
+
+        // Here we are mostly afraid of LazyInitializationException
+        assertNotNull(inspectionPortElement.getElementId());
+        inspectionPortElement.getParentId();
+        assertNotNull(inspectionPortElement.getIngressPort());
+        assertNotNull(inspectionPortElement.getEgressPort());
+        assertNotNull(inspectionPortElement.getEgressPort().getMacAddresses());
+        assertNotNull(inspectionPortElement.getEgressPort().getElementId());
+        assertNotNull(inspectionPortElement.getIngressPort());
+        assertNotNull(inspectionPortElement.getIngressPort().getMacAddresses());
+        assertNotNull(inspectionPortElement.getIngressPort().getElementId());
+        inspectionPortElement.getIngressPort().getParentId();
+        inspectionPortElement.getEgressPort().getParentId();
+
+        final InspectionPortElement inspectionPortElementTmp = inspectionPortElement;
+        NetworkElementEntity foundIngress = this.txControl.required(() -> {
+            NetworkElementEntity elementEntity = utils
+                    .txNetworkElementEntityByElementId(inspectionPortElementTmp.getIngressPort().getElementId());
+            return elementEntity;
+        });
+
+        assertNotNull(foundIngress);
+        assertEquals(inspectionPortElement.getIngressPort().getElementId(), foundIngress.getElementId());
+
+        // Here we are afraid of lazyInitializationException
+        foundIngress.getMacAddresses();
+        foundIngress.getPortIPs();
+        foundIngress.getElementId();
+        foundIngress.getParentId();
+
+        InspectionPortElement foundInspPortElement = this.redirApi.getInspectionPort(inspectionPortElement);
+        assertEquals(inspectionPortElement.getIngressPort().getElementId(),
+                foundInspPortElement.getIngressPort().getElementId());
+        assertEquals(inspectionPortElement.getEgressPort().getElementId(),
+                foundInspPortElement.getEgressPort().getElementId());
+        assertEquals(inspectionPortElement.getElementId(), foundInspPortElement.getElementId());
+
+        assertEquals(null, inspectionPortElement.getParentId());
+        assertEquals(null, foundInspPortElement.getParentId());
+    }
+
+    @Test
+    public void testApiRegisterInspectionPortWithNetworkElementsAlreadyPersisted() throws Exception {
+        this.redirApi = new SampleSdnRedirectionApi(this.txControl, this.em);
+
+        this.txControl.required(() -> {
+            this.em.persist(this.ingress);
+            this.em.persist(this.egress);
+            return null;
+        });
+
+        InspectionPortElement inspectionPortElement = new InspectionPortEntity(null, this.ingress, this.egress);
+
+        // ... and the test
+        inspectionPortElement = (InspectionPortElement) this.redirApi.registerInspectionPort(inspectionPortElement);
+        assertNotNull(inspectionPortElement);
+        assertNotNull(inspectionPortElement.getElementId());
+        assertNotNull(inspectionPortElement.getIngressPort());
+        assertNotNull(inspectionPortElement.getEgressPort());
+        assertEquals(this.ingress.getElementId(), inspectionPortElement.getIngressPort().getElementId());
+        assertEquals(this.egress.getElementId(), inspectionPortElement.getEgressPort().getElementId());
+    }
+
+    @Test
+    public void testApiInstallInspectionHook() throws Exception {
+        this.redirApi = new SampleSdnRedirectionApi(this.txControl, this.em);
+
+        InspectionPortEntity inspectionPortElement = new InspectionPortEntity(null, this.ingress, this.egress);
+
+        // expected before installInspectionHook
+        this.redirApi.registerInspectionPort(inspectionPortElement);
+        final String hookId = this.redirApi.installInspectionHook(Arrays.asList(this.inspected), inspectionPortElement,
+                                                                  0L, VLAN, 0L, NA);
+
+        assertNotNull(hookId);
+
+        InspectionHookElement inspectionHookElement = this.txControl.required(() -> {
+            InspectionHookElement tmp = this.em.find(InspectionHookEntity.class, hookId);
+            assertNotNull(tmp);
+            assertNotNull(tmp.getInspectionPort());
+            return tmp;
+        });
+
+        // Here we are mostly afraid of LazyInitializationException
+        assertNotNull(inspectionHookElement);
+        assertNotNull(inspectionHookElement.getHookId());
+        assertNotNull(inspectionHookElement.getInspectionPort());
+        assertNotNull(inspectionHookElement.getInspectionPort().getIngressPort());
+        assertNotNull(inspectionHookElement.getInspectionPort().getIngressPort().getMacAddresses());
+        assertNotNull(inspectionHookElement.getInspectionPort().getIngressPort().getPortIPs());
+        assertNotNull(inspectionHookElement.getInspectionPort().getEgressPort());
+        assertNotNull(inspectionHookElement.getInspectionPort().getEgressPort().getMacAddresses());
+        assertNotNull(inspectionHookElement.getInspectionPort().getEgressPort().getPortIPs());
+        assertNotNull(inspectionHookElement.getInspectionPort().getIngressPort());
+        assertNotNull(inspectionHookElement.getInspectionPort().getEgressPort());
+        assertNotNull(inspectionHookElement.getInspectedPort().getMacAddresses());
+        assertNotNull(inspectionHookElement.getInspectedPort().getPortIPs());
+    }
+
+    @Test
+    public void testApiGetInspectionHook() throws Exception {
+        this.redirApi = new SampleSdnRedirectionApi(this.txControl, this.em);
+
+        InspectionPortEntity inspectionPortElement = new InspectionPortEntity(null, this.ingress, this.egress);
+
+        InspectionHookElement foundInspectionHook = this.redirApi.getInspectionHook(this.inspected, inspectionPortElement);
+        assertEquals("Inspection Hook already in the database before installed!", null, foundInspectionHook);
+
+        // expected before installInspectionHook
+        this.redirApi.registerInspectionPort(inspectionPortElement);
+
+        foundInspectionHook = this.redirApi.getInspectionHook(this.inspected, inspectionPortElement);
+        assertEquals("Inspection Hook already in the database before installed!", null, foundInspectionHook);
+
+        final String hookId = this.redirApi.installInspectionHook(Arrays.asList(this.inspected), inspectionPortElement,
+                                                                  0L, VLAN, 0L, NA);
+
+        assertNotNull(hookId);
+        foundInspectionHook = this.redirApi.getInspectionHook(this.inspected, inspectionPortElement);
+        assertNotNull("Not found Inspection Hook by ports after install!", foundInspectionHook);
+        foundInspectionHook = this.redirApi.getInspectionHook(hookId);
+        assertNotNull("Not found Inspection Hook by id after install!", foundInspectionHook);
+    }
+
+    @Test
+    public void testApiRemoveInspectionHookByPorts_InspectionHookDisappears() throws Exception {
+        this.redirApi = new SampleSdnRedirectionApi(this.txControl, this.em);
+
+        InspectionPortEntity inspectionPortElement = new InspectionPortEntity(null, this.ingress, this.egress);
+
+        // expected before installInspectionHook
+        Element registeredElement = this.redirApi.registerInspectionPort(inspectionPortElement);
+
+        assertNotNull(registeredElement);
+        assertNotNull(registeredElement.getElementId());
+
+        final String hookId = this.redirApi.installInspectionHook(Arrays.asList(this.inspected), inspectionPortElement,
+                                                                  0L, VLAN, 0L, NA);
+
+        assertNotNull(hookId);
+
+        InspectionHookEntity inspectionHookEntity = this.txControl.required(() -> {
+            InspectionHookEntity tmpInspectionHook = this.em.find(InspectionHookEntity.class, hookId);
+            return tmpInspectionHook;
+        });
+
+        assertNotNull(inspectionHookEntity);
+        assertEquals(hookId, inspectionHookEntity.getHookId());
+
+        this.redirApi.removeInspectionHook(Arrays.asList(inspectionHookEntity.getInspectedPort()),
+                                           inspectionHookEntity.getInspectionPort());
+
+        inspectionHookEntity = this.txControl.required(() -> {
+            InspectionHookEntity tmpInspectionHook = this.em.find(InspectionHookEntity.class, hookId);
+            return tmpInspectionHook;
+        });
+
+        assertEquals(null, inspectionHookEntity);
+    }
+
+    @Test
+    public void testApiRemoveInspectionHookById_InspectionHookDisappears() throws Exception {
+        this.redirApi = new SampleSdnRedirectionApi(this.txControl, this.em);
+
+        InspectionPortEntity inspectionPortElement = new InspectionPortEntity(null, this.ingress, this.egress);
+
+        // expected before installInspectionHook
+        Element registeredElement = this.redirApi.registerInspectionPort(inspectionPortElement);
+
+        assertNotNull(registeredElement);
+        assertNotNull(registeredElement.getElementId());
+
+        final String hookId = this.redirApi.installInspectionHook(Arrays.asList(this.inspected), inspectionPortElement,
+                                                                  0L, VLAN, 0L, NA);
+
+        assertNotNull(hookId);
+
+        InspectionHookEntity inspectionHookEntity = this.txControl.required(() -> {
+            InspectionHookEntity tmpInspectionHook = this.em.find(InspectionHookEntity.class, hookId);
+            return tmpInspectionHook;
+        });
+
+        assertNotNull(inspectionHookEntity);
+        assertEquals(hookId, inspectionHookEntity.getHookId());
+
+        this.redirApi.removeInspectionHook(inspectionHookEntity.getHookId());
+
+        inspectionHookEntity = this.txControl.required(() -> {
+            InspectionHookEntity tmpInspectionHook = this.em.find(InspectionHookEntity.class, hookId);
+            return tmpInspectionHook;
+        });
+
+        assertEquals(null, inspectionHookEntity);
+    }
+
+    @Test
+    public void testApiRemoveAllInspectionHooks_InspectionHookDisappears() throws Exception {
         this.redirApi = new SampleSdnRedirectionApi(this.txControl, this.em);
 
         InspectionPortEntity inspectionPortElement = new InspectionPortEntity(null, this.ingress, this.egress);
@@ -563,7 +665,7 @@ public class OSGiIntegrationTest {
     }
 
     @Test
-    public void testRemoveAllInspectionHooks_InspectedPortDisappears() throws Exception {
+    public void testApiRemoveAllInspectionHooks_InspectedPortDisappears() throws Exception {
         this.redirApi = new SampleSdnRedirectionApi(this.txControl, this.em);
 
         InspectionPortEntity inspectionPortElement = new InspectionPortEntity(null, this.ingress, this.egress);
@@ -603,7 +705,7 @@ public class OSGiIntegrationTest {
     }
 
     @Test
-    public void testRemoveAllInspectionHooks_PortPairRemains() throws Exception {
+    public void testApiRemoveAllInspectionHooks_PortPairRemains() throws Exception {
         this.redirApi = new SampleSdnRedirectionApi(this.txControl, this.em);
 
         InspectionPortEntity inspectionPortElement = new InspectionPortEntity(null, this.ingress, this.egress);
@@ -639,7 +741,7 @@ public class OSGiIntegrationTest {
     }
 
     @Test
-    public void testRemoveInspectionPort() throws Exception {
+    public void testApiRemoveInspectionPort() throws Exception {
         this.redirApi = new SampleSdnRedirectionApi(this.txControl, this.em);
 
         InspectionPortEntity inspectionPortElement = new InspectionPortEntity(null, this.ingress, this.egress);
@@ -663,6 +765,7 @@ public class OSGiIntegrationTest {
 
         // The inspectionPortElement does not have an id. Should still work.
         this.redirApi.removeInspectionPort(inspectionPortElement);
+
         foundInspectionPort = this.txControl.required(() -> {
             return this.em.find(InspectionPortEntity.class, elementId);
         });

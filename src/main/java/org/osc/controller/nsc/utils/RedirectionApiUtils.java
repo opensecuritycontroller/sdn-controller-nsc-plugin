@@ -106,7 +106,7 @@ public class RedirectionApiUtils {
         return retVal;
     }
 
-    public NetworkElementEntity networkElementEntityByElementId(String elementId) {
+    public NetworkElementEntity txNetworkElementEntityByElementId(String elementId) {
         CriteriaBuilder cb = this.em.getCriteriaBuilder();
 
         CriteriaQuery<NetworkElementEntity> q = cb.createQuery(NetworkElementEntity.class);
@@ -137,16 +137,16 @@ public class RedirectionApiUtils {
             @SuppressWarnings("unchecked")
             List<InspectionPortEntity> ports = q.getResultList();
             if (ports == null || ports.size() == 0) {
-                LOG.warn(String.format("No Inspection ports by ingress %s and egress %s", ingressId, egressId));
+                LOG.warn(String.format("No Inspection Ports by ingress %s and egress %s", ingressId, egressId));
                 return null;
             } else if (ports.size() > 1) {
-                LOG.warn(String.format("Multiple results! Inspection ports by ingress %s and egress %s", ingressId,
+                LOG.warn(String.format("Multiple results! Inspection Ports by ingress %s and egress %s", ingressId,
                         egressId));
             }
             return ports.get(0);
 
         } catch (Exception e) {
-            LOG.error(String.format("Finding Inspection ports by ingress %s and egress %s", ingress.getElementId(),
+            LOG.error(String.format("Finding Inspection Ports by ingress %s and egress %s", ingress.getElementId(),
                     egress.getElementId()), e);
             return null;
         }
@@ -155,8 +155,7 @@ public class RedirectionApiUtils {
     public InspectionHookEntity findInspHookByInspectedAndPort(NetworkElement inspected,
             InspectionPortElement element) {
         return this.txControl.required(() -> {
-            InspectionHookEntity e = txInspHookByInspectedAndPort(inspected, element);
-            return e;
+            return txInspHookByInspectedAndPort(inspected, element);
         });
     }
 
@@ -170,33 +169,39 @@ public class RedirectionApiUtils {
 
     public void removeSingleInspectionHook(String hookId) {
         if (hookId == null) {
+            LOG.warn("Attempt to remove Inspection Hook with null id");
             return;
         }
 
-        InspectionHookEntity inspectionHook = this.txControl.required(() -> {
-            return this.em.find(InspectionHookEntity.class, hookId);
-        });
-
-        NetworkElementEntity inspected = inspectionHook.getInspectedPort();
-
-        this.txControl.required(() -> {
+        String inspectedId  = this.txControl.required(() -> {
             InspectionHookEntity dbInspectionHook =
-            this.em.find(InspectionHookEntity.class, hookId);
+                    this.em.find(InspectionHookEntity.class, hookId);
+
+            if (dbInspectionHook == null) {
+                LOG.warn("Attempt to remove nonexistent Inspection Hook for id " + hookId);
+                return null;
+            }
+
             NetworkElementEntity dbInspectedPort = dbInspectionHook.getInspectedPort();
 
             dbInspectedPort.setInspectionHook(null);
             dbInspectionHook.setInspectedPort(null);
-            return null;
+            return dbInspectedPort.getElementId();
         });
 
-        this.txControl.required(() -> {
-            NetworkElementEntity tmpNE = this.em.find(NetworkElementEntity.class, inspected.getElementId());
+        if (inspectedId == null) {
+            return;
+        }
 
-            this.em.remove(tmpNE);
+        this.txControl.required(() -> {
+            NetworkElementEntity dbNetworkElement = this.em.find(NetworkElementEntity.class, inspectedId);
+
+            this.em.remove(dbNetworkElement);
 
             Query q = this.em.createQuery("DELETE FROM InspectionHookEntity WHERE hook_id = :id");
             q.setParameter("id", hookId);
             q.executeUpdate();
+
             return null;
         });
     }
@@ -248,13 +253,12 @@ public class RedirectionApiUtils {
     public void throwExceptionIfNullEntity(InspectionPortEntity inspectionPortTmp, InspectionPortElement inspectionPort)
             throws IllegalArgumentException {
         if (inspectionPortTmp == null) {
-            String ingressId = inspectionPort.getIngressPort() != null ? inspectionPort.getIngressPort().getElementId()
-                    : null;
-            String egressId = inspectionPort.getEgressPort() != null ? inspectionPort.getEgressPort().getElementId()
-                    : null;
             String msg = String.format(
-                    "Cannot find inspection port for inspection hook " + "id: %s; ingressId: %s; egressId: %s\n",
-                    inspectionPort.getElementId(), ingressId, egressId);
+                    "Cannot find inspection port for inspection hook " + "id: %s; ingress: %s; egress: %s\n",
+                    inspectionPort.getElementId(),
+                    "" + inspectionPort.getIngressPort(),
+                    "" + inspectionPort.getEgressPort());
+            LOG.error(msg);
             throw new IllegalArgumentException(msg);
         }
     }
