@@ -25,7 +25,9 @@ import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Root;
+import javax.persistence.metamodel.SingularAttribute;
 
 import org.apache.log4j.Logger;
 import org.osc.controller.nsc.entities.InspectionHookEntity;
@@ -129,9 +131,25 @@ public class RedirectionApiUtils {
         String ingressId = ingress != null ? ingress.getElementId() : null;
         String egressId = ingress != null ? egress.getElementId() : null;
 
-        Query q = this.em.createQuery("FROM InspectionPortEntity WHERE ingress_fk = :ingId AND egress_fk = :egId ");
-        q.setParameter("ingId", ingressId);
-        q.setParameter("egId", egressId);
+        CriteriaBuilder cb = this.em.getCriteriaBuilder();
+        CriteriaQuery<InspectionPortEntity> criteria = cb.createQuery(InspectionPortEntity.class);
+        Root<InspectionPortEntity> root = criteria.from(InspectionPortEntity.class);
+
+        SingularAttribute<? super InspectionPortEntity, NetworkElementEntity> ingressAttr =
+                this.em.getMetamodel()
+                       .entity(InspectionPortEntity.class)
+                       .getSingularAttribute("ingressPort", NetworkElementEntity.class);
+
+        SingularAttribute<? super InspectionPortEntity, NetworkElementEntity> egressAttr =
+                this.em.getMetamodel()
+                       .entity(InspectionPortEntity.class)
+                       .getSingularAttribute("egressPort", NetworkElementEntity.class);
+
+        Path<String> ingressIdPath = root.get(ingressAttr).get("elementId");
+        Path<String> egressIdPath = root.get(egressAttr).get("elementId");
+
+        criteria.where(cb.and(cb.equal(ingressIdPath, ingressId), cb.equal(egressIdPath, egressId)));
+        Query q= this.em.createQuery(criteria);
 
         try {
             @SuppressWarnings("unchecked")
@@ -227,10 +245,25 @@ public class RedirectionApiUtils {
 
         String portId = inspPort != null ? inspPort.getElementId() : null;
 
-        Query q = this.em.createQuery(
-                "FROM InspectionHookEntity WHERE inspected_port_fk = :inspectedId AND inspection_port_fk = :inspectionId ");
-        q.setParameter("inspectedId", inspectedId);
-        q.setParameter("inspectionId", portId);
+        CriteriaBuilder cb = this.em.getCriteriaBuilder();
+        CriteriaQuery<InspectionHookEntity> criteria = cb.createQuery(InspectionHookEntity.class);
+        Root<InspectionHookEntity> root = criteria.from(InspectionHookEntity.class);
+
+        SingularAttribute<? super InspectionHookEntity, NetworkElementEntity> inspectedPortAttr =
+                this.em.getMetamodel()
+                       .entity(InspectionHookEntity.class)
+                       .getSingularAttribute("inspectedPort", NetworkElementEntity.class);
+
+        SingularAttribute<? super InspectionHookEntity, InspectionPortEntity> inspectionPortAttr =
+                this.em.getMetamodel()
+                       .entity(InspectionHookEntity.class)
+                       .getSingularAttribute("inspectionPort", InspectionPortEntity.class);
+
+        Path<String> inspectedIdPath = root.get(inspectedPortAttr).get("elementId");
+        Path<String> inspectionIdPath  = root.get(inspectionPortAttr).get("elementId");
+
+        criteria.where(cb.and(cb.equal(inspectedIdPath, inspectedId), cb.equal(inspectionIdPath, portId)));
+        Query q= this.em.createQuery(criteria);
 
         try {
             @SuppressWarnings("unchecked")
@@ -248,6 +281,28 @@ public class RedirectionApiUtils {
             LOG.error(String.format("Finding Inspection hooks by inspected %s and port %s", inspectedId, portId), e);
             return null;
         }
+    }
+
+    public List<InspectionHookEntity> txInspectionHookEntitiesByInspected(String inspectedId) {
+
+        CriteriaBuilder cb = this.em.getCriteriaBuilder();
+        CriteriaQuery<InspectionHookEntity> criteria = cb.createQuery(InspectionHookEntity.class);
+        Root<InspectionHookEntity> root = criteria.from(InspectionHookEntity.class);
+
+        SingularAttribute<? super InspectionHookEntity, NetworkElementEntity> inspectedPortAttr =
+                this.em.getMetamodel()
+                       .entity(InspectionHookEntity.class)
+                       .getSingularAttribute("inspectedPort", NetworkElementEntity.class);
+
+        Path<String> inspectedIdPath = root.get(inspectedPortAttr).get("elementId");
+
+        criteria.where(cb.equal(inspectedIdPath, inspectedId));
+        Query q= this.em.createQuery(criteria);
+
+        @SuppressWarnings("unchecked")
+        List<InspectionHookEntity> results = q.getResultList();
+
+        return results;
     }
 
     public void throwExceptionIfNullEntity(InspectionPortEntity inspectionPortTmp, InspectionPortElement inspectionPort)
