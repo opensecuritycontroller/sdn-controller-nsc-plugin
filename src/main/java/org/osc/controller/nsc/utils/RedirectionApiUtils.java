@@ -25,9 +25,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Root;
-import javax.persistence.metamodel.SingularAttribute;
 
 import org.apache.log4j.Logger;
 import org.osc.controller.nsc.entities.InspectionHookEntity;
@@ -134,21 +132,9 @@ public class RedirectionApiUtils {
         CriteriaBuilder cb = this.em.getCriteriaBuilder();
         CriteriaQuery<InspectionPortEntity> criteria = cb.createQuery(InspectionPortEntity.class);
         Root<InspectionPortEntity> root = criteria.from(InspectionPortEntity.class);
-
-        SingularAttribute<? super InspectionPortEntity, NetworkElementEntity> ingressAttr =
-                this.em.getMetamodel()
-                       .entity(InspectionPortEntity.class)
-                       .getSingularAttribute("ingressPort", NetworkElementEntity.class);
-
-        SingularAttribute<? super InspectionPortEntity, NetworkElementEntity> egressAttr =
-                this.em.getMetamodel()
-                       .entity(InspectionPortEntity.class)
-                       .getSingularAttribute("egressPort", NetworkElementEntity.class);
-
-        Path<String> ingressIdPath = root.get(ingressAttr).get("elementId");
-        Path<String> egressIdPath = root.get(egressAttr).get("elementId");
-
-        criteria.where(cb.and(cb.equal(ingressIdPath, ingressId), cb.equal(egressIdPath, egressId)));
+        criteria.select(root).where(cb.and(
+                cb.equal(root.join("ingressPort").get("elementId"), ingressId),
+                cb.equal(root.join("egressPort").get("elementId"), egressId)));
         Query q= this.em.createQuery(criteria);
 
         try {
@@ -248,21 +234,9 @@ public class RedirectionApiUtils {
         CriteriaBuilder cb = this.em.getCriteriaBuilder();
         CriteriaQuery<InspectionHookEntity> criteria = cb.createQuery(InspectionHookEntity.class);
         Root<InspectionHookEntity> root = criteria.from(InspectionHookEntity.class);
-
-        SingularAttribute<? super InspectionHookEntity, NetworkElementEntity> inspectedPortAttr =
-                this.em.getMetamodel()
-                       .entity(InspectionHookEntity.class)
-                       .getSingularAttribute("inspectedPort", NetworkElementEntity.class);
-
-        SingularAttribute<? super InspectionHookEntity, InspectionPortEntity> inspectionPortAttr =
-                this.em.getMetamodel()
-                       .entity(InspectionHookEntity.class)
-                       .getSingularAttribute("inspectionPort", InspectionPortEntity.class);
-
-        Path<String> inspectedIdPath = root.get(inspectedPortAttr).get("elementId");
-        Path<String> inspectionIdPath  = root.get(inspectionPortAttr).get("elementId");
-
-        criteria.where(cb.and(cb.equal(inspectedIdPath, inspectedId), cb.equal(inspectionIdPath, portId)));
+        criteria.select(root).where(cb.and(
+                cb.equal(root.join("inspectedPort").get("elementId"), inspectedId),
+                cb.equal(root.join("inspectionPort").get("elementId"), portId)));
         Query q= this.em.createQuery(criteria);
 
         try {
@@ -289,14 +263,8 @@ public class RedirectionApiUtils {
         CriteriaQuery<InspectionHookEntity> criteria = cb.createQuery(InspectionHookEntity.class);
         Root<InspectionHookEntity> root = criteria.from(InspectionHookEntity.class);
 
-        SingularAttribute<? super InspectionHookEntity, NetworkElementEntity> inspectedPortAttr =
-                this.em.getMetamodel()
-                       .entity(InspectionHookEntity.class)
-                       .getSingularAttribute("inspectedPort", NetworkElementEntity.class);
+        criteria.select(root).where(cb.equal(root.join("inspectedPort").get("elementId"), inspectedId));
 
-        Path<String> inspectedIdPath = root.get(inspectedPortAttr).get("elementId");
-
-        criteria.where(cb.equal(inspectedIdPath, inspectedId));
         Query q= this.em.createQuery(criteria);
 
         @SuppressWarnings("unchecked")
