@@ -16,7 +16,7 @@
  *******************************************************************************/
 package org.osc.controller.nsc.api;
 
-import static java.util.Collections.*;
+import static java.util.Collections.singletonMap;
 import static org.osc.sdk.controller.Constants.*;
 import static org.osgi.service.jdbc.DataSourceFactory.*;
 
