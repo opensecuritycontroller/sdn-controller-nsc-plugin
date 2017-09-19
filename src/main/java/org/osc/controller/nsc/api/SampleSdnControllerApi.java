@@ -49,7 +49,8 @@ import org.osgi.service.transaction.control.jpa.JPAEntityManagerProviderFactory;
                  SUPPORT_FAILURE_POLICY + ":Boolean=false",
                  USE_PROVIDER_CREDS + ":Boolean=true",
                  QUERY_PORT_INFO + ":Boolean=false",
-                 SUPPORT_PORT_GROUP + ":Boolean=false" })
+                 SUPPORT_PORT_GROUP + ":Boolean=false",
+                 SUPPORT_NEUTRON_SFC + ":Boolean=false" })
 public class SampleSdnControllerApi implements SdnControllerApi {
 
     @Reference(target = "(osgi.local.enabled=true)")
