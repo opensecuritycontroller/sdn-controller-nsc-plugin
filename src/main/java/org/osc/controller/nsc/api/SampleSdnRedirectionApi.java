@@ -22,6 +22,7 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
+import org.apache.commons.lang.NotImplementedException;
 import org.apache.log4j.Logger;
 import org.osc.controller.nsc.entities.InspectionHookEntity;
 import org.osc.controller.nsc.entities.InspectionPortEntity;
@@ -81,7 +82,7 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
     @Override
     public String installInspectionHook(List<NetworkElement> inspectedPorts, InspectionPortElement inspectionPort,
             Long tag, TagEncapsulationType encType, Long order, FailurePolicyType failurePolicyType)
-            throws NetworkPortNotFoundException, Exception {
+                    throws NetworkPortNotFoundException, Exception {
 
         if (inspectedPorts == null || inspectedPorts.size() == 0) {
             throw new IllegalArgumentException("Attempt to install an Inspection Hook with no Inspected Port");
@@ -99,7 +100,7 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
         NetworkElement inspected = inspectedPorts.get(0);
 
         LOG.info(String.format("Installing Inspection Hook for (Inspected %s ; Inspection Port %s):", "" + inspected,
-                                "" + inspectionPort));
+                inspectionPort));
         LOG.info(String.format("Tag: %d; EncType: %s; Order: %d, Fail Policy: %s", tag, encType, order, failurePolicyType));
 
         InspectionHookEntity retValEntity = this.txControl.required(() -> {
@@ -110,7 +111,7 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
 
             if (inspectionHookEntity == null) {
                 inspectionHookEntity = this.utils.makeInspectionHookEntity(inspected, dbInspectionPort, tag,
-                                                                           encType, order, failurePolicyType);
+                        encType, order, failurePolicyType);
             }
 
             return this.em.merge(inspectionHookEntity);
@@ -376,6 +377,11 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
     }
 
     @Override
+    public NetworkElement getNetworkElementByDeviceOwnerId(String deviceOwnerId) throws Exception {
+        throw new NotImplementedException("Retrieving the network element given the device owner id is currently not supported.");
+    }
+
+    @Override
     public NetworkElement updateNetworkElement(NetworkElement portGroup, List<NetworkElement> inspectedPorts)
             throws Exception {
         // no-op
@@ -409,7 +415,7 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
             NetworkElement egress = inspectionPort.getEgressPort();
 
             LOG.warn(String.format("Attempt to remove nonexistent Inspection Port for ingress %s and egress %s",
-                                   "" + ingress, "" + egress));
+                    "" + ingress, "" + egress));
         }
     }
 
