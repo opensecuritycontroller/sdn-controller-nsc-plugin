@@ -18,15 +18,17 @@ package org.osc.controller.nsc.api;
 
 import static java.util.Arrays.asList;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import javax.persistence.EntityManager;
 
-import org.apache.commons.lang.NotImplementedException;
 import org.apache.log4j.Logger;
 import org.osc.controller.nsc.entities.InspectionHookEntity;
 import org.osc.controller.nsc.entities.InspectionPortEntity;
 import org.osc.controller.nsc.utils.RedirectionApiUtils;
+import org.osc.sdk.controller.DefaultNetworkPort;
 import org.osc.sdk.controller.FailurePolicyType;
 import org.osc.sdk.controller.TagEncapsulationType;
 import org.osc.sdk.controller.api.SdnRedirectionApi;
@@ -378,7 +380,13 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
 
     @Override
     public NetworkElement getNetworkElementByDeviceOwnerId(String deviceOwnerId) throws Exception {
-        throw new NotImplementedException("Retrieving the network element given the device owner id is currently not supported.");
+        // TODO emanoel: Add this as an entity in the plugin database.
+        DefaultNetworkPort devicePort = new DefaultNetworkPort(
+                deviceOwnerId + "-" + UUID.randomUUID().toString() + "-port-id",
+                deviceOwnerId + "-" + UUID.randomUUID().toString() + "-mac-address");
+        devicePort.setParentId(deviceOwnerId + "-" + UUID.randomUUID().toString() + "-parent-id");
+        devicePort.setPortIPs(Arrays.asList(deviceOwnerId + "-" + UUID.randomUUID().toString() + "-1.1.1.1"));
+        return devicePort;
     }
 
     @Override
