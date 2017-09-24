@@ -19,6 +19,7 @@ package org.osc.controller.nsc.utils;
 import static org.osc.sdk.controller.FailurePolicyType.NA;
 import static org.osc.sdk.controller.TagEncapsulationType.VLAN;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -121,6 +122,39 @@ public class RedirectionApiUtils {
         }
     }
 
+    public NetworkElementEntity findNetworkElementEntityByDeviceOwnerId(String deviceOwnerId) {
+        CriteriaBuilder cb = this.em.getCriteriaBuilder();
+
+        CriteriaQuery<NetworkElementEntity> q = cb.createQuery(NetworkElementEntity.class);
+        Root<NetworkElementEntity> r = q.from(NetworkElementEntity.class);
+        q.where(cb.equal(r.get("deviceOwnerId"), deviceOwnerId));
+        return this.txControl.required(() -> {
+            try {
+                return this.em.createQuery(q).getSingleResult();
+            } catch (Exception e) {
+                LOG.warn(String.format("Finding Network Element %s ", deviceOwnerId), e);
+                return null;
+            }
+        });
+    }
+
+    public List<NetworkElementEntity> findNetworkElementEntitiesByDeviceOwnerPrefixId(String deviceOwnerPrefixId) {
+        CriteriaBuilder cb = this.em.getCriteriaBuilder();
+
+        CriteriaQuery<NetworkElementEntity> q = cb.createQuery(NetworkElementEntity.class);
+        Root<NetworkElementEntity> r = q.from(NetworkElementEntity.class);
+        q.where(cb.like(r.get("deviceOwnerId"), deviceOwnerPrefixId + "%"));
+
+        return this.txControl.required(() -> {
+            try {
+                return this.em.createQuery(q).getResultList();
+            } catch (Exception e) {
+                LOG.error(String.format("Finding Network Elements with Prefix Id %s ", deviceOwnerPrefixId), e);
+                return new ArrayList<>();
+            }
+        });
+    }
+
     public InspectionPortEntity findInspPortByNetworkElements(NetworkElement ingress, NetworkElement egress) {
         return this.txControl.required(() -> txInspPortByNetworkElements(ingress, egress));
     }
@@ -213,10 +247,10 @@ public class RedirectionApiUtils {
     public void removeSingleInspectionPort(String inspectionPortId) {
         this.txControl.required(() -> {
 
-          Query q = this.em.createQuery("DELETE FROM InspectionPortEntity WHERE element_id = :id");
-          q.setParameter("id", inspectionPortId);
-          q.executeUpdate();
-          return null;
+            Query q = this.em.createQuery("DELETE FROM InspectionPortEntity WHERE element_id = :id");
+            q.setParameter("id", inspectionPortId);
+            q.executeUpdate();
+            return null;
         });
     }
 
