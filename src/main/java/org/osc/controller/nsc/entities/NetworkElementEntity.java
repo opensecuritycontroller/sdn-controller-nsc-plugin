@@ -44,6 +44,9 @@ public class NetworkElementEntity implements NetworkElement {
     @Column(name = "element_id", unique = true)
     private String elementId;
 
+    @Column(name = "device_owner_id")
+    private String deviceOwnerId;
+
     // TODO : for SFC functionality
     @Transient
     private String parentId;
@@ -51,14 +54,14 @@ public class NetworkElementEntity implements NetworkElement {
     @ElementCollection(fetch = EAGER)
     @Fetch(FetchMode.SELECT)
     @CollectionTable(name = "NETWORK_ELEMENT_MACADDRESSES",
-            joinColumns = @JoinColumn(name = "network_element_fk"),
-            foreignKey = @ForeignKey(name = "FK_NETWORK_ELEMENT_MACADDRESSES_NETWORK_ELEMENT"))
+    joinColumns = @JoinColumn(name = "network_element_fk"),
+    foreignKey = @ForeignKey(name = "FK_NETWORK_ELEMENT_MACADDRESSES_NETWORK_ELEMENT"))
     private List<String> macAddresses;
 
     @ElementCollection(fetch = EAGER)
     @CollectionTable(name = "NETWORK_ELEMENT_PORTIPS",
-            joinColumns = @JoinColumn(name = "network_element_fk"),
-            foreignKey = @ForeignKey(name = "FK_NETWORK_ELEMENT_PORTIPS_NETWORK_ELEMENT"))
+    joinColumns = @JoinColumn(name = "network_element_fk"),
+    foreignKey = @ForeignKey(name = "FK_NETWORK_ELEMENT_PORTIPS_NETWORK_ELEMENT"))
     private List<String> portIPs;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = false, fetch = EAGER, optional = true)

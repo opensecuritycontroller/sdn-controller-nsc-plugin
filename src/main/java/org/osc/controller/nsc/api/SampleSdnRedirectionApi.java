@@ -16,17 +16,15 @@
  *******************************************************************************/
 package org.osc.controller.nsc.api;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 
 import javax.persistence.EntityManager;
 
 import org.apache.log4j.Logger;
 import org.osc.controller.nsc.entities.InspectionHookEntity;
 import org.osc.controller.nsc.entities.InspectionPortEntity;
+import org.osc.controller.nsc.entities.NetworkElementEntity;
 import org.osc.controller.nsc.utils.RedirectionApiUtils;
-import org.osc.sdk.controller.DefaultNetworkPort;
 import org.osc.sdk.controller.FailurePolicyType;
 import org.osc.sdk.controller.TagEncapsulationType;
 import org.osc.sdk.controller.api.SdnRedirectionApi;
@@ -280,9 +278,7 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
             // must be within this transaction, because if the DB retrievals inside makeInspectionPortEntry
             // are inside the required() call themselves. That makes them a part of a separate transaction
 
-            NetworkElement ingress = inspectionPort.getIngressPort();
-            NetworkElement egress = inspectionPort.getEgressPort();
-            InspectionPortEntity inspectionPortEntity = this.utils.findInspPortByNetworkElements(ingress, egress);
+            InspectionPortEntity inspectionPortEntity = (InspectionPortEntity) getInspectionPort(inspectionPort);
 
             if (inspectionPortEntity == null) {
                 inspectionPortEntity = this.utils.makeInspectionPortEntity(inspectionPort);
@@ -359,12 +355,29 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
 
     @Override
     public NetworkElement getNetworkElementByDeviceOwnerId(String deviceOwnerId) throws Exception {
-        // TODO emanoel: Add this as an entity in the plugin database.
-        DefaultNetworkPort devicePort = new DefaultNetworkPort(
-                deviceOwnerId + "-" + UUID.randomUUID().toString() + "-port-id",
-                deviceOwnerId + "-" + UUID.randomUUID().toString() + "-mac-address");
-        devicePort.setParentId(deviceOwnerId + "-" + UUID.randomUUID().toString() + "-parent-id");
-        devicePort.setPortIPs(Arrays.asList(deviceOwnerId + "-" + UUID.randomUUID().toString() + "-1.1.1.1"));
+        // For ports belonging to a security group we should find an exact match (pre-populated in the plugin DB using information from kubernetes)
+        NetworkElement devicePort = this.utils.findNetworkElementEntityByDeviceOwnerId(deviceOwnerId);
+
+        if (devicePort != null) {
+            return devicePort;
+        }
+
+        // If did not find an exact match we will try to find the ports assigned to pods using the prefix of the id.
+        // This prefix is the deployment spec name in OSC which is easy to predict and therefore pre-populate in the plugin DB to facilitate demos.
+        String[] deviceOwnerIdParts = deviceOwnerId.split("-");
+
+        String deviceOwnerPrefixId = deviceOwnerIdParts[0];
+        String deviceId = deviceOwnerIdParts[deviceOwnerIdParts.length - 1];
+
+        List<NetworkElementEntity> devicePorts = this.utils.findNetworkElementEntitiesByDeviceOwnerPrefixId(deviceOwnerPrefixId);
+
+        if (!devicePorts.isEmpty()) {
+            // We will return any port that matches this prefix, we are using a mod hash here to add some level of randomness.
+            int index = Math.abs(deviceId.hashCode() % devicePorts.size());
+            devicePort = devicePorts.get(index);
+            LOG.info(String.format("Returning device port index %s id %s", index, devicePort.getElementId()));
+        }
+
         return devicePort;
     }
 
