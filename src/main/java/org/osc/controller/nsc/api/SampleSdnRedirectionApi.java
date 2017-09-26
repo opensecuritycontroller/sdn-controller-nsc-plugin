@@ -17,6 +17,7 @@
 package org.osc.controller.nsc.api;
 
 import java.util.List;
+import java.util.UUID;
 
 import javax.persistence.EntityManager;
 
@@ -25,6 +26,7 @@ import org.osc.controller.nsc.entities.InspectionHookEntity;
 import org.osc.controller.nsc.entities.InspectionPortEntity;
 import org.osc.controller.nsc.entities.NetworkElementEntity;
 import org.osc.controller.nsc.utils.RedirectionApiUtils;
+import org.osc.sdk.controller.DefaultNetworkPort;
 import org.osc.sdk.controller.FailurePolicyType;
 import org.osc.sdk.controller.TagEncapsulationType;
 import org.osc.sdk.controller.api.SdnRedirectionApi;
@@ -350,7 +352,10 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
 
     @Override
     public NetworkElement registerNetworkElement(List<NetworkElement> inspectedPorts) throws Exception {
-        return null;
+        // TODO emanoel: Create a port group entity in the db.
+        DefaultNetworkPort netElement =  new DefaultNetworkPort(UUID.randomUUID().toString(), UUID.randomUUID().toString() + "-mac");
+        netElement.setParentId(UUID.randomUUID().toString());
+        return netElement;
     }
 
     @Override
@@ -384,8 +389,8 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
     @Override
     public NetworkElement updateNetworkElement(NetworkElement portGroup, List<NetworkElement> inspectedPorts)
             throws Exception {
-        // no-op
-        return null;
+        // TODO emanoel: Add a port group entity in the DB.
+        return portGroup;
     }
 
     @Override
