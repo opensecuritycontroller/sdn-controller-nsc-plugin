@@ -30,7 +30,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
@@ -47,8 +46,7 @@ public class NetworkElementEntity implements NetworkElement {
     @Column(name = "device_owner_id")
     private String deviceOwnerId;
 
-    // TODO : for SFC functionality
-    @Transient
+    @Column(name = "parent_id")
     private String parentId;
 
     @ElementCollection(fetch = EAGER)
