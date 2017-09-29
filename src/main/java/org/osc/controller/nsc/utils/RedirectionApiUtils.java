@@ -201,8 +201,38 @@ public class RedirectionApiUtils {
         return this.em.find(InspectionPortEntity.class, id);
     }
 
+    public List<InspectionHookEntity> txInspectionHookEntities(String inspectionPort) {
+        CriteriaBuilder criteriaBuilder = this.em.getCriteriaBuilder();
+
+        CriteriaQuery<InspectionHookEntity> query = criteriaBuilder.createQuery(InspectionHookEntity.class);
+        Root<InspectionHookEntity> r = query.from(InspectionHookEntity.class);
+        query.select(r).where(criteriaBuilder.equal(r.join("inspectionPort").get("elementId"), inspectionPort));
+
+        return this.em.createQuery(query).getResultList();
+    }
+
+    public List<InspectionPortEntity> txInspectionPortEntities() {
+        CriteriaBuilder criteriaBuilder = this.em.getCriteriaBuilder();
+
+        CriteriaQuery<InspectionPortEntity> query = criteriaBuilder.createQuery(InspectionPortEntity.class);
+        Root<InspectionPortEntity> r = query.from(InspectionPortEntity.class);
+        query.select(r);
+
+        return this.em.createQuery(query).getResultList();
+    }
+
     public NetworkElementEntity txNetworkElementEntityById(Long id) {
         return this.em.find(NetworkElementEntity.class, id);
+    }
+
+    public List<NetworkElementEntity> txNetworkElementEntities() {
+        CriteriaBuilder criteriaBuilder = this.em.getCriteriaBuilder();
+
+        CriteriaQuery<NetworkElementEntity> query = criteriaBuilder.createQuery(NetworkElementEntity.class);
+        Root<NetworkElementEntity> r = query.from(NetworkElementEntity.class);
+        query.select(r);
+
+        return this.em.createQuery(query).getResultList();
     }
 
     public void removeSingleInspectionHook(String hookId) {

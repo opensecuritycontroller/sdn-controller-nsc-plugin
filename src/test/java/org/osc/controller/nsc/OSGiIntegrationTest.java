@@ -129,6 +129,26 @@ public class OSGiIntegrationTest {
                     mavenBundle("org.apache.aries.tx-control", "tx-control-service-local").versionAsInProject(),
                     mavenBundle("org.apache.aries.tx-control", "tx-control-provider-jpa-local").versionAsInProject(),
                     mavenBundle("com.h2database", "h2").versionAsInProject(),
+                    mavenBundle("javax.servlet", "javax.servlet-api").versionAsInProject(),
+                    mavenBundle("javax.ws.rs", "javax.ws.rs-api").versionAsInProject(),
+                    mavenBundle("org.glassfish.jersey.core", "jersey-server").versionAsInProject(),
+                    mavenBundle("org.glassfish.jersey.containers", "jersey-container-servlet-core")
+                            .versionAsInProject(),
+                    mavenBundle("javax.annotation", "javax.annotation-api").versionAsInProject(),
+                    mavenBundle("javax.validation", "validation-api").versionAsInProject(),
+                    mavenBundle("org.glassfish.jersey.bundles.repackaged", "jersey-guava").versionAsInProject(),
+                    mavenBundle("org.glassfish.hk2", "hk2-api").versionAsInProject(),
+                    mavenBundle("org.glassfish.hk2.external", "aopalliance-repackaged").versionAsInProject(),
+                    mavenBundle("org.glassfish.hk2", "hk2-utils").versionAsInProject(),
+                    mavenBundle("org.glassfish.jersey.core", "jersey-common").versionAsInProject(),
+                    mavenBundle("org.glassfish.hk2", "osgi-resource-locator").versionAsInProject(),
+                    mavenBundle("org.glassfish.jersey.core", "jersey-client").versionAsInProject(),
+                    mavenBundle("org.glassfish.hk2", "hk2-locator").versionAsInProject(),
+                    mavenBundle("com.fasterxml.jackson.jaxrs", "jackson-jaxrs-json-provider").versionAsInProject(),
+                    mavenBundle("com.fasterxml.jackson.core", "jackson-annotations").versionAsInProject(),
+                    mavenBundle("com.fasterxml.jackson.core", "jackson-core").versionAsInProject(),
+                    mavenBundle("com.fasterxml.jackson.core", "jackson-databind").versionAsInProject(),
+                    mavenBundle("com.fasterxml.jackson.jaxrs", "jackson-jaxrs-base").versionAsInProject(),
 
                     // Hibernate
 
@@ -137,9 +157,9 @@ public class OSGiIntegrationTest {
                     systemPackage("javax.transaction.xa;version=1.1"),
 
                     mavenBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.antlr")
-                            .versionAsInProject(),
+                    .versionAsInProject(),
                     mavenBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.dom4j")
-                            .versionAsInProject(),
+                    .versionAsInProject(),
                     mavenBundle("org.javassist", "javassist").versionAsInProject(),
                     mavenBundle("org.jboss.logging", "jboss-logging").versionAsInProject(),
                     mavenBundle("org.jboss", "jandex").versionAsInProject(),
@@ -158,7 +178,7 @@ public class OSGiIntegrationTest {
                     //                    CoreOptions.vmOption("-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=1044"),
 
                     bootClasspathLibrary(mavenBundle("org.apache.geronimo.specs", "geronimo-jta_1.1_spec", "1.1.1"))
-                            .beforeFramework(),
+                    .beforeFramework(),
                     junitBundles());
         } catch (Throwable t) {
 
