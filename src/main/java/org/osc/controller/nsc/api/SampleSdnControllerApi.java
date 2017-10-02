@@ -17,6 +17,7 @@
 package org.osc.controller.nsc.api;
 
 import static java.util.Collections.singletonMap;
+import static org.osc.controller.nsc.utils.RedirectionApiUtils.SUPPORTS_PORT_GROUP_VALUE;
 import static org.osc.sdk.controller.Constants.*;
 import static org.osgi.service.jdbc.DataSourceFactory.*;
 
@@ -43,16 +44,15 @@ import org.osgi.service.transaction.control.TransactionControl;
 import org.osgi.service.transaction.control.jpa.JPAEntityManagerProviderFactory;
 
 @Component(configurationPid = "com.intel.nsc.SdnController",
-    property = { PLUGIN_NAME + "=NSC",
-                 SUPPORT_OFFBOX_REDIRECTION + ":Boolean=false",
-                 SUPPORT_SFC + ":Boolean=false",
-                 SUPPORT_FAILURE_POLICY + ":Boolean=false",
-                 USE_PROVIDER_CREDS + ":Boolean=true",
-                 QUERY_PORT_INFO + ":Boolean=false",
-                 SUPPORT_PORT_GROUP + ":Boolean=false",
-                 SUPPORT_NEUTRON_SFC + ":Boolean=false" })
+property = { PLUGIN_NAME + "=NSC",
+        SUPPORT_OFFBOX_REDIRECTION + ":Boolean=false",
+        SUPPORT_SFC + ":Boolean=false",
+        SUPPORT_FAILURE_POLICY + ":Boolean=false",
+        USE_PROVIDER_CREDS + ":Boolean=true",
+        QUERY_PORT_INFO + ":Boolean=false",
+        SUPPORT_PORT_GROUP + SUPPORTS_PORT_GROUP_VALUE,
+        SUPPORT_NEUTRON_SFC + ":Boolean=false" })
 public class SampleSdnControllerApi implements SdnControllerApi {
-
     @Reference(target = "(osgi.local.enabled=true)")
     private TransactionControl txControl;
 

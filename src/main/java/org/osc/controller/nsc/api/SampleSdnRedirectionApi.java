@@ -17,7 +17,6 @@
 package org.osc.controller.nsc.api;
 
 import java.util.List;
-import java.util.UUID;
 
 import javax.persistence.EntityManager;
 
@@ -25,8 +24,8 @@ import org.apache.log4j.Logger;
 import org.osc.controller.nsc.entities.InspectionHookEntity;
 import org.osc.controller.nsc.entities.InspectionPortEntity;
 import org.osc.controller.nsc.entities.NetworkElementEntity;
+import org.osc.controller.nsc.entities.PortGroupEntity;
 import org.osc.controller.nsc.utils.RedirectionApiUtils;
-import org.osc.sdk.controller.DefaultNetworkPort;
 import org.osc.sdk.controller.FailurePolicyType;
 import org.osc.sdk.controller.TagEncapsulationType;
 import org.osc.sdk.controller.api.SdnRedirectionApi;
@@ -351,14 +350,6 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
     }
 
     @Override
-    public NetworkElement registerNetworkElement(List<NetworkElement> inspectedPorts) throws Exception {
-        // TODO emanoel: Create a port group entity in the db.
-        DefaultNetworkPort netElement =  new DefaultNetworkPort(UUID.randomUUID().toString(), UUID.randomUUID().toString() + "-mac");
-        netElement.setParentId(UUID.randomUUID().toString());
-        return netElement;
-    }
-
-    @Override
     public NetworkElement getNetworkElementByDeviceOwnerId(String deviceOwnerId) throws Exception {
         // For ports belonging to a security group we should find an exact match (pre-populated in the plugin DB using information from kubernetes)
         NetworkElement devicePort = this.utils.findNetworkElementEntityByDeviceOwnerId(deviceOwnerId);
@@ -387,19 +378,66 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
     }
 
     @Override
-    public NetworkElement updateNetworkElement(NetworkElement portGroup, List<NetworkElement> inspectedPorts)
-            throws Exception {
-        // TODO emanoel: Add a port group entity in the DB.
-        return portGroup;
+    public NetworkElement registerNetworkElement(List<NetworkElement> inspectedPorts) throws Exception {
+        if (!RedirectionApiUtils.supportsPortGroup()) {
+            throw new UnsupportedOperationException("Registering a network element is only supported for SDN supporting port group.");
+        }
+
+        PortGroupEntity newPortGroupEntity = this.utils.makePortGroupEntity(inspectedPorts);
+        return this.txControl.required(() -> {
+            return this.em.merge(newPortGroupEntity);
+        });
     }
 
     @Override
-    public void deleteNetworkElement(NetworkElement portGroupId) throws Exception {
-        // no-op
+    public NetworkElement updateNetworkElement(NetworkElement portGroup, List<NetworkElement> inspectedPorts)
+            throws Exception {
+        if (!RedirectionApiUtils.supportsPortGroup()) {
+            throw new UnsupportedOperationException("Updating a network element is only supported for SDN supporting port group.");
+        }
+
+        this.utils.throwExceptionIfNullElement(portGroup, "Null passed for the portGroup paramater");
+
+        return this.txControl.required(() -> {
+            PortGroupEntity portGroupEntity = this.utils.txPortGroupEntity(portGroup.getElementId(), portGroup.getParentId());
+
+            if (portGroupEntity == null) {
+                throw new IllegalArgumentException(String.format("No port group entity found for the id '%s' and parentId %s", portGroup.getElementId(), portGroup.getParentId()));
+            }
+
+            portGroupEntity.setVirtualPorts(this.utils.networkElementsToEntities(inspectedPorts));
+            return this.em.merge(portGroupEntity);
+        });
+    }
+
+    @Override
+    public void deleteNetworkElement(NetworkElement portGroup) throws Exception {
+        if (!RedirectionApiUtils.supportsPortGroup()) {
+            throw new UnsupportedOperationException("Deleting a network element is only supported for SDN supporting port group.");
+        }
+
+        this.txControl.required(() -> {
+            PortGroupEntity portGroupEntity = this.utils.txPortGroupEntity(portGroup.getElementId(), portGroup.getParentId());
+
+            if (portGroupEntity == null) {
+                LOG.info(String.format("No port group entity found for the id '%s' and parentId %s while deleting a port group. Noop.", portGroup.getElementId(), portGroup.getParentId()));
+                return null;
+            }
+
+            portGroupEntity.getVirtualPorts().forEach(virtualPort -> virtualPort.setPortGroup(null));
+            portGroupEntity.getVirtualPorts().clear();
+            this.em.remove(portGroupEntity);
+
+            return null;
+        });
     }
 
     @Override
     public List<NetworkElement> getNetworkElements(NetworkElement element) throws Exception {
+        if (!RedirectionApiUtils.supportsPortGroup()) {
+            throw new UnsupportedOperationException("Retrieving the network elements is only supported for SDN supporting port group.");
+        }
+
         return null;
     }
 
