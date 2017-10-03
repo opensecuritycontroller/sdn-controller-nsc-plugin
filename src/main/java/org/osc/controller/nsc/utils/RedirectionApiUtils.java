@@ -30,7 +30,6 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
-import org.apache.log4j.Logger;
 import org.osc.controller.nsc.entities.InspectionHookEntity;
 import org.osc.controller.nsc.entities.InspectionPortEntity;
 import org.osc.controller.nsc.entities.NetworkElementEntity;
@@ -40,10 +39,14 @@ import org.osc.sdk.controller.TagEncapsulationType;
 import org.osc.sdk.controller.element.InspectionPortElement;
 import org.osc.sdk.controller.element.NetworkElement;
 import org.osgi.service.transaction.control.TransactionControl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RedirectionApiUtils {
+
+
     public final static String SUPPORTS_PORT_GROUP_VALUE = ":Boolean=false";
-    private static final Logger LOG = Logger.getLogger(RedirectionApiUtils.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RedirectionApiUtils.class);
 
     private TransactionControl txControl;
     private EntityManager em;
