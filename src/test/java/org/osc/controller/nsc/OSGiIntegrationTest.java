@@ -150,7 +150,8 @@ public class OSGiIntegrationTest {
                     mavenBundle("com.fasterxml", "classmate").versionAsInProject(),
                     mavenBundle("org.javassist", "javassist").versionAsInProject(),
 
-                    mavenBundle("log4j", "log4j").versionAsInProject(),
+                    mavenBundle("slf4j-api", "slf4j-api").versionAsInProject(),
+                    mavenBundle("slf4j-simple", "slf4j-simple").versionAsInProject(),
 
                     mavenBundle("org.apache.directory.studio", "org.apache.commons.lang").versionAsInProject(),
 

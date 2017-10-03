@@ -21,10 +21,10 @@ import java.util.UUID;
 
 import javax.persistence.EntityManager;
 
-import org.apache.log4j.Logger;
 import org.osc.controller.nsc.entities.InspectionHookEntity;
 import org.osc.controller.nsc.entities.InspectionPortEntity;
 import org.osc.controller.nsc.entities.NetworkElementEntity;
+import org.osc.controller.nsc.utils.LogProvider;
 import org.osc.controller.nsc.utils.RedirectionApiUtils;
 import org.osc.sdk.controller.DefaultNetworkPort;
 import org.osc.sdk.controller.FailurePolicyType;
@@ -36,10 +36,11 @@ import org.osc.sdk.controller.element.InspectionPortElement;
 import org.osc.sdk.controller.element.NetworkElement;
 import org.osc.sdk.controller.exception.NetworkPortNotFoundException;
 import org.osgi.service.transaction.control.TransactionControl;
+import org.slf4j.Logger;
 
 public class SampleSdnRedirectionApi implements SdnRedirectionApi {
 
-    private static final Logger LOG = Logger.getLogger(SampleSdnRedirectionApi.class);
+    private static final Logger LOG = LogProvider.getLogger(SampleSdnRedirectionApi.class);
 
     private TransactionControl txControl;
     private EntityManager em;
