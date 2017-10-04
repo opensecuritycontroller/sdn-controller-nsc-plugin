@@ -16,19 +16,25 @@
  *******************************************************************************/
 package org.osc.controller.nsc.utils;
 
+import static org.osgi.service.component.annotations.ReferencePolicyOption.GREEDY;
+
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
 
 @Component
 public class LogProvider {
+    private static ConcurrentHashMap<String, Logger> loggerCache = new ConcurrentHashMap<>();
 
     private static ILoggerFactory loggerFactory;
 
-    @Reference
+    @Reference(cardinality=ReferenceCardinality.OPTIONAL, policyOption=GREEDY)
     public void setLoggerFactoryInst(ILoggerFactory instance) {
-        loggerFactory = instance;
+        setLoggerFactory(instance);
     }
 
     public static Logger getLogger(Object object) {
@@ -45,6 +51,14 @@ public class LogProvider {
             className = object.getClass().getName();
         }
 
-        return loggerFactory.getLogger(className);
+        if (!loggerCache.containsKey(className)) {
+            loggerCache.put(className, new LoggerProxy(className, loggerFactory));
+        }
+
+        return loggerCache.get(className);
+    }
+
+    public static void setLoggerFactory(ILoggerFactory instance) {
+        loggerFactory = instance;
     }
 }
