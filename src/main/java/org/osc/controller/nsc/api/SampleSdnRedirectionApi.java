@@ -438,6 +438,7 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
             throw new UnsupportedOperationException("Retrieving the network elements is only supported for SDN supporting port group.");
         }
 
+        // TODO emanoel: This method is currently not referenced by OSC.
         return null;
     }
 
