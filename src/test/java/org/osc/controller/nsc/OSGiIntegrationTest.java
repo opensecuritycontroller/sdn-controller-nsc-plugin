@@ -151,6 +151,8 @@ public class OSGiIntegrationTest {
                     mavenBundle("org.javassist", "javassist").versionAsInProject(),
 
                     mavenBundle("org.slf4j", "slf4j-api").versionAsInProject(),
+                    // Fragment bundles cannot be started
+                    mavenBundle("org.slf4j", "slf4j-simple").versionAsInProject().noStart(),
 
                     mavenBundle("org.apache.directory.studio", "org.apache.commons.lang").versionAsInProject(),
 
