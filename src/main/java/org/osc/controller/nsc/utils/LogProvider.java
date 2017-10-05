@@ -20,15 +20,22 @@ import static org.osgi.service.component.annotations.ReferencePolicyOption.GREED
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
 
+/**
+ * This component Takes the properly initialized {@link ILoggerFactory}
+ * service from OSGi uses it to create {@link Logger} objects for other
+ * classes via a static {@code getLogger} method.
+ *
+ * @see org.osc.core.broker.util.log
+ * @see org.osc.core.server.Server
+ */
 @Component
 public class LogProvider {
-    static ILoggerFactory loggerFactory;
+    private static ILoggerFactory loggerFactory;
 
-    @Reference(cardinality=ReferenceCardinality.OPTIONAL, policyOption=GREEDY)
+    @Reference(policyOption=GREEDY)
     public void setLoggerFactoryInst(ILoggerFactory instance) {
         setLoggerFactory(instance);
     }
@@ -41,7 +48,11 @@ public class LogProvider {
         return new LoggerProxy(clazz.getName());
     }
 
-    public static void setLoggerFactory(ILoggerFactory instance) {
+    public static ILoggerFactory getLoggerFactory() {
+        return loggerFactory;
+    }
+
+    private static void setLoggerFactory(ILoggerFactory instance) {
         loggerFactory = instance;
     }
 }

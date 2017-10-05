@@ -16,12 +16,17 @@
  *******************************************************************************/
 package org.osc.controller.nsc.utils;
 
-import static org.osc.controller.nsc.utils.LogProvider.loggerFactory;
+import static org.osc.controller.nsc.utils.LogProvider.getLoggerFactory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
 
+/**
+ * Wrapper around the properly initialized {@link Logger}, once available from {@link LogProvider}.
+ * Delegates all the calls to that logger or to a standin logger in the meanwhile.
+ *
+ */
 class LoggerProxy implements Logger {
 
     private Logger properLogger;
@@ -343,8 +348,8 @@ class LoggerProxy implements Logger {
             return this.properLogger;
         }
 
-        if (loggerFactory != null) {
-            Logger implToUse = loggerFactory.getLogger(this.className);
+        if (getLoggerFactory() != null) {
+            Logger implToUse = getLoggerFactory().getLogger(this.className);
             synchronized (this) {
                 if (this.properLogger == null) {
                     this.properLogger = implToUse;
