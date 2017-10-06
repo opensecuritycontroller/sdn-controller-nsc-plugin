@@ -29,7 +29,9 @@ import javax.servlet.ServletResponse;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.ServerProperties;
 import org.glassfish.jersey.servlet.ServletContainer;
-import org.osc.controller.nsc.restserver.api.InspectionApis;
+import org.osc.controller.nsc.restserver.api.InspectionHookApis;
+import org.osc.controller.nsc.restserver.api.InspectionPortApis;
+import org.osc.controller.nsc.restserver.api.NetworkElementApis;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -45,7 +47,11 @@ import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
 public class SampleSdnServletDelegate extends ResourceConfig implements Servlet {
     static final long serialVersionUID = 1L;
     @Reference
-    private InspectionApis inspectionApis;
+    private InspectionPortApis inspectionPortApis;
+    @Reference
+    private NetworkElementApis networkElementApis;
+    @Reference
+    private InspectionHookApis inspectionHookApis;
     /** The Jersey REST container */
     private ServletContainer container;
 
@@ -53,7 +59,7 @@ public class SampleSdnServletDelegate extends ResourceConfig implements Servlet 
     void activate() throws Exception {
         super.register(JacksonJaxbJsonProvider.class);
         super.property(ServerProperties.FEATURE_AUTO_DISCOVERY_DISABLE, true);
-        super.registerInstances(this.inspectionApis);
+        super.registerInstances(this.inspectionPortApis, this.networkElementApis, this.inspectionHookApis);
         this.container = new ServletContainer(this);
     }
 

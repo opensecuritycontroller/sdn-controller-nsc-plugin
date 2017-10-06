@@ -91,7 +91,7 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
             throw new IllegalArgumentException("Attempt to install an Inspection Hook with null Inspection Port");
         }
 
-        LOG.info(String.format("Installing Inspection Hook for (Inspected %s ; Inspection Port %s):", "" + inspectedPort,
+        LOG.info(String.format("Installing Inspection Hook for (Inspected %s ; Inspection Port %s):", inspectedPort,
                 inspectionPort));
         LOG.info(String.format("Tag: %d; EncType: %s; Order: %d, Fail Policy: %s", tag, encType, order, failurePolicyType));
 
@@ -104,6 +104,11 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
             if (inspectionHookEntity == null) {
                 inspectionHookEntity = this.utils.makeInspectionHookEntity(inspectedPort, dbInspectionPort, tag,
                         encType, order, failurePolicyType);
+            } else {
+                inspectionHookEntity.setEncType(encType);
+                inspectionHookEntity.setOrder(order);
+                inspectionHookEntity.setFailurePolicyType(failurePolicyType);
+                inspectionHookEntity.setTag(tag);
             }
 
             return this.em.merge(inspectionHookEntity);

@@ -201,12 +201,12 @@ public class RedirectionApiUtils {
         return this.em.find(InspectionPortEntity.class, id);
     }
 
-    public List<InspectionHookEntity> txInspectionHookEntities(String inspectionPort) {
+    public List<InspectionHookEntity> txInspectionHookEntities() {
         CriteriaBuilder criteriaBuilder = this.em.getCriteriaBuilder();
 
         CriteriaQuery<InspectionHookEntity> query = criteriaBuilder.createQuery(InspectionHookEntity.class);
         Root<InspectionHookEntity> r = query.from(InspectionHookEntity.class);
-        query.select(r).where(criteriaBuilder.equal(r.join("inspectionPort").get("elementId"), inspectionPort));
+        query.select(r);
 
         return this.em.createQuery(query).getResultList();
     }
