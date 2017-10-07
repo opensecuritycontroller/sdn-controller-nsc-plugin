@@ -28,6 +28,7 @@ import javax.persistence.Entity;
 import javax.persistence.ForeignKey;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
@@ -65,6 +66,10 @@ public class NetworkElementEntity implements NetworkElement {
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = false, fetch = EAGER, optional = true)
     @JoinColumn(name = "inspection_hook_fk", nullable = true, updatable = true)
     private InspectionHookEntity inspectionHook;
+
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH}, fetch = EAGER, optional = true)
+    @JoinColumn(name = "port_group_fk", nullable = true, updatable = true)
+    private PortGroupEntity portGroup;
 
     public NetworkElementEntity() {
     }
@@ -116,6 +121,18 @@ public class NetworkElementEntity implements NetworkElement {
     @Override
     public String getParentId() {
         return this.parentId;
+    }
+
+    public void setParentId(String parentId) {
+        this.parentId = parentId;
+    }
+
+    public PortGroupEntity getPortGroup() {
+        return this.portGroup;
+    }
+
+    public void setPortGroup(PortGroupEntity portGroupEntity) {
+        this.portGroup = portGroupEntity;
     }
 
     @Override

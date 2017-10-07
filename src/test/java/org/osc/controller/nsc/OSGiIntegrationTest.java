@@ -26,8 +26,10 @@ import static org.osgi.service.jdbc.DataSourceFactory.*;
 
 import java.io.File;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -47,6 +49,7 @@ import org.osc.controller.nsc.api.SampleSdnRedirectionApi;
 import org.osc.controller.nsc.entities.InspectionHookEntity;
 import org.osc.controller.nsc.entities.InspectionPortEntity;
 import org.osc.controller.nsc.entities.NetworkElementEntity;
+import org.osc.controller.nsc.entities.PortGroupEntity;
 import org.osc.controller.nsc.utils.RedirectionApiUtils;
 import org.osc.sdk.controller.api.SdnControllerApi;
 import org.osc.sdk.controller.element.Element;
@@ -170,7 +173,9 @@ public class OSGiIntegrationTest {
                     mavenBundle("com.fasterxml", "classmate").versionAsInProject(),
                     mavenBundle("org.javassist", "javassist").versionAsInProject(),
 
-                    mavenBundle("log4j", "log4j").versionAsInProject(),
+                    mavenBundle("org.slf4j", "slf4j-api").versionAsInProject(),
+                    mavenBundle("ch.qos.logback", "logback-core").versionAsInProject(),
+                    mavenBundle("ch.qos.logback", "logback-classic").versionAsInProject(),
 
                     mavenBundle("org.apache.directory.studio", "org.apache.commons.lang").versionAsInProject(),
 
@@ -487,7 +492,6 @@ public class OSGiIntegrationTest {
 
         this.txControl.required(() -> {
             this.em.persist(this.ingress);
-            this.em.persist(this.egress);
             return null;
         });
 
@@ -501,6 +505,66 @@ public class OSGiIntegrationTest {
         assertNotNull(inspectionPortElement.getEgressPort());
         assertEquals(this.ingress.getElementId(), inspectionPortElement.getIngressPort().getElementId());
         assertEquals(this.egress.getElementId(), inspectionPortElement.getEgressPort().getElementId());
+    }
+
+    // Test applicable only for SUPPORTS_PORT_GROUP_VALUE == true, the default current value is false
+    //@Test
+    public void testRegisterNetworkElement_NetworkElementCreated() throws Exception {
+        // Arrange.
+        this.redirApi = new SampleSdnRedirectionApi(this.txControl, this.em);
+        this.ingress.setParentId(UUID.randomUUID().toString());
+        this.txControl.required(() -> {
+            this.em.persist(this.ingress);
+            return null;
+        });
+
+        // Act.
+        NetworkElement portGroup = this.redirApi.registerNetworkElement(Arrays.asList(this.ingress));
+
+        // Assert.
+        RedirectionApiUtils utils = new RedirectionApiUtils(this.em, this.txControl);
+
+        PortGroupEntity createdPortGroupEntity = utils.findPortGroupEntity(portGroup.getElementId(), portGroup.getParentId());
+
+        NetworkElementEntity updatedVirtualPort = utils.findNetworkElementEntityByElementId(this.ingress.getElementId());
+
+        assertNotNull(createdPortGroupEntity);
+        assertNotNull(createdPortGroupEntity.getElementId());
+        assertNotNull(createdPortGroupEntity.getParentId());
+        assertNotNull(updatedVirtualPort.getPortGroup());
+        assertEquals(portGroup.getElementId(), updatedVirtualPort.getPortGroup().getElementId());
+    }
+
+
+    // Test applicable only for SUPPORTS_PORT_GROUP_VALUE == true, the default current value is false
+    //@Test
+    public void testDeleteNetworkElement_NetworkElementDeleted() throws Exception {
+        // Arrange.
+        this.redirApi = new SampleSdnRedirectionApi(this.txControl, this.em);
+        this.ingress.setParentId(UUID.randomUUID().toString());
+        this.txControl.required(() -> {
+            this.em.persist(this.ingress);
+            return null;
+        });
+
+        NetworkElement portGroup = this.redirApi.registerNetworkElement(Arrays.asList(this.ingress));
+
+        // Act.
+        this.redirApi.deleteNetworkElement(portGroup);
+
+        // Assert.
+        RedirectionApiUtils utils = new RedirectionApiUtils(this.em, this.txControl);
+
+        PortGroupEntity deletedPortGroupEntity = utils.findPortGroupEntity(portGroup.getElementId(), portGroup.getParentId());
+
+        assertNull(deletedPortGroupEntity);
+
+        NetworkElementEntity updatedVirtualPort = utils.findNetworkElementEntityByElementId(this.ingress.getElementId());
+
+        assertNotNull(updatedVirtualPort);
+        assertNotNull(portGroup);
+        assertNotNull(portGroup.getElementId());
+        assertNull(updatedVirtualPort.getPortGroup());
     }
 
     @Test
