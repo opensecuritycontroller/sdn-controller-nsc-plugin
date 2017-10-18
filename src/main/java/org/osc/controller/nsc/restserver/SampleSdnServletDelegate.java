@@ -40,18 +40,23 @@ import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
 
 @Component(name = "nsc.servlet", service = Servlet.class, property = {
 
-        HTTP_WHITEBOARD_SERVLET_NAME + "=" + "OSC-API", HTTP_WHITEBOARD_SERVLET_PATTERN + "=/testplugin/sdn/*",
+        HTTP_WHITEBOARD_SERVLET_NAME + "=" + "NSC-API", HTTP_WHITEBOARD_SERVLET_PATTERN + "=/nsc/*",
         HTTP_WHITEBOARD_CONTEXT_SELECT + "=(" + HTTP_WHITEBOARD_CONTEXT_NAME + "=" + "OSC-API" + ")",
         HTTP_WHITEBOARD_TARGET + "=(" + "org.apache.felix.http.name" + "=" + "OSC-API" + ")" })
 
 public class SampleSdnServletDelegate extends ResourceConfig implements Servlet {
+
     static final long serialVersionUID = 1L;
+
     @Reference
     private InspectionPortApis inspectionPortApis;
+
     @Reference
     private NetworkElementApis networkElementApis;
+
     @Reference
     private InspectionHookApis inspectionHookApis;
+
     /** The Jersey REST container */
     private ServletContainer container;
 

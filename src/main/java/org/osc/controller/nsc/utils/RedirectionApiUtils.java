@@ -46,9 +46,11 @@ public class RedirectionApiUtils {
 
 
     public final static String SUPPORTS_PORT_GROUP_VALUE = ":Boolean=false";
+
     private static final Logger LOG = LoggerFactory.getLogger(RedirectionApiUtils.class);
 
     private TransactionControl txControl;
+
     private EntityManager em;
 
     public RedirectionApiUtils(EntityManager em, TransactionControl txControl) {
