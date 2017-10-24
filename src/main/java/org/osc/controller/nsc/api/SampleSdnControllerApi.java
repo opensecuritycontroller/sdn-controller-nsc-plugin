@@ -29,7 +29,6 @@ import javax.persistence.EntityManager;
 import javax.sql.DataSource;
 
 import org.apache.commons.lang.NotImplementedException;
-import org.slf4j.LoggerFactory;
 import org.osc.sdk.controller.FlowInfo;
 import org.osc.sdk.controller.FlowPortInfo;
 import org.osc.sdk.controller.Status;
@@ -43,6 +42,7 @@ import org.osgi.service.jpa.EntityManagerFactoryBuilder;
 import org.osgi.service.transaction.control.TransactionControl;
 import org.osgi.service.transaction.control.jpa.JPAEntityManagerProviderFactory;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Component(configurationPid = "com.intel.nsc.SdnController",
 property = { PLUGIN_NAME + "=NSC",
@@ -68,8 +68,8 @@ public class SampleSdnControllerApi implements SdnControllerApi {
 
     private static final Logger LOG = LoggerFactory.getLogger(SampleSdnControllerApi.class);
 
-    private final static String VERSION = "0.1";
-    private final static String NAME = "NSC";
+    private static final String VERSION = "0.1";
+    private static final String NAME = "NSC";
 
     private static final String DB_URL_PREFIX = "jdbc:h2:./nscPlugin_";
     private static final String DB_USER = "admin";
@@ -77,6 +77,7 @@ public class SampleSdnControllerApi implements SdnControllerApi {
     private static final String URL_OPTS = ";MVCC\\=TRUE;LOCK_TIMEOUT\\=10000;MV_STORE=FALSE;";
 
     public SampleSdnControllerApi() {
+        // For dependency injection. could be package private?
     }
 
     @Override
@@ -122,5 +123,6 @@ public class SampleSdnControllerApi implements SdnControllerApi {
 
     @Override
     public void close() throws Exception {
+        // No-op
     }
 }
