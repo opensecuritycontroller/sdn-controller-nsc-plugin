@@ -27,7 +27,18 @@ addons:
   apt:
     packages:
       - oracle-java8-installer
-install: 
+install:
     true
+addons:
+  sonarcloud:
+    organization: "opensecuritycontroller-org"
+    token:
+      secure: "X/KPYRG0wxmhj3vLdCsqbBcyMkCwRn3E2ah9iY6Gq23/WSZKlfOfZsDSUpaRGRJyUatTh78VNJ14S1ToAw70P+9g0y1bpQIG/i1ZXHkvdsh1zubcmMLPKlE0yKNa1oi64JiJmoDXPCG9g1P+PuqT8H3dr5H8gKkUaIBPzcrDPf872L+PO5a+uCOWC0UpJ8Wl2WPlDBQDSjIO8omMnOHyBf1wy0XTGjpRGNC/QT1HmgOUZ9D3IjUSs4NFZvlsvQRFC+yc1M3ztGFrs5LDcyG5dCvJVr8anL5RZKF2N79xaHXOtwKrt3a6GzJs8iGOTF6Zu0xkLPsWfxCIi09AO7eARkb1pQTJ0oVWnUJNMb9JsYlfMHQVQDRsimc4jif+WvU40ZcsALTj4wZYi79afRKls3hU0Q/x5Oi8HpRYKFe1bmdMLpS1s5L0qPZFa1HprpyUpQHF1yHJ1wEkaGVIo2d/v3IskPzt9EndMqxD7FiQKq3Qg5DYtB2v7mfUIO1vEcraoBTJhdgsMfZyxyAvr25wXCJPFcLh59yVd6YpjmZPbaSt8xuc26Jh8OSPPWCc7iEL8vYpF6dKibPMgdIBw7FOcsQKtyQ0vj2yYVAAXN+t0E2u1gJolBrcbt8/XQLlVWB6P4MdaYR9rAFVbKpcSPUhzlh319f7NSZoiA0AIIF1+RY="
 script:
-    mvn install
+# the following command line builds the project, executes the SonarCloud analysis
+    - if [[ -n "${TRAVIS_PULL_REQUEST_SLUG}" || "$(cut -d'/' -f1 <<<${TRAVIS_REPO_SLUG})" != opensecuritycontroller ]]; then
+        echo "Skipping sonar analysis as this is a pull request or a build of a fork";
+        mvn install;
+      else
+        mvn install sonar:sonar;
+      fi
