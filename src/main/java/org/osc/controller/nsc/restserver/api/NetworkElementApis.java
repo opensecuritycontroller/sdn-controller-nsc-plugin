@@ -18,7 +18,6 @@ package org.osc.controller.nsc.restserver.api;
 
 import java.util.List;
 
-import javax.persistence.EntityManager;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -29,8 +28,8 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import org.osc.controller.nsc.api.SampleSdnRedirectionApi;
 import org.osc.controller.nsc.entities.NetworkElementEntity;
+import org.osc.sdk.controller.api.SdnControllerApi;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.jdbc.DataSourceFactory;
@@ -46,9 +45,7 @@ import org.slf4j.LoggerFactory;
 @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 public class NetworkElementApis {
 
-    private static Logger LOG = LoggerFactory.getLogger(InspectionPortApis.class);
-
-    private EntityManager em;
+    private static Logger LOG = LoggerFactory.getLogger(NetworkElementApis.class);
 
     @Reference(target = "(osgi.local.enabled=true)")
     private TransactionControl txControl;
@@ -62,18 +59,26 @@ public class NetworkElementApis {
     @Reference(target = "(osgi.local.enabled=true)")
     private JPAEntityManagerProviderFactory resourceFactory;
 
+    @Reference
+    private SdnControllerApi api;
+
     @Path("/{elementId}")
     @POST
     public String createNetworkElement(@PathParam("id") String id, @PathParam("elementId") String elementId,
             NetworkElementEntity entity)
                     throws Exception {
+        // TODO:SUDHIR - Rename Rest API's to Port instead of NetworkElement, for eg: createPort etc.
+        // TODO:SUDHIR - Rename NetworkElementEntity to PortEntity.
+
         if (entity == null) {
             throw new IllegalArgumentException("Attempt to create network element with no network entities");
         }
+
         LOG.info(String.format("Creating network element with elementId  %s", elementId));
 
         entity.setElementId(elementId);
-        return getSdnRedirectionApi(id).registerNetworkElement(entity).getElementId();
+
+        return RestServerApiUtils.getSdnRedirectionApi(id, this.api).registerPort(entity).getElementId();
     }
 
     @Path("/{elementId}")
@@ -83,7 +88,8 @@ public class NetworkElementApis {
         LOG.info(String.format("Updating the network element id %s ", "" + elementId));
 
         entity.setElementId(elementId);
-        return (NetworkElementEntity) getSdnRedirectionApi(id).updateNetworkElement(entity);
+
+        return (NetworkElementEntity) RestServerApiUtils.getSdnRedirectionApi(id, this.api).updatePort(entity);
     }
 
     @Path("/{elementId}")
@@ -92,14 +98,14 @@ public class NetworkElementApis {
             throws Exception {
         LOG.info(String.format("Deleting the network element for id %s ", elementId));
 
-        getSdnRedirectionApi(id).deleteNetworkElement(elementId);
+        RestServerApiUtils.getSdnRedirectionApi(id, this.api).deletePort(elementId);
     }
 
     @GET
     public List<String> getNetworkElementIds(@PathParam("id") String id) throws Exception {
         LOG.info("Listing network elements ids'");
 
-        return getSdnRedirectionApi(id).getNetworkElements();
+        return RestServerApiUtils.getSdnRedirectionApi(id, this.api).getPortIds();
     }
 
     @Path("/{elementId}")
@@ -109,25 +115,6 @@ public class NetworkElementApis {
                     throws Exception {
         LOG.info(String.format("Getting the network for id %s ", elementId));
 
-        return (NetworkElementEntity) getSdnRedirectionApi(id).getNetworkElement(elementId);
-    }
-
-    private SampleSdnRedirectionApi getSdnRedirectionApi(String id) throws Exception {
-
-        if (id == null) {
-            return null;
-        }
-
-        SampleSdnRedirectionApi sdnApi = RestServerApiUtils.getSdnApi(id);
-        if (sdnApi != null) {
-            return sdnApi;
-        }
-
-        this.em = RestServerApiUtils.createEntityHandle(this.resourceFactory, this.txControl, this.builder,
-                this.jdbcFactory, id);
-        sdnApi = new SampleSdnRedirectionApi(this.txControl, this.em);
-        RestServerApiUtils.insertSdnApi(id, sdnApi);
-
-        return sdnApi;
+        return (NetworkElementEntity) RestServerApiUtils.getSdnRedirectionApi(id, this.api).getPort(elementId);
     }
 }

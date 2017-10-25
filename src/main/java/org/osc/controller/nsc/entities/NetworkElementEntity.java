@@ -127,6 +127,14 @@ public class NetworkElementEntity implements NetworkElement {
         this.parentId = parentId;
     }
 
+    public String getDeviceOwnerId() {
+        return this.deviceOwnerId;
+    }
+
+    public void setDeviceOwnerId(String deviceOwnerId) {
+        this.deviceOwnerId = deviceOwnerId;
+    }
+
     public PortGroupEntity getPortGroup() {
         return this.portGroup;
     }

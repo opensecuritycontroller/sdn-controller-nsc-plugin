@@ -66,6 +66,10 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
             LOG.warn("Attempt to find an Inspection Hook with null Inspected Port");
             return null;
         }
+        if (inspectionPort == null) {
+            LOG.warn("Attempt to find an Inspection Hook with null Inspection Port");
+            return null;
+        }
 
         try {
             InspectionHookEntity inspectionHook = this.utils.findInspHookByInspectedAndPort(inspectedPort, inspectionPort);
@@ -77,18 +81,6 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
         }
     }
 
-    public List<String> getInspectionHooks() throws Exception {
-
-        return this.txControl.supports(() -> {
-            List<InspectionHookEntity> elements = this.utils.txInspectionHookEntities();
-            List<String> elementList = new ArrayList<String>();
-            if (!elements.isEmpty()) {
-                elementList = elements.stream().map(InspectionHookEntity::getHookId).collect(Collectors.toList());
-            }
-            return elementList;
-        });
-    }
-
     @Override
     public String installInspectionHook(NetworkElement inspectedPort, InspectionPortElement inspectionPort,
             Long tag, TagEncapsulationType encType, Long order, FailurePolicyType failurePolicyType)
@@ -96,6 +88,9 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
 
         if (inspectedPort == null) {
             throw new IllegalArgumentException("Attempt to install an Inspection Hook with no Inspected Port");
+        }
+        if (inspectionPort == null) {
+            throw new IllegalArgumentException("Attempt to install an Inspection Hook with null Inspection Port");
         }
 
         LOG.info(String.format("Installing Inspection Hook for (Inspected %s ; Inspection Port %s):", inspectedPort,
@@ -132,6 +127,10 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
             LOG.warn("Attempt to remove an Inspection Hook with no Inspected Port");
             return;
         }
+        if (inspectionPort == null) {
+            LOG.warn("Attempt to remove an Inspection Hook with null Inspection Port");
+            return;
+        }
 
         this.txControl.required(() -> {
             InspectionHookEntity inspectionHook = this.utils.findInspHookByInspectedAndPort(inspectedPort,
@@ -162,6 +161,10 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
             LOG.error("Attempt to modify an Inspection Hook with null Inspected Port");
             return;
         }
+        if (inspectionPort == null) {
+            LOG.error("Attempt to modify an Inspection Hook with null Inspection Port");
+            return;
+        }
 
         this.txControl.required(() -> {
             InspectionHookEntity inspectionHook = this.utils.findInspHookByInspectedAndPort(inspectedPort, inspectionPort);
@@ -183,6 +186,10 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
             LOG.warn("Attempt to find an Inspection Hook with null Inspected Port");
             return null;
         }
+        if (inspectionPort == null) {
+            LOG.warn("Attempt to find an Inspection Hook with null Inspection Port");
+            return null;
+        }
 
         InspectionHookEntity inspectionHook = this.utils.findInspHookByInspectedAndPort(inspectedPort, inspectionPort);
         return inspectionHook == null ? null : inspectionHook.getFailurePolicyType();
@@ -193,6 +200,10 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
             FailurePolicyType failurePolicyType) throws Exception {
         if (inspectedPort == null) {
             LOG.error("Attempt to modify an Inspection Hook with null Inspected Port");
+            return;
+        }
+        if (inspectionPort == null) {
+            LOG.error("Attempt to modify an Inspection Hook with null Inspection Port");
             return;
         }
 
@@ -263,18 +274,6 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
         return ipEntity;
     }
 
-    public List<String> getInspectionPorts() throws Exception {
-
-        return this.txControl.supports(() -> {
-            List<? extends InspectionPortEntity> elements = this.utils.txInspectionPortEntities();
-            List<String> elementList = new ArrayList<String>();
-            if (!elements.isEmpty()) {
-                elementList = elements.stream().map(InspectionPortEntity::getElementId).collect(Collectors.toList());
-            }
-            return elementList;
-        });
-    }
-
     @Override
     public Element registerInspectionPort(InspectionPortElement inspectionPort) throws Exception {
         if (inspectionPort == null) {
@@ -298,29 +297,15 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
         });
     }
 
-    public Element updateInspectionPort(InspectionPortElement inspectionPort) throws Exception {
-
-        return this.txControl.required(() -> {
-
-            InspectionPortEntity inspectionPortEntity = (InspectionPortEntity) getInspectionPort(inspectionPort);
-
-            if (inspectionPortEntity == null) {
-                String msg = String.format("inspection port element does not exists id: %s\n",
-                        inspectionPort.getElementId());
-                LOG.error(msg);
-                throw new IllegalArgumentException(msg);
-            }
-            inspectionPortEntity.setEgressPort((NetworkElementEntity) inspectionPort.getEgressPort());
-            inspectionPortEntity.setIngressPort((NetworkElementEntity) inspectionPort.getIngressPort());
-            return this.em.merge(inspectionPortEntity);
-        });
-    }
-
     @Override
     public void setInspectionHookOrder(NetworkElement inspectedPort, InspectionPortElement inspectionPort, Long order)
             throws Exception {
         if (inspectedPort == null) {
             LOG.error("Attempt to modify an Inspection Hook with null Inspected Port");
+            return;
+        }
+        if (inspectionPort == null) {
+            LOG.error("Attempt to modify an Inspection Hook with null Inspection Port");
             return;
         }
 
@@ -342,6 +327,10 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
             throws Exception {
         if (inspectedPort == null) {
             LOG.warn("Attempt to find an Inspection Hook with null Inspected Port");
+            return null;
+        }
+        if (inspectionPort == null) {
+            LOG.warn("Attempt to find an Inspection Hook with null Inspection Port");
             return null;
         }
 
@@ -427,23 +416,6 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
         });
     }
 
-    public NetworkElement updateNetworkElement(NetworkElement nwElement) throws Exception {
-        return this.txControl.required(() -> {
-            NetworkElementEntity element = this.utils.txNetworkElementEntityByElementId(nwElement.getElementId());
-
-            if (element == null) {
-                String msg = String.format("Cannot find the network element id: %s\n", nwElement.getElementId());
-                LOG.error(msg);
-                throw new IllegalArgumentException(msg);
-            }
-
-            element.setMacAddresses(nwElement.getMacAddresses());
-            element.setPortIPs(nwElement.getPortIPs());
-            this.em.merge(element);
-            return element;
-        });
-    }
-
     @Override
     public void deleteNetworkElement(NetworkElement portGroup) throws Exception {
         if (!RedirectionApiUtils.supportsPortGroup()) {
@@ -466,41 +438,6 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
         });
     }
 
-    public void deleteNetworkElement(String id) throws Exception {
-
-        this.txControl.required(() -> {
-            NetworkElementEntity element = this.utils.txNetworkElementEntityByElementId(id);
-
-            if (element == null) {
-                LOG.info(String.format(
-                        "Attempt to delete network element for id %s and network element not found, no-op.", id));
-                return null;
-            }
-
-            this.em.remove(element);
-            return null;
-        });
-    }
-
-    public NetworkElement registerNetworkElement(NetworkElement nwElement) throws Exception {
-
-        return this.txControl.required(() -> {
-            NetworkElementEntity element = this.utils.txNetworkElementEntityByElementId(nwElement.getElementId());
-
-            if (element != null) {
-                String msg = String.format("Network element already exists id: %s\n", nwElement.getElementId());
-                LOG.error(msg);
-                throw new IllegalArgumentException(msg);
-            }
-            element = new NetworkElementEntity();
-            element.setElementId(nwElement.getElementId());
-            element.setMacAddresses(nwElement.getMacAddresses());
-            element.setPortIPs(nwElement.getPortIPs());
-            this.em.merge(element);
-            return element;
-        });
-    }
-
     @Override
     public List<NetworkElement> getNetworkElements(NetworkElement element) throws Exception {
         if (!RedirectionApiUtils.supportsPortGroup()) {
@@ -509,23 +446,6 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
 
         // TODO emanoel: This method is currently not referenced by OSC.
         return null;
-    }
-
-    public List<String> getNetworkElements() throws Exception {
-        return this.txControl.supports(() -> {
-            List<? extends NetworkElementEntity> elements = this.utils.txNetworkElementEntities();
-            List<String> elementList = new ArrayList<String>();
-            if (!elements.isEmpty()) {
-                elementList = elements.stream().map(NetworkElementEntity::getElementId).collect(Collectors.toList());
-            }
-            return elementList;
-        });
-    }
-
-    public NetworkElement getNetworkElement(String id) throws Exception {
-        return this.txControl.supports(() -> {
-            return this.utils.txNetworkElementEntityByElementId(id);
-        });
     }
 
     @Override
@@ -577,6 +497,138 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
         this.txControl.required(() -> {
             this.em.close();
             return null;
+        });
+    }
+
+    // Support methods for REST API's
+
+    public List<String> getInspectionHooksIds() throws Exception {
+
+        return this.txControl.supports(() -> {
+
+            List<InspectionHookEntity> elements = this.utils.txInspectionHookEntities();
+            List<String> elementList = new ArrayList<String>();
+
+            if (!elements.isEmpty()) {
+                elementList = elements.stream().map(InspectionHookEntity::getHookId).collect(Collectors.toList());
+            }
+
+            return elementList;
+        });
+    }
+
+    public Element updateInspectionPort(InspectionPortElement inspectionPort) throws Exception {
+
+        InspectionPortEntity inspectionPortEntity = (InspectionPortEntity) getInspectionPort(inspectionPort);
+        if (inspectionPortEntity == null) {
+            String msg = String.format("inspection port element does not exists id: %s\n",
+                    inspectionPort.getElementId());
+            LOG.error(msg);
+            throw new IllegalArgumentException(msg);
+        }
+
+        return this.txControl.required(() -> {
+            inspectionPortEntity.setEgressPort((NetworkElementEntity) inspectionPort.getEgressPort());
+            inspectionPortEntity.setIngressPort((NetworkElementEntity) inspectionPort.getIngressPort());
+
+            return this.em.merge(inspectionPortEntity);
+        });
+    }
+
+    public List<String> getInspectionPortsIds() throws Exception {
+
+        return this.txControl.supports(() -> {
+
+            List<? extends InspectionPortEntity> elements = this.utils.txInspectionPortEntities();
+            List<String> elementList = new ArrayList<String>();
+
+            if (!elements.isEmpty()) {
+                elementList = elements.stream().map(InspectionPortEntity::getElementId).collect(Collectors.toList());
+            }
+
+            return elementList;
+        });
+    }
+
+    public NetworkElement registerPort(NetworkElement nwElement) throws Exception {
+
+        NetworkElementEntity element = this.utils.txNetworkElementEntityByElementId(nwElement.getElementId());
+        if (element != null) {
+            String msg = String.format("Network element already exists id: %s\n", nwElement.getElementId());
+            LOG.error(msg);
+            throw new IllegalArgumentException(msg);
+        }
+
+        return this.txControl.required(() -> {
+            NetworkElementEntity portElement = new NetworkElementEntity();
+            portElement.setElementId(nwElement.getElementId());
+            portElement.setMacAddresses(nwElement.getMacAddresses());
+            portElement.setPortIPs(nwElement.getPortIPs());
+            portElement.setDeviceOwnerId(((NetworkElementEntity) nwElement).getDeviceOwnerId());
+            portElement.setParentId(nwElement.getParentId());
+
+            this.em.merge(portElement);
+
+            return portElement;
+        });
+    }
+
+    public NetworkElement updatePort(NetworkElement nwElement) throws Exception {
+
+        NetworkElementEntity element = this.utils.txNetworkElementEntityByElementId(nwElement.getElementId());
+        if (element == null) {
+            String msg = String.format("Cannot find the network element id: %s\n", nwElement.getElementId());
+            LOG.error(msg);
+            throw new IllegalArgumentException(msg);
+        }
+
+        return this.txControl.required(() -> {
+            element.setMacAddresses(nwElement.getMacAddresses());
+            element.setPortIPs(nwElement.getPortIPs());
+            element.setDeviceOwnerId(((NetworkElementEntity) nwElement).getDeviceOwnerId());
+            element.setParentId(nwElement.getParentId());
+
+            this.em.merge(element);
+
+            return element;
+        });
+    }
+
+    public void deletePort(String id) throws Exception {
+
+        this.txControl.required(() -> {
+            NetworkElementEntity element = this.utils.txNetworkElementEntityByElementId(id);
+
+            if (element == null) {
+                LOG.warn(String.format(
+                        "Attempt to delete network element for id %s and network element not found, no-op.", id));
+                return null;
+            }
+
+            this.em.remove(element);
+            return null;
+        });
+    }
+
+    public List<String> getPortIds() throws Exception {
+
+        return this.txControl.supports(() -> {
+            List<? extends NetworkElementEntity> elements = this.utils.txNetworkElementEntities();
+            List<String> elementList = new ArrayList<String>();
+
+            if (!elements.isEmpty()) {
+                elementList = elements.stream().map(NetworkElementEntity::getElementId).collect(Collectors.toList());
+            }
+
+            return elementList;
+        });
+    }
+
+    public NetworkElement getPort(String id) throws Exception {
+
+        return this.txControl.supports(() -> {
+
+            return this.utils.txNetworkElementEntityByElementId(id);
         });
     }
 }

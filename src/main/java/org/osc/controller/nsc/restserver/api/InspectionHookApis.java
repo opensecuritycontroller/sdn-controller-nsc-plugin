@@ -18,7 +18,6 @@ package org.osc.controller.nsc.restserver.api;
 
 import java.util.List;
 
-import javax.persistence.EntityManager;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -29,8 +28,8 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import org.osc.controller.nsc.api.SampleSdnRedirectionApi;
 import org.osc.controller.nsc.entities.InspectionHookEntity;
+import org.osc.sdk.controller.api.SdnControllerApi;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.jdbc.DataSourceFactory;
@@ -46,9 +45,7 @@ import org.slf4j.LoggerFactory;
 @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 public class InspectionHookApis {
 
-    private static Logger LOG = LoggerFactory.getLogger(InspectionPortApis.class);
-
-    private EntityManager em;
+    private static Logger LOG = LoggerFactory.getLogger(InspectionHookApis.class);
 
     @Reference(target = "(osgi.local.enabled=true)")
     private TransactionControl txControl;
@@ -62,74 +59,67 @@ public class InspectionHookApis {
     @Reference(target = "(osgi.local.enabled=true)")
     private JPAEntityManagerProviderFactory resourceFactory;
 
+    @Reference
+    private SdnControllerApi api;
+
     @POST
     public String createInspectionHook(@PathParam("id") String id, InspectionHookEntity entity) throws Exception {
 
         LOG.info(String.format("Creating inspection hook with inspection port id %s",
                 entity.getInspectionPort().getElementId()));
-        return getSdnRedirectionApi(id).installInspectionHook(entity.getInspectedPort(), entity.getInspectionPort(),
-                entity.getTag(),
-                entity.getEncType(), entity.getOrder(), entity.getFailurePolicyType());
+
+        return RestServerApiUtils.getSdnRedirectionApi(id, this.api).installInspectionHook(entity.getInspectedPort(),
+                entity.getInspectionPort(), entity.getTag(), entity.getEncType(), entity.getOrder(),
+                entity.getFailurePolicyType());
     }
 
-    @Path("/{inshookId}")
+    @Path("/{InspectionHookId}")
     @PUT
     public InspectionHookEntity updateInspectionHook(@PathParam("id") String id,
-            @PathParam("inshookId") String inshookId, InspectionHookEntity entity) throws Exception {
-        entity.setHookId(inshookId);
-        getSdnRedirectionApi(id).updateInspectionHook(entity);
+            @PathParam("InspectionHookId") String InspectionHookId, InspectionHookEntity entity) throws Exception {
+        entity.setHookId(InspectionHookId);
+
+        RestServerApiUtils.getSdnRedirectionApi(id, this.api).updateInspectionHook(entity);
+
         return entity;
     }
 
-    @Path("/{inshookId}")
+    @Path("/{InspectionHookId}")
     @DELETE
-    public void deleteInspectionHook(@PathParam("id") String id, @PathParam("inshookId") String inshookId)
+    public void deleteInspectionHook(@PathParam("id") String id, @PathParam("InspectionHookId") String InspectionHookId)
             throws Exception {
-        if (inshookId == null) {
+        if (InspectionHookId == null) {
             throw new IllegalArgumentException("Attempt to delete null inspection hook port");
         }
-        LOG.info(String.format("Deleting the inspection hook element for id %s ", inshookId));
-        getSdnRedirectionApi(id).removeInspectionHook(inshookId);
+
+        LOG.info(String.format("Deleting the inspection hook element for id %s ", InspectionHookId));
+
+        RestServerApiUtils.getSdnRedirectionApi(id, this.api).removeInspectionHook(InspectionHookId);
     }
 
     @GET
     public List<String> getInspectionHookIds(@PathParam("id") String id) throws Exception {
         LOG.info("Listing inspection hook ids'");
 
-        return getSdnRedirectionApi(id).getInspectionHooks();
+        return RestServerApiUtils.getSdnRedirectionApi(id, this.api).getInspectionHooksIds();
     }
 
-    @Path("/{inshookId}")
+    @Path("/{InspectionHookId}")
     @GET
-    public InspectionHookEntity getInspectionHook(@PathParam("id") String id, @PathParam("inshookId") String inshookId)
-            throws Exception {
-        if (inshookId == null) {
+    public InspectionHookEntity getInspectionHook(@PathParam("id") String id,
+            @PathParam("InspectionHookId") String InspectionHookId)
+                    throws Exception {
+        if (InspectionHookId == null) {
             throw new IllegalArgumentException("Attempt to retrive null inspection hook");
         }
-        LOG.info(String.format("Getting the inspection hook element for id %s ", inshookId));
-        InspectionHookEntity inspectionHook = (InspectionHookEntity) getSdnRedirectionApi(id)
-                .getInspectionHook(inshookId);
+
+        LOG.info(String.format("Getting the inspection hook element for id %s ", InspectionHookId));
+        InspectionHookEntity inspectionHook = (InspectionHookEntity) RestServerApiUtils
+                .getSdnRedirectionApi(id, this.api).getInspectionHook(InspectionHookId);
+
         inspectionHook.setInspectedPort(null);
         inspectionHook.setInspectionPort(null);
+
         return inspectionHook;
-    }
-
-    private SampleSdnRedirectionApi getSdnRedirectionApi(String id) throws Exception {
-
-        if (id == null) {
-            return null;
-        }
-
-        SampleSdnRedirectionApi sdnApi = RestServerApiUtils.getSdnApi(id);
-        if (sdnApi != null) {
-            return sdnApi;
-        }
-
-        this.em = RestServerApiUtils.createEntityHandle(this.resourceFactory, this.txControl, this.builder,
-                this.jdbcFactory, id);
-        sdnApi = new SampleSdnRedirectionApi(this.txControl, this.em);
-        RestServerApiUtils.insertSdnApi(id, sdnApi);
-
-        return sdnApi;
     }
 }

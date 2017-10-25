@@ -40,7 +40,7 @@ import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
 
 @Component(name = "nsc.servlet", service = Servlet.class, property = {
 
-        HTTP_WHITEBOARD_SERVLET_NAME + "=" + "NSC-API", HTTP_WHITEBOARD_SERVLET_PATTERN + "=/nsc/*",
+        HTTP_WHITEBOARD_SERVLET_NAME + "=" + "NSC-API", HTTP_WHITEBOARD_SERVLET_PATTERN + "=/sample/sdn/nsc/*",
         HTTP_WHITEBOARD_CONTEXT_SELECT + "=(" + HTTP_WHITEBOARD_CONTEXT_NAME + "=" + "OSC-API" + ")",
         HTTP_WHITEBOARD_TARGET + "=(" + "org.apache.felix.http.name" + "=" + "OSC-API" + ")" })
 
@@ -62,6 +62,7 @@ public class SampleSdnServletDelegate extends ResourceConfig implements Servlet 
 
     @Activate
     void activate() throws Exception {
+
         super.register(JacksonJaxbJsonProvider.class);
         super.property(ServerProperties.FEATURE_AUTO_DISCOVERY_DISABLE, true);
         super.registerInstances(this.inspectionPortApis, this.networkElementApis, this.inspectionHookApis);
