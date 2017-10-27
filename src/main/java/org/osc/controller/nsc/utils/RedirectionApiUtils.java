@@ -346,6 +346,14 @@ public class RedirectionApiUtils {
         }
     }
 
+    public void throwExceptionIfNullElement(InspectionPortElement networkElement) {
+        if (networkElement == null) {
+            String msg = "null passed for Inspection Port argument!";
+            LOG.error(msg);
+            throw new IllegalArgumentException(msg);
+        }
+    }
+
     public void throwExceptionIfNullElement(NetworkElement networkElement, String msg) {
         if (networkElement == null) {
             msg = (msg != null ? msg : "null passed for Network Element argument!");
@@ -423,14 +431,6 @@ public class RedirectionApiUtils {
         } catch (Exception e) {
             LOG.error(String.format("Finding Inspection hooks by inspected %s and port %s", inspectedId, portId), e);
             return null;
-        }
-    }
-
-    private void throwExceptionIfNullElement(InspectionPortElement networkElement) {
-        if (networkElement == null) {
-            String msg = "null passed for Inspection Port argument!";
-            LOG.error(msg);
-            throw new IllegalArgumentException(msg);
         }
     }
 

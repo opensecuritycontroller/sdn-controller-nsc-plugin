@@ -23,6 +23,10 @@ import javax.net.ssl.TrustManager;
 
 import org.osc.sdk.controller.element.VirtualizationConnectorElement;
 
+/**
+ * This implements virtualization connector element to the extent that is required for
+ * sdn-controller-nsc-plugin.
+ */
 public class VirtualizationConnectorElementImpl implements VirtualizationConnectorElement {
 
     private String name;
@@ -37,29 +41,44 @@ public class VirtualizationConnectorElementImpl implements VirtualizationConnect
         this.providerIpAddress = providerIpAddress;
     }
 
+    /**
+     * @return the name of virtualization connector
+     */
     @Override
     public String getName() {
         return this.name;
     }
 
+    /**
+     * @return the IP address of controller
+     */
     @Override
     public String getControllerIpAddress() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
+    /**
+     * This is not support as it is not used in sdn-controller-nsc-plugin
+     */
     @Override
     public String getControllerUsername() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
+    /**
+     * This is not support as it is not used in sdn-controller-nsc-plugin
+     */
     @Override
     public String getControllerPassword() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
+    /**
+     * This is not support as it is not used in sdn-controller-nsc-plugin
+     */
     @Override
     public boolean isControllerHttps() {
-        return Boolean.TRUE;
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -67,43 +86,64 @@ public class VirtualizationConnectorElementImpl implements VirtualizationConnect
         return this.providerIpAddress;
     }
 
+    /**
+     * This is not support as it is not used in sdn-controller-nsc-plugin
+     */
     @Override
     public String getProviderUsername() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public String getProviderPassword() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
+    /**
+     * This is not support as it is not used in sdn-controller-nsc-plugin
+     */
     @Override
     public String getProviderAdminTenantName() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
+    /**
+     * This is not support as it is not used in sdn-controller-nsc-plugin
+     */
     @Override
     public String getProviderAdminDomainId() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
+    /**
+     * This is not support as it is not used in sdn-controller-nsc-plugin
+     */
     @Override
     public boolean isProviderHttps() {
-        return Boolean.TRUE;
+        throw new UnsupportedOperationException();
     }
 
+    /**
+     * This is not support as it is not used in sdn-controller-nsc-plugin
+     */
     @Override
     public Map<String, String> getProviderAttributes() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
+    /**
+     * This is not support as it is not used in sdn-controller-nsc-plugin
+     */
     @Override
     public SSLContext getSslContext() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
+    /**
+     * This is not support as it is not used in sdn-controller-nsc-plugin
+     */
     @Override
     public TrustManager[] getTruststoreManager() throws Exception {
-        return null;
+        throw new UnsupportedOperationException();
     }
 }

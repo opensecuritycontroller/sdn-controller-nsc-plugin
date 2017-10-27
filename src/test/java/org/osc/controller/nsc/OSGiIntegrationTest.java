@@ -26,6 +26,7 @@ import static org.osgi.service.jdbc.DataSourceFactory.*;
 
 import java.io.File;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
@@ -88,6 +89,14 @@ public class OSGiIntegrationTest {
 
     private static final String IMAC2_STR = "ff:ff:aa:bb:cc:02";
 
+    private static final String ADDR1_STR = "192.168.0.14";
+
+    private static final String ADDR2_STR = "10.4.3.3";
+
+    private static final String MAC1_STR = "ee:ff:aa:bb:cc:03";
+
+    private static final String MAC2_STR = "ff:ff:aa:bb:cc:03";
+
     private static final String INSPMAC1_STR = "aa:aa:aa:bb:cc:01";
 
     @Inject
@@ -109,6 +118,7 @@ public class OSGiIntegrationTest {
     private NetworkElementEntity ingress;
     private NetworkElementEntity egress;
     private NetworkElementEntity inspected;
+    private NetworkElementEntity port;
 
     private SampleSdnRedirectionApi redirApi;
 
@@ -136,7 +146,7 @@ public class OSGiIntegrationTest {
                     mavenBundle("javax.ws.rs", "javax.ws.rs-api").versionAsInProject(),
                     mavenBundle("org.glassfish.jersey.core", "jersey-server").versionAsInProject(),
                     mavenBundle("org.glassfish.jersey.containers", "jersey-container-servlet-core")
-                            .versionAsInProject(),
+                    .versionAsInProject(),
                     mavenBundle("javax.annotation", "javax.annotation-api").versionAsInProject(),
                     mavenBundle("javax.validation", "validation-api").versionAsInProject(),
                     mavenBundle("org.glassfish.jersey.bundles.repackaged", "jersey-guava").versionAsInProject(),
@@ -246,16 +256,21 @@ public class OSGiIntegrationTest {
         this.ingress = new NetworkElementEntity();
         this.egress = new NetworkElementEntity();
         this.inspected = new NetworkElementEntity();
+        this.port = new NetworkElementEntity();
 
         this.ingress.setElementId(IMAC1_STR + IMAC1_STR);
         this.egress.setElementId(EMAC1_STR + EMAC1_STR);
         this.inspected.setElementId("iNsPeCtEdPoRt");
+        this.port.setElementId(MAC1_STR + MAC2_STR);
 
         this.ingress.setMacAddresses(asList(IMAC1_STR, IMAC2_STR));
         this.ingress.setPortIPs(asList(IADDR1_STR, IADDR2_STR));
 
         this.egress.setMacAddresses(asList(EMAC1_STR, EMAC2_STR));
         this.egress.setPortIPs(asList(EADDR1_STR, EADDR2_STR));
+
+        this.port.setMacAddresses(asList(MAC1_STR, MAC2_STR));
+        this.port.setPortIPs(asList(ADDR1_STR, ADDR2_STR));
 
         this.inspected.setMacAddresses(asList(INSPMAC1_STR));
 
@@ -524,9 +539,11 @@ public class OSGiIntegrationTest {
         // Assert.
         RedirectionApiUtils utils = new RedirectionApiUtils(this.em, this.txControl);
 
-        PortGroupEntity createdPortGroupEntity = utils.findPortGroupEntity(portGroup.getElementId(), portGroup.getParentId());
+        PortGroupEntity createdPortGroupEntity = utils.findPortGroupEntity(portGroup.getElementId(),
+                portGroup.getParentId());
 
-        NetworkElementEntity updatedVirtualPort = utils.findNetworkElementEntityByElementId(this.ingress.getElementId());
+        NetworkElementEntity updatedVirtualPort = utils
+                .findNetworkElementEntityByElementId(this.ingress.getElementId());
 
         assertNotNull(createdPortGroupEntity);
         assertNotNull(createdPortGroupEntity.getElementId());
@@ -555,7 +572,8 @@ public class OSGiIntegrationTest {
         // Assert.
         RedirectionApiUtils utils = new RedirectionApiUtils(this.em, this.txControl);
 
-        PortGroupEntity deletedPortGroupEntity = utils.findPortGroupEntity(portGroup.getElementId(), portGroup.getParentId());
+        PortGroupEntity deletedPortGroupEntity = utils.findPortGroupEntity(portGroup.getElementId(),
+                portGroup.getParentId());
 
         assertNull(deletedPortGroupEntity);
 
@@ -852,5 +870,176 @@ public class OSGiIntegrationTest {
         });
 
         assertEquals(null, foundInspectionPort);
+    }
+
+    @Test
+    public void testApiRegisterPort() throws Exception {
+        this.redirApi = new SampleSdnRedirectionApi(this.txControl, this.em);
+
+        this.port.setParentId(UUID.randomUUID().toString());
+        this.port.setDeviceOwnerId("DeviceOwnerId");
+
+        NetworkElement port = this.redirApi.registerPort(this.port);
+
+        assertNotNull(port);
+    }
+
+    @Test
+    public void testApiDeletePort() throws Exception {
+
+        this.redirApi = new SampleSdnRedirectionApi(this.txControl, this.em);
+
+        NetworkElement port = this.redirApi.registerPort(this.port);
+
+        assertNotNull(port);
+
+        this.redirApi.deletePort(this.port.getElementId());
+
+        assertEquals(null, this.redirApi.getPort(this.port.getElementId()));
+    }
+
+    @Test
+    public void testGetPortIds() throws Exception {
+        this.redirApi = new SampleSdnRedirectionApi(this.txControl, this.em);
+
+        this.redirApi.registerPort(this.ingress);
+        this.redirApi.registerPort(this.egress);
+        this.redirApi.registerPort(this.port);
+
+        List <String> portIds = this.redirApi.getPortIds();
+
+        assertNotNull(portIds);
+        assertTrue(portIds.contains(this.ingress.getElementId()));
+        assertTrue(portIds.contains(this.egress.getElementId()));
+        assertTrue(portIds.contains(this.port.getElementId()));
+    }
+
+    @Test
+    public void testApiGetPort() throws Exception {
+        this.redirApi = new SampleSdnRedirectionApi(this.txControl, this.em);
+
+        this.port.setParentId(UUID.randomUUID().toString());
+        this.port.setDeviceOwnerId("DeviceOwnerId");
+        this.redirApi.registerPort(this.port);
+
+        NetworkElement port = this.redirApi.getPort(this.port.getElementId());
+
+        assertNotNull(port);
+        assertNotNull(port.getElementId());
+        assertNotNull(port.getParentId());
+        assertNotNull(port.getMacAddresses());
+        assertNotNull(port.getPortIPs());
+    }
+
+    @Test
+    public void testApiUpdatePort() throws Exception {
+        ArrayList<String> macAdresses = new ArrayList<String>(asList("ff:ff:ff:bb:aa:02", "ff:ff:ff:bb:aa:03"));
+
+        ArrayList<String> ipAdresses = new ArrayList<String>(asList("10.5.2.3", "10.5.3.4"));
+
+        String newParentId = "NewParentId";
+
+        String newDeviceOwnerId = "NewDeviceOwnerId";
+
+        this.redirApi = new SampleSdnRedirectionApi(this.txControl, this.em);
+
+        this.redirApi.registerPort(this.port);
+
+        NetworkElementEntity port = this.redirApi.getPort(this.port.getElementId());
+        port.setMacAddresses(macAdresses);
+        port.setPortIPs(ipAdresses);
+        port.setParentId(newParentId);
+        port.setDeviceOwnerId(newDeviceOwnerId);
+
+        NetworkElementEntity updatedPort = this.redirApi.updatePort(port);
+
+        assertNotNull(updatedPort);
+        assertEquals(newDeviceOwnerId, updatedPort.getDeviceOwnerId());
+        assertEquals(newParentId, updatedPort.getParentId());
+        assertEquals(macAdresses, updatedPort.getMacAddresses());
+        assertEquals(ipAdresses, updatedPort.getPortIPs());
+    }
+
+    @Test
+    public void testApiGetInspectionPortsIds() throws Exception {
+        this.redirApi = new SampleSdnRedirectionApi(this.txControl, this.em);
+
+        InspectionPortElement inspectionPortElement = new InspectionPortEntity(null, this.ingress, this.egress);
+        inspectionPortElement = (InspectionPortElement) this.redirApi.registerInspectionPort(inspectionPortElement);
+
+        String inspectionPortElementId = inspectionPortElement.getElementId();
+
+        assertEquals(1, this.redirApi.getInspectionPortsIds().size());
+        assertTrue(this.redirApi.getInspectionPortsIds().contains(inspectionPortElementId));
+    }
+
+    @Test
+    public void testApiGetInspectionHooksIds() throws Exception{
+        this.redirApi = new SampleSdnRedirectionApi(this.txControl, this.em);
+
+        InspectionPortEntity inspectionPortElement = new InspectionPortEntity(null, this.ingress, this.egress);
+
+        Element registeredElement = this.redirApi.registerInspectionPort(inspectionPortElement);
+
+        assertNotNull(registeredElement);
+        assertNotNull(registeredElement.getElementId());
+
+        String hookId = this.redirApi.installInspectionHook(this.inspected, inspectionPortElement, 0L, VLAN, 0L, NA);
+
+        assertNotNull(hookId);
+        assertTrue(this.redirApi.getInspectionHooksIds().contains(hookId));
+        assertEquals(1, this.redirApi.getInspectionHooksIds().size());
+    }
+
+    @Test
+    public void testApiUpdateInspectionPort() throws Exception {
+
+        ArrayList<String> macAdressesSet1 = new ArrayList<String>(
+                asList("ff:ff:ff:bb:cc:01", "ff:ff:ff:bb:aa:01"));
+
+        ArrayList<String> ipAdressesSet1 = new ArrayList<String>(asList("10.5.2.3", "10.5.3.4"));
+
+        ArrayList<String> macAdressesSet2 = new ArrayList<String>(
+                asList("ff:ff:ff:bb:aa:02", "ff:ff:ff:bb:aa:03"));
+
+        ArrayList<String> ipAdressesSet2 = new ArrayList<String>(asList("10.5.2.5", "10.5.3.6"));
+
+        String elementId1 = "ElementId1";
+
+        String elementId2 = "ElementId2";
+
+        this.redirApi = new SampleSdnRedirectionApi(this.txControl, this.em);
+
+        InspectionPortEntity inspectionPortElement = new InspectionPortEntity(null, this.ingress, this.egress);
+        InspectionPortEntity registeredPortEntity =
+                (InspectionPortEntity) this.redirApi.registerInspectionPort(inspectionPortElement);
+
+        NetworkElementEntity newIngress = new NetworkElementEntity(elementId1, macAdressesSet1,
+                ipAdressesSet1, UUID.randomUUID().toString());
+
+        NetworkElementEntity newEgress = new NetworkElementEntity(elementId2, macAdressesSet2,
+                ipAdressesSet2, UUID.randomUUID().toString());
+
+        assertNotNull(this.redirApi.registerPort(newEgress));
+        assertNotNull(this.redirApi.registerPort(newIngress));
+
+        registeredPortEntity.setEgressPort(newEgress);
+        registeredPortEntity.setIngressPort(newIngress);
+
+        assertNotNull(registeredPortEntity.getEgressPort().getElementId());
+        assertNotNull(registeredPortEntity.getIngressPort().getElementId());
+
+        InspectionPortEntity updatedPortEntity = (InspectionPortEntity) this.redirApi
+                .updateInspectionPort(registeredPortEntity);
+
+        assertNotNull(updatedPortEntity);
+        assertEquals(newEgress.getElementId(), updatedPortEntity.getEgressPort().getElementId());
+        assertEquals(newEgress.getParentId(), updatedPortEntity.getEgressPort().getParentId());
+        assertTrue(newEgress.getMacAddresses().containsAll(updatedPortEntity.getEgressPort().getMacAddresses()));
+        assertEquals(newIngress.getElementId(), updatedPortEntity.getIngressPort().getElementId());
+        assertEquals(newIngress.getParentId(), updatedPortEntity.getIngressPort().getParentId());
+        assertTrue(newEgress.getMacAddresses().containsAll(updatedPortEntity.getEgressPort().getMacAddresses()));
+
+        updatedPortEntity = (InspectionPortEntity) this.redirApi.updateInspectionPort(registeredPortEntity);
     }
 }

@@ -28,8 +28,11 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import org.osc.controller.nsc.api.SampleSdnRedirectionApi;
 import org.osc.controller.nsc.entities.InspectionHookEntity;
+import org.osc.controller.nsc.model.VirtualizationConnectorElementImpl;
 import org.osc.sdk.controller.api.SdnControllerApi;
+import org.osc.sdk.controller.element.VirtualizationConnectorElement;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.jdbc.DataSourceFactory;
@@ -40,7 +43,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Component(service = InspectionHookApis.class)
-@Path("/controller/{id}/inspectionHooks")
+@Path("/controller/{controllerId}/inspectionHooks")
 @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 public class InspectionHookApis {
@@ -63,59 +66,103 @@ public class InspectionHookApis {
     private SdnControllerApi api;
 
     @POST
-    public String createInspectionHook(@PathParam("id") String id, InspectionHookEntity entity) throws Exception {
+    public String createInspectionHook(@PathParam("controllerId") String controllerId, InspectionHookEntity entity)
+            throws Exception {
 
-        LOG.info(String.format("Creating inspection hook with inspection port id %s",
-                entity.getInspectionPort().getElementId()));
+        LOG.info("Creating inspection hook with inspection port id %s", entity.getInspectionPort().getElementId());
 
-        return RestServerApiUtils.getSdnRedirectionApi(id, this.api).installInspectionHook(entity.getInspectedPort(),
-                entity.getInspectionPort(), entity.getTag(), entity.getEncType(), entity.getOrder(),
-                entity.getFailurePolicyType());
+        RestServerApiUtils.throwExceptionIfNullId(controllerId);
+
+        SampleSdnRedirectionApi sdnApi = RestServerApiUtils.getSdnApi(controllerId);
+        if (sdnApi == null) {
+            VirtualizationConnectorElement vc = new VirtualizationConnectorElementImpl("Sample", controllerId);
+            sdnApi = (SampleSdnRedirectionApi) this.api.createRedirectionApi(vc, "TEST");
+
+            RestServerApiUtils.insertSdnApi(controllerId, sdnApi);
+        }
+
+        return sdnApi.installInspectionHook(entity.getInspectedPort(), entity.getInspectionPort(), entity.getTag(),
+                entity.getEncType(), entity.getOrder(), entity.getFailurePolicyType());
     }
 
-    @Path("/{InspectionHookId}")
+    @Path("/{inspectionHookId}")
     @PUT
-    public InspectionHookEntity updateInspectionHook(@PathParam("id") String id,
-            @PathParam("InspectionHookId") String InspectionHookId, InspectionHookEntity entity) throws Exception {
-        entity.setHookId(InspectionHookId);
+    public InspectionHookEntity updateInspectionHook(@PathParam("controllerId") String controllerId,
+            @PathParam("inspectionHookId") String inspectionHookId, InspectionHookEntity entity) throws Exception {
 
-        RestServerApiUtils.getSdnRedirectionApi(id, this.api).updateInspectionHook(entity);
+        RestServerApiUtils.throwExceptionIfNullId(controllerId);
+
+        SampleSdnRedirectionApi sdnApi = RestServerApiUtils.getSdnApi(controllerId);
+        if (sdnApi == null) {
+            VirtualizationConnectorElement vc = new VirtualizationConnectorElementImpl("Sample", controllerId);
+            sdnApi = (SampleSdnRedirectionApi) this.api.createRedirectionApi(vc, "TEST");
+
+            RestServerApiUtils.insertSdnApi(controllerId, sdnApi);
+        }
+
+        RestServerApiUtils.validateIdMatches(entity.getHookId(), inspectionHookId, "InspectionHook");
+
+        sdnApi.updateInspectionHook(entity);
 
         return entity;
     }
 
-    @Path("/{InspectionHookId}")
+    @Path("/{inspectionHookId}")
     @DELETE
-    public void deleteInspectionHook(@PathParam("id") String id, @PathParam("InspectionHookId") String InspectionHookId)
-            throws Exception {
-        if (InspectionHookId == null) {
-            throw new IllegalArgumentException("Attempt to delete null inspection hook port");
+    public void deleteInspectionHook(@PathParam("controllerId") String controllerId,
+            @PathParam("inspectionHookId") String inspectionHookId)
+                    throws Exception {
+        LOG.info("Deleting the inspection hook element for id %s ", inspectionHookId);
+
+        RestServerApiUtils.throwExceptionIfNullId(controllerId);
+
+        SampleSdnRedirectionApi sdnApi = RestServerApiUtils.getSdnApi(controllerId);
+        if (sdnApi == null) {
+            VirtualizationConnectorElement vc = new VirtualizationConnectorElementImpl("Sample", controllerId);
+            sdnApi = (SampleSdnRedirectionApi) this.api.createRedirectionApi(vc, "TEST");
+
+            RestServerApiUtils.insertSdnApi(controllerId, sdnApi);
         }
 
-        LOG.info(String.format("Deleting the inspection hook element for id %s ", InspectionHookId));
-
-        RestServerApiUtils.getSdnRedirectionApi(id, this.api).removeInspectionHook(InspectionHookId);
+        sdnApi.removeInspectionHook(inspectionHookId);
     }
 
     @GET
-    public List<String> getInspectionHookIds(@PathParam("id") String id) throws Exception {
+    public List<String> getInspectionHookIds(@PathParam("controllerId") String controllerId) throws Exception {
+
         LOG.info("Listing inspection hook ids'");
 
-        return RestServerApiUtils.getSdnRedirectionApi(id, this.api).getInspectionHooksIds();
-    }
+        RestServerApiUtils.throwExceptionIfNullId(controllerId);
 
-    @Path("/{InspectionHookId}")
-    @GET
-    public InspectionHookEntity getInspectionHook(@PathParam("id") String id,
-            @PathParam("InspectionHookId") String InspectionHookId)
-                    throws Exception {
-        if (InspectionHookId == null) {
-            throw new IllegalArgumentException("Attempt to retrive null inspection hook");
+        SampleSdnRedirectionApi sdnApi = RestServerApiUtils.getSdnApi(controllerId);
+        if (sdnApi == null) {
+            VirtualizationConnectorElement vc = new VirtualizationConnectorElementImpl("Sample", controllerId);
+            sdnApi = (SampleSdnRedirectionApi) this.api.createRedirectionApi(vc, "TEST");
+
+            RestServerApiUtils.insertSdnApi(controllerId, sdnApi);
         }
 
-        LOG.info(String.format("Getting the inspection hook element for id %s ", InspectionHookId));
-        InspectionHookEntity inspectionHook = (InspectionHookEntity) RestServerApiUtils
-                .getSdnRedirectionApi(id, this.api).getInspectionHook(InspectionHookId);
+        return sdnApi.getInspectionHooksIds();
+    }
+
+    @Path("/{inspectionHookId}")
+    @GET
+    public InspectionHookEntity getInspectionHook(@PathParam("controllerId") String controllerId,
+            @PathParam("inspectionHookId") String inspectionHookId)
+                    throws Exception {
+
+        LOG.info("Getting the inspection hook element for id %s ", inspectionHookId);
+
+        RestServerApiUtils.throwExceptionIfNullId(controllerId);
+
+        SampleSdnRedirectionApi sdnApi = RestServerApiUtils.getSdnApi(controllerId);
+        if (sdnApi == null) {
+            VirtualizationConnectorElement vc = new VirtualizationConnectorElementImpl("Sample", controllerId);
+            sdnApi = (SampleSdnRedirectionApi) this.api.createRedirectionApi(vc, "TEST");
+
+            RestServerApiUtils.insertSdnApi(controllerId, sdnApi);
+        }
+        InspectionHookEntity inspectionHook = (InspectionHookEntity) sdnApi.getInspectionHook(inspectionHookId);
 
         inspectionHook.setInspectedPort(null);
         inspectionHook.setInspectionPort(null);

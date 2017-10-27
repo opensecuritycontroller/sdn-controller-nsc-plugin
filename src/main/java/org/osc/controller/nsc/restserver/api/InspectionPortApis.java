@@ -28,8 +28,11 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import org.osc.controller.nsc.api.SampleSdnRedirectionApi;
 import org.osc.controller.nsc.entities.InspectionPortEntity;
+import org.osc.controller.nsc.model.VirtualizationConnectorElementImpl;
 import org.osc.sdk.controller.api.SdnControllerApi;
+import org.osc.sdk.controller.element.VirtualizationConnectorElement;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.jdbc.DataSourceFactory;
@@ -40,7 +43,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Component(service = InspectionPortApis.class)
-@Path("/controller/{id}/inspectionPorts")
+@Path("/controller/{controllerId}/inspectionPorts")
 @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 public class InspectionPortApis {
@@ -63,65 +66,105 @@ public class InspectionPortApis {
     private SdnControllerApi api;
 
     @POST
-    public String createInspectionPort(@PathParam("id") String id, InspectionPortEntity entity)
+    public String createInspectionPort(@PathParam("controllerId") String controllerId, InspectionPortEntity entity)
             throws Exception {
-        if (entity == null) {
-            throw new IllegalArgumentException("Attempt to create null InspectionPort");
+
+        LOG.info("Creating inspection port for (ingress id %s ; egress id %s)", entity.getIngressPort().getElementId(),
+                entity.getEgressPort().getElementId());
+
+        RestServerApiUtils.throwExceptionIfNullId(controllerId);
+
+        SampleSdnRedirectionApi sdnApi = RestServerApiUtils.getSdnApi(controllerId);
+        if (sdnApi == null) {
+            VirtualizationConnectorElement vc = new VirtualizationConnectorElementImpl("Sample", controllerId);
+            sdnApi = (SampleSdnRedirectionApi) this.api.createRedirectionApi(vc, "TEST");
+
+            RestServerApiUtils.insertSdnApi(controllerId, sdnApi);
         }
 
-        LOG.info(String.format("Creating inspection port for (ingress id %s ; egress id %s)",
-                entity.getIngressPort().getElementId(), entity.getEgressPort().getElementId()));
-
-        InspectionPortEntity inspectionPort = (InspectionPortEntity) RestServerApiUtils
-                .getSdnRedirectionApi(id, this.api).registerInspectionPort(entity);
+        InspectionPortEntity inspectionPort = (InspectionPortEntity) sdnApi.registerInspectionPort(entity);
 
         return inspectionPort == null ? null : inspectionPort.getElementId();
     }
 
     @Path("/{inspectionPortId}")
     @PUT
-    public InspectionPortEntity updateInspectionPort(@PathParam("id") String id,
+    public InspectionPortEntity updateInspectionPort(@PathParam("controllerId") String controllerId,
             @PathParam("inspectionPortId") String inspectionPortId, InspectionPortEntity entity) throws Exception {
 
-        LOG.info(String.format("Updating the inspection port element id %s ", inspectionPortId));
+        LOG.info("Updating the inspection port element id %s ", inspectionPortId);
 
-        entity.setId(inspectionPortId);
+        RestServerApiUtils.throwExceptionIfNullId(controllerId);
 
-        return (InspectionPortEntity) RestServerApiUtils.getSdnRedirectionApi(id, this.api)
-                .updateInspectionPort(entity);
+        SampleSdnRedirectionApi sdnApi = RestServerApiUtils.getSdnApi(controllerId);
+        if (sdnApi == null) {
+            VirtualizationConnectorElement vc = new VirtualizationConnectorElementImpl("Sample", controllerId);
+            sdnApi = (SampleSdnRedirectionApi) this.api.createRedirectionApi(vc, "TEST");
+
+            RestServerApiUtils.insertSdnApi(controllerId, sdnApi);
+        }
+
+        RestServerApiUtils.validateIdMatches(entity.getElementId(), inspectionPortId, "InspectionPort");
+
+        return (InspectionPortEntity) sdnApi.updateInspectionPort(entity);
     }
 
     @Path("/{inspectionPortId}")
     @DELETE
-    public void deleteInspectionPort(@PathParam("id") String id, @PathParam("inspectionPortId") String inspectionPortId)
-            throws Exception {
-        if (inspectionPortId == null) {
-            throw new IllegalArgumentException("Attempt to update null inspection port");
+    public void deleteInspectionPort(@PathParam("controllerId") String controllerId,
+            @PathParam("inspectionPortId") String inspectionPortId)
+                    throws Exception {
+
+        LOG.info("Deleting the inspection port element for id %s ", inspectionPortId);
+
+        RestServerApiUtils.throwExceptionIfNullId(controllerId);
+
+        SampleSdnRedirectionApi sdnApi = RestServerApiUtils.getSdnApi(controllerId);
+        if (sdnApi == null) {
+            VirtualizationConnectorElement vc = new VirtualizationConnectorElementImpl("Sample", controllerId);
+            sdnApi = (SampleSdnRedirectionApi) this.api.createRedirectionApi(vc, "TEST");
+
+            RestServerApiUtils.insertSdnApi(controllerId, sdnApi);
         }
 
-        LOG.info(String.format("Deleting the inspection port element for id %s ", inspectionPortId));
-
-        RestServerApiUtils.getSdnRedirectionApi(id, this.api)
-        .removeInspectionPort(new InspectionPortEntity(inspectionPortId, null, null));
+        sdnApi.removeInspectionPort(new InspectionPortEntity(inspectionPortId, null, null));
     }
 
     @GET
-    public List<String> getInspectionPortIds(@PathParam("id") String id) throws Exception {
+    public List<String> getInspectionPortIds(@PathParam("controllerId") String controllerId) throws Exception {
+
         LOG.info("Listing inspection port ids'");
 
-        return RestServerApiUtils.getSdnRedirectionApi(id, this.api).getInspectionPortsIds();
+        RestServerApiUtils.throwExceptionIfNullId(controllerId);
+
+        SampleSdnRedirectionApi sdnApi = RestServerApiUtils.getSdnApi(controllerId);
+        if (sdnApi == null) {
+            VirtualizationConnectorElement vc = new VirtualizationConnectorElementImpl("Sample", controllerId);
+            sdnApi = (SampleSdnRedirectionApi) this.api.createRedirectionApi(vc, "TEST");
+
+            RestServerApiUtils.insertSdnApi(controllerId, sdnApi);
+        }
+
+        return sdnApi.getInspectionPortsIds();
     }
 
     @Path("/{inspectionPortId}")
     @GET
-    public InspectionPortEntity getInspectionPort(@PathParam("id") String id,
+    public InspectionPortEntity getInspectionPort(@PathParam("controllerId") String controllerId,
             @PathParam("inspectionPortId") String inspectionPortId) throws Exception {
-        if (inspectionPortId == null) {
-            throw new IllegalArgumentException("Attempt to retrive null inspection port");
-        }
-        LOG.info(String.format("Getting the inspection port element for id %s ", inspectionPortId));
 
-        return (InspectionPortEntity) RestServerApiUtils.getSdnRedirectionApi(id, this.api)
-                .getInspectionPort(new InspectionPortEntity(inspectionPortId, null, null));
+        LOG.info("Getting the inspection port element for id %s ", inspectionPortId);
+
+        RestServerApiUtils.throwExceptionIfNullId(controllerId);
+
+        SampleSdnRedirectionApi sdnApi = RestServerApiUtils.getSdnApi(controllerId);
+        if (sdnApi == null) {
+            VirtualizationConnectorElement vc = new VirtualizationConnectorElementImpl("Sample", controllerId);
+            sdnApi = (SampleSdnRedirectionApi) this.api.createRedirectionApi(vc, "TEST");
+
+            RestServerApiUtils.insertSdnApi(controllerId, sdnApi);
+        }
+
+        return (InspectionPortEntity) sdnApi.getInspectionPort(new InspectionPortEntity(inspectionPortId, null, null));
     }
 }

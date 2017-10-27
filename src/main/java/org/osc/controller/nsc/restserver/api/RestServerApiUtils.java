@@ -19,11 +19,12 @@ package org.osc.controller.nsc.restserver.api;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.osc.controller.nsc.api.SampleSdnRedirectionApi;
-import org.osc.controller.nsc.model.VirtualizationConnectorElementImpl;
-import org.osc.sdk.controller.api.SdnControllerApi;
-import org.osc.sdk.controller.element.VirtualizationConnectorElement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RestServerApiUtils {
+
+    private static Logger LOG = LoggerFactory.getLogger(RestServerApiUtils.class);
 
     private static ConcurrentHashMap<String, SampleSdnRedirectionApi> sdnApiHashMap = new ConcurrentHashMap<String, SampleSdnRedirectionApi>();
 
@@ -35,22 +36,23 @@ public class RestServerApiUtils {
         return sdnApiHashMap.get(id);
     }
 
-    static SampleSdnRedirectionApi getSdnRedirectionApi(String id, SdnControllerApi api) throws Exception {
+    static void validateIdMatches(String entityId, String id, String objName) throws Exception {
+        if (!id.equals(entityId)) {
+            throw new IllegalArgumentException(
+                    String.format("The ID %s specified in the '%s' data does not match the id specified in the URL",
+                            entityId, objName));
+        }
+    }
 
+    static void flushSdnApiCache() {
+        sdnApiHashMap.clear();
+    }
+
+    static void throwExceptionIfNullId(String id) {
         if (id == null) {
-            return null;
+            String msg = "null passed for controller id argument!";
+            LOG.error(msg);
+            throw new IllegalArgumentException(msg);
         }
-
-        SampleSdnRedirectionApi sdnApi = RestServerApiUtils.getSdnApi(id);
-        if (sdnApi != null) {
-            return sdnApi;
-        }
-
-        VirtualizationConnectorElement vc = new VirtualizationConnectorElementImpl("Sample", id);
-        sdnApi = (SampleSdnRedirectionApi) api.createRedirectionApi(vc, "TEST");
-
-        RestServerApiUtils.insertSdnApi(id, sdnApi);
-
-        return sdnApi;
     }
 }

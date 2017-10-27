@@ -49,21 +49,25 @@
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
 			<version>3.1.0</version>
+			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.glassfish.jersey.core</groupId>
 			<artifactId>jersey-server</artifactId>
 			<version>2.25</version>
+			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.glassfish.jersey.containers</groupId>
 			<artifactId>jersey-container-servlet-core</artifactId>
 			<version>2.25</version>
+			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>javax.ws.rs</groupId>
 			<artifactId>javax.ws.rs-api</artifactId>
 			<version>2.0.1</version>
+			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -75,31 +79,31 @@
 			<groupId>com.fasterxml.jackson.jaxrs</groupId>
 			<artifactId>jackson-jaxrs-json-provider</artifactId>
 			<version>2.8.5</version>
+			<scope>compile</scope>
 		</dependency>
 			<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-annotations</artifactId>
 			<version>2.8.5</version>
+			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-core</artifactId>
 			<version>2.8.5</version>
+			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
 			<version>2.8.5</version>
+			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.jaxrs</groupId>
 			<artifactId>jackson-jaxrs-base</artifactId>
 			<version>2.8.5</version>
-		</dependency>
-		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<version>1.2.17</version>
+			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.osgi</groupId>
@@ -124,6 +128,7 @@
             <groupId>org.osc.api</groupId>
             <artifactId>sdn-controller-api</artifactId>
             <version>2.0.0-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
         <!-- An OSGi bundle version of the AOP dependency -->
         <dependency>
@@ -143,6 +148,7 @@
             <groupId>org.apache.directory.studio</groupId>
             <artifactId>org.apache.commons.lang</artifactId>
             <version>2.6</version>
+            <scope>compile</scope>
         </dependency>
         <!-- Declarative Services is used to publish the service at runtime -->
         <dependency>
@@ -161,6 +167,7 @@
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
             <version>6.0.0</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.osgi</groupId>
@@ -172,16 +179,19 @@
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.compendium</artifactId>
             <version>5.0.0</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.service.jpa</artifactId>
             <version>1.0.0</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.aries.tx-control</groupId>
             <artifactId>tx-control-provider-jpa-local</artifactId>
             <version>0.0.2</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.aries.tx-control</groupId>
@@ -221,6 +231,7 @@
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
             <version>5.2.8.Final</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
@@ -238,11 +249,13 @@
             <groupId>com.fasterxml</groupId>
             <artifactId>classmate</artifactId>
             <version>1.3.3</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.javassist</groupId>
             <artifactId>javassist</artifactId>
             <version>3.20.0-GA</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
