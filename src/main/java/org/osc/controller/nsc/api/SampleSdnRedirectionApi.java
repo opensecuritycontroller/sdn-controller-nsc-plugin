@@ -72,11 +72,10 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
         }
 
         try {
-            InspectionHookEntity inspectionHook = this.utils.findInspHookByInspectedAndPort(inspectedPort, inspectionPort);
-            return inspectionHook;
+            return this.utils.findInspHookByInspectedAndPort(inspectedPort, inspectionPort);
         } catch (Exception e) {
-            LOG.error(String.format("Exception finding Network Element (Inspected %s ; Inspection Port %s):", "" + inspectedPort,
-                    "" + inspectionPort), e);
+            LOG.error(String.format("Exception finding Network Element (Inspected %s ; Inspection Port %s):",
+                    "" + inspectedPort, "" + inspectionPort), e);
             return null;
         }
     }
@@ -257,8 +256,7 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
         if (portId != null) {
             try {
                 return this.txControl.required(() -> {
-                    InspectionPortEntity ipEntity = this.utils.txInspectionPortEntityById(portId);
-                    return ipEntity;
+                    return this.utils.txInspectionPortEntityById(portId);
                 });
             } catch (Exception e) {
                 LOG.warn("Failed to retrieve InspectionPort by id! Trying by ingress and egress");
@@ -270,8 +268,7 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
         NetworkElement ingress = inspectionPort.getIngressPort();
         NetworkElement egress = inspectionPort.getEgressPort();
 
-        InspectionPortEntity ipEntity = this.utils.findInspPortByNetworkElements(ingress, egress);
-        return ipEntity;
+        return this.utils.findInspPortByNetworkElements(ingress, egress);
     }
 
     @Override
@@ -390,9 +387,7 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
         }
 
         PortGroupEntity newPortGroupEntity = this.utils.makePortGroupEntity(inspectedPorts);
-        return this.txControl.required(() -> {
-            return this.em.merge(newPortGroupEntity);
-        });
+        return this.txControl.required(() -> this.em.merge(newPortGroupEntity));
     }
 
     @Override
@@ -465,7 +460,7 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
             NetworkElement egress = inspectionPort.getEgressPort();
 
             LOG.warn(String.format("Attempt to remove nonexistent Inspection Port for ingress %s and egress %s",
-                    "" + ingress, "" + egress));
+                    ingress, egress));
         }
     }
 
@@ -486,9 +481,7 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
             return null;
         }
 
-        return this.txControl.required(() -> {
-            return this.em.find(InspectionHookEntity.class, inspectionHookId);
-        });
+        return this.txControl.required(() -> this.em.find(InspectionHookEntity.class, inspectionHookId));
     }
 
     @Override

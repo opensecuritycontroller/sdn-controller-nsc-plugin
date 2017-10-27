@@ -384,8 +384,7 @@ public class RedirectionApiUtils {
             return ports.get(0);
 
         } catch (Exception e) {
-            LOG.error(String.format("Finding Inspection Ports by ingress %s and egress %s", ingress.getElementId(),
-                    egress.getElementId()), e);
+            LOG.error(String.format("Finding Inspection Ports by ingress %s and egress %s", ingressId, egressId), e);
             return null;
         }
     }
