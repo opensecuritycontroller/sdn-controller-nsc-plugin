@@ -24,14 +24,6 @@ import org.osc.controller.nsc.entities.NetworkElementEntity;
 
 public class SampleSdnRedirectionApiTestData {
 
-    public static final String TEST_DB_URL_PREFIX = "jdbc:h2:";
-
-    public static final String TEST_DB_FILENAME = "./nscPlugin_OSGiIntegrationTest";
-
-    public static final String TEST_DB_URL_SUFFIX = ";MVCC\\=FALSE;LOCK_TIMEOUT\\=10000;MV_STORE=FALSE;";
-
-    public static final String TEST_DB_URL = TEST_DB_URL_PREFIX + TEST_DB_FILENAME + TEST_DB_URL_SUFFIX;
-
     public static final String EADDR2_STR = "192.168.0.12";
 
     public static final String EADDR1_STR = "192.168.0.11";
