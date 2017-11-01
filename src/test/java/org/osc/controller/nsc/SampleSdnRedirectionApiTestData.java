@@ -22,25 +22,25 @@ import org.osc.controller.nsc.entities.InspectionHookEntity;
 import org.osc.controller.nsc.entities.InspectionPortEntity;
 import org.osc.controller.nsc.entities.NetworkElementEntity;
 
-public class SampleSdnRedirectionApiTestData {
+class SampleSdnRedirectionApiTestData {
 
-    public static final String EADDR2_STR = "192.168.0.12";
+     private static final String EADDR2_STR = "192.168.0.12";
 
-    public static final String EADDR1_STR = "192.168.0.11";
+     private static final String EADDR1_STR = "192.168.0.11";
 
-    public static final String IADDR2_STR = "10.4.3.2";
+     private static final String IADDR2_STR = "10.4.3.2";
 
-    public static final String IADDR1_STR = "10.4.3.1";
+     private static final String IADDR1_STR = "10.4.3.1";
 
-    public static final String EMAC2_STR = "ee:ff:aa:bb:cc:02";
+     private static final String EMAC2_STR = "ee:ff:aa:bb:cc:02";
 
-    public static final String EMAC1_STR = "ee:ff:aa:bb:cc:01";
+     private static final String EMAC1_STR = "ee:ff:aa:bb:cc:01";
 
-    public static final String IMAC1_STR = "ff:ff:aa:bb:cc:01";
+     private static final String IMAC1_STR = "ff:ff:aa:bb:cc:01";
 
-    public static final String IMAC2_STR = "ff:ff:aa:bb:cc:02";
+     private static final String IMAC2_STR = "ff:ff:aa:bb:cc:02";
 
-    public static final String INSPMAC1_STR = "aa:aa:aa:bb:cc:01";
+     private static final String INSPMAC1_STR = "aa:aa:aa:bb:cc:01";
 
     public static InspectionHookEntity inspectionHook;
     public static InspectionPortEntity inspectionPort;
