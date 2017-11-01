@@ -143,7 +143,6 @@ public class OSGiIntegrationTest {
                 public TrustManager[] getTruststoreManager() throws Exception {
                     return null;
                 }
-
     };
 
     @org.ops4j.pax.exam.Configuration
