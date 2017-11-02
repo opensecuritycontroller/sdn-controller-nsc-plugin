@@ -25,15 +25,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import javax.persistence.EntityManager;
-
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Answers;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.osc.controller.nsc.api.SampleSdnRedirectionApi;
 import org.osc.controller.nsc.entities.InspectionHookEntity;
 import org.osc.controller.nsc.entities.InspectionPortEntity;
@@ -47,27 +42,16 @@ import org.osc.sdk.controller.element.NetworkElement;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 @RunWith(PowerMockRunner.class)
-public class SampleSdnRedirectionApiTest {
-
-    public EntityManager em;
-
-    @Mock(answer = Answers.CALLS_REAL_METHODS)
-    TestTransactionControl txControl;
+public class SampleSdnRedirectionApiTest extends AbstractSampleSdnPluginTest {
 
     @InjectMocks
     private SampleSdnRedirectionApi redirApi;
 
     @Before
+    @Override
     public void setup() {
-        this.em = InMemDB.getEntityManager();
-        this.txControl.init(this.em);
+        super.setup();
         this.redirApi = new SampleSdnRedirectionApi(this.txControl, this.em);
-        setupDataObjects();
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        InMemDB.close();
     }
 
     @Test

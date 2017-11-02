@@ -18,45 +18,17 @@ package org.osc.controller.nsc;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.osc.controller.nsc.TestData.*;
+import static org.osc.controller.nsc.TestData.inspectionHook;
+import static org.osc.controller.nsc.TestData.inspectionPort;
 
-import javax.persistence.EntityManager;
-
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Answers;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.osc.controller.nsc.entities.InspectionHookEntity;
 import org.osc.controller.nsc.entities.InspectionPortEntity;
-import org.osc.controller.nsc.utils.RedirectionApiUtils;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 @RunWith(PowerMockRunner.class)
-public class HibernateSetupTest {
-
-    public EntityManager em;
-
-    @Mock(answer = Answers.CALLS_REAL_METHODS)
-    TestTransactionControl txControl;
-
-    @InjectMocks
-    private RedirectionApiUtils utils;
-
-    @Before
-    public void setup() {
-        this.em = InMemDB.getEntityManager();
-        this.txControl.init(this.em);
-        this.utils = new RedirectionApiUtils(this.em, this.txControl);
-        setupDataObjects();
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        InMemDB.close();
-    }
+public class HibernateSetupTest extends AbstractSampleSdnPluginTest {
 
     @Test
     public void testDb_PersistInspection_CorrectNumberOfMacsAdPortIps() throws Exception {

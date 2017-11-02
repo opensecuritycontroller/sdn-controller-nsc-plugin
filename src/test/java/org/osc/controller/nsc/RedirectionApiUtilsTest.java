@@ -22,15 +22,11 @@ import static org.osc.controller.nsc.TestData.*;
 import static org.osc.sdk.controller.FailurePolicyType.NA;
 import static org.osc.sdk.controller.TagEncapsulationType.VLAN;
 
-import javax.persistence.EntityManager;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Answers;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.osc.controller.nsc.api.SampleSdnRedirectionApi;
 import org.osc.controller.nsc.entities.InspectionHookEntity;
 import org.osc.controller.nsc.entities.InspectionPortEntity;
@@ -40,24 +36,19 @@ import org.osc.sdk.controller.element.Element;
 import org.powermock.modules.junit4.PowerMockRunner;;
 
 @RunWith(PowerMockRunner.class)
-public class RedirectionApiUtilsTest {
-
-    public EntityManager em;
-
-    @Mock(answer = Answers.CALLS_REAL_METHODS)
-    TestTransactionControl txControl;
+public class RedirectionApiUtilsTest extends AbstractSampleSdnPluginTest {
 
     @InjectMocks
     private RedirectionApiUtils utils;
 
+    @Override
     @Before
     public void setup() {
-        this.em = InMemDB.getEntityManager();
-        this.txControl.init(this.em);
+        super.setup();
         this.utils = new RedirectionApiUtils(this.em, this.txControl);
-        setupDataObjects();
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         InMemDB.close();
