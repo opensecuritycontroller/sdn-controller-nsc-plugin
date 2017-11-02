@@ -26,7 +26,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.osc.controller.nsc.api.SampleSdnRedirectionApi;
 import org.osc.controller.nsc.entities.InspectionHookEntity;
 import org.osc.controller.nsc.entities.InspectionPortEntity;
@@ -38,11 +37,10 @@ import org.powermock.modules.junit4.PowerMockRunner;;
 @RunWith(PowerMockRunner.class)
 public class RedirectionApiUtilsTest extends AbstractSampleSdnPluginTest {
 
-    @InjectMocks
     private RedirectionApiUtils utils;
 
-    @Override
     @Before
+    @Override
     public void setup() {
         super.setup();
         this.utils = new RedirectionApiUtils(this.em, this.txControl);
