@@ -22,7 +22,7 @@ import org.osc.controller.nsc.entities.InspectionHookEntity;
 import org.osc.controller.nsc.entities.InspectionPortEntity;
 import org.osc.controller.nsc.entities.NetworkElementEntity;
 
-class SampleSdnRedirectionApiTestData {
+class TestData {
 
      private static final String EADDR2_STR = "192.168.0.12";
 
