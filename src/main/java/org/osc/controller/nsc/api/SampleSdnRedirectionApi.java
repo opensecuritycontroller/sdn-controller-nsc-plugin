@@ -96,7 +96,7 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
         LOG.info("Tag: %d; EncType: %s; Order: %d, Fail Policy: %s", tag, encType, order, failurePolicyType);
 
         InspectionHookEntity retValEntity = this.txControl.required(() -> {
-            InspectionPortEntity dbInspectionPort =(InspectionPortEntity) getInspectionPort(inspectionPort);
+            InspectionPortEntity dbInspectionPort = (InspectionPortEntity) getInspectionPort(inspectionPort);
             this.utils.throwExceptionIfNullEntity(dbInspectionPort, inspectionPort);
 
             InspectionHookEntity inspectionHookEntity = this.utils.findInspHookByInspectedAndPort(inspectedPort, dbInspectionPort);
