@@ -160,7 +160,7 @@ public class RedirectionApiUtils {
         try {
             return this.em.createQuery(q).getSingleResult();
         } catch (Exception e) {
-            LOG.error(String.format("Finding Network Element %s ", elementId), e);
+            LOG.error("Finding Network Element {} ", elementId, e);
             return null;
         }
     }
@@ -175,7 +175,7 @@ public class RedirectionApiUtils {
         try {
             return this.em.createQuery(q).getSingleResult();
         } catch (Exception e) {
-            LOG.error(String.format("Finding port group entity id '%s' and parentId '%s' ", elementId, parentId), e);
+            LOG.error("Finding port group entity id '{}' and parentId '{}' ", elementId, parentId, e);
             return null;
         }
     }
@@ -196,7 +196,7 @@ public class RedirectionApiUtils {
             try {
                 return this.em.createQuery(q).getSingleResult();
             } catch (Exception e) {
-                LOG.warn(String.format("Finding Network Element %s ", deviceOwnerId), e);
+                LOG.warn("Finding Network Element {} ", deviceOwnerId, e);
                 return null;
             }
         });
@@ -213,7 +213,7 @@ public class RedirectionApiUtils {
             try {
                 return this.em.createQuery(q).getResultList();
             } catch (Exception e) {
-                LOG.error(String.format("Finding Network Elements with Prefix Id %s ", deviceOwnerPrefixId), e);
+                LOG.error("Finding Network Elements with Prefix Id {} ", deviceOwnerPrefixId, e);
                 return new ArrayList<>();
             }
         });
@@ -337,10 +337,8 @@ public class RedirectionApiUtils {
             throws IllegalArgumentException {
         if (inspectionPortTmp == null) {
             String msg = String.format(
-                    "Cannot find inspection port for inspection hook " + "id: %s; ingress: %s; egress: %s\n",
-                    inspectionPort.getElementId(),
-                    "" + inspectionPort.getIngressPort(),
-                    "" + inspectionPort.getEgressPort());
+                    "Cannot find inspection port for inspection hook id: %s; ingress: %s; egress: %s\n",
+                    inspectionPort.getElementId(), inspectionPort.getIngressPort(), inspectionPort.getEgressPort());
             LOG.error(msg);
             throw new IllegalArgumentException(msg);
         }
@@ -357,6 +355,29 @@ public class RedirectionApiUtils {
     public void throwExceptionIfNullElement(NetworkElement networkElement, String msg) {
         if (networkElement == null) {
             msg = (msg != null ? msg : "null passed for Network Element argument!");
+            LOG.error(msg);
+            throw new IllegalArgumentException(msg);
+        }
+    }
+
+    public void throwExceptionIfIdMismatch(String entityId, String id) throws Exception {
+        if (!id.equals(entityId)) {
+            throw new IllegalArgumentException(String
+                    .format("The ID %s specified in the entity does not match the id specified by the user", entityId));
+        }
+    }
+
+    public void throwExceptionIfIdMismatch(String entityId, String id, String objName) throws Exception {
+        if (!id.equals(entityId)) {
+            throw new IllegalArgumentException(
+                    String.format("The ID %s specified in the '%s' data does not match the id specified in the URL",
+                            entityId, objName));
+        }
+    }
+
+    public void throwExceptionIfNullId(String id) {
+        if (id == null) {
+            String msg = "null passed for the id argument!";
             LOG.error(msg);
             throw new IllegalArgumentException(msg);
         }
@@ -383,16 +404,15 @@ public class RedirectionApiUtils {
             @SuppressWarnings("unchecked")
             List<InspectionPortEntity> ports = q.getResultList();
             if (ports == null || ports.size() == 0) {
-                LOG.warn(String.format("No Inspection Ports by ingress %s and egress %s", ingressId, egressId));
+                LOG.warn("No Inspection Ports by ingress {} and egress {}", ingressId, egressId);
                 return null;
             } else if (ports.size() > 1) {
-                LOG.warn(String.format("Multiple results! Inspection Ports by ingress %s and egress %s", ingressId,
-                        egressId));
+                LOG.warn("Multiple results! Inspection Ports by ingress {} and egress {}", ingressId, egressId);
             }
             return ports.get(0);
 
         } catch (Exception e) {
-            LOG.error(String.format("Finding Inspection Ports by ingress %s and egress %s", ingressId, egressId), e);
+            LOG.error("Finding Inspection Ports by ingress {} and egress {}", ingressId, egressId, e);
             return null;
         }
     }
@@ -420,16 +440,15 @@ public class RedirectionApiUtils {
             @SuppressWarnings("unchecked")
             List<InspectionHookEntity> inspectionHooks = q.getResultList();
             if (inspectionHooks == null || inspectionHooks.size() == 0) {
-                LOG.warn(String.format("No Inspection hooks by inspected %s and port %s", inspectedId, portId));
+                LOG.warn("No Inspection hooks by inspected {} and port {}", inspectedId, portId);
                 return null;
             } else if (inspectionHooks.size() > 1) {
-                LOG.warn(String.format("Multiple results! Inspection hooks by inspected %s and port %s", inspectedId,
-                        portId));
+                LOG.warn("Multiple results! Inspection hooks by inspected {} and port {}", inspectedId, portId);
             }
             return inspectionHooks.get(0);
 
         } catch (Exception e) {
-            LOG.error(String.format("Finding Inspection hooks by inspected %s and port %s", inspectedId, portId), e);
+            LOG.error("Finding Inspection hooks by inspected {} and port {}", inspectedId, portId, e);
             return null;
         }
     }

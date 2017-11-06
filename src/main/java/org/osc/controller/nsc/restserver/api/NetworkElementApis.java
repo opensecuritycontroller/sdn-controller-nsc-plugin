@@ -31,8 +31,8 @@ import javax.ws.rs.core.MediaType;
 import org.osc.controller.nsc.api.SampleSdnRedirectionApi;
 import org.osc.controller.nsc.entities.NetworkElementEntity;
 import org.osc.controller.nsc.model.VirtualizationConnectorElementImpl;
+import org.osc.controller.nsc.utils.RedirectionApiUtils;
 import org.osc.sdk.controller.api.SdnControllerApi;
-import org.osc.sdk.controller.element.VirtualizationConnectorElement;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.jdbc.DataSourceFactory;
@@ -76,19 +76,16 @@ public class NetworkElementApis {
             throw new IllegalArgumentException("Attempt to create network element with no network entities");
         }
 
-        RestServerApiUtils.throwExceptionIfNullId(controllerId);
+        SampleSdnRedirectionApi sdnApi = ((SampleSdnRedirectionApi) this.api
+                .createRedirectionApi(new VirtualizationConnectorElementImpl("Sample", controllerId), "TEST"));
 
-        LOG.info("Creating network element with elementId  %s", elementId);
+        RedirectionApiUtils utilsApi = new RedirectionApiUtils(null, null);
 
-        RestServerApiUtils.validateIdMatches(entity.getElementId(), elementId, "Port");
+        utilsApi.throwExceptionIfNullId(controllerId);
 
-        SampleSdnRedirectionApi sdnApi = RestServerApiUtils.getSdnApi(controllerId);
-        if (sdnApi == null) {
-            VirtualizationConnectorElement vc = new VirtualizationConnectorElementImpl("Sample", controllerId);
-            sdnApi = (SampleSdnRedirectionApi) this.api.createRedirectionApi(vc, "TEST");
+        LOG.info("Creating network element with elementId  {}", elementId);
 
-            RestServerApiUtils.insertSdnApi(controllerId, sdnApi);
-        }
+        utilsApi.throwExceptionIfIdMismatch(entity.getElementId(), elementId, "Port");
 
         return sdnApi.registerPort(entity).getElementId();
     }
@@ -97,19 +94,16 @@ public class NetworkElementApis {
     @PUT
     public NetworkElementEntity updateNetworkElement(@PathParam("controllerId") String controllerId,
             @PathParam("elementId") String elementId, NetworkElementEntity entity) throws Exception {
-        LOG.info(String.format("Updating the network element id %s ", "" + elementId));
+        LOG.info("Updating the network element id {} ", elementId);
 
-        RestServerApiUtils.throwExceptionIfNullId(controllerId);
+        SampleSdnRedirectionApi sdnApi = ((SampleSdnRedirectionApi) this.api
+                .createRedirectionApi(new VirtualizationConnectorElementImpl("Sample", controllerId), "TEST"));
 
-        RestServerApiUtils.validateIdMatches(entity.getElementId(), elementId, "Port");
+        RedirectionApiUtils utilsApi = new RedirectionApiUtils(null, null);
 
-        SampleSdnRedirectionApi sdnApi = RestServerApiUtils.getSdnApi(controllerId);
-        if (sdnApi == null) {
-            VirtualizationConnectorElement vc = new VirtualizationConnectorElementImpl("Sample", controllerId);
-            sdnApi = (SampleSdnRedirectionApi) this.api.createRedirectionApi(vc, "TEST");
+        utilsApi.throwExceptionIfNullId(controllerId);
 
-            RestServerApiUtils.insertSdnApi(controllerId, sdnApi);
-        }
+        utilsApi.throwExceptionIfIdMismatch(entity.getElementId(), elementId, "Port");
 
         return sdnApi.updatePort(entity);
     }
@@ -119,17 +113,12 @@ public class NetworkElementApis {
     public void deleteNetworkElement(@PathParam("controllerId") String controllerId,
             @PathParam("elementId") String elementId)
                     throws Exception {
-        LOG.info("Deleting the network element for id %s ", elementId);
+        LOG.info("Deleting the network element for id {} ", elementId);
 
-        RestServerApiUtils.throwExceptionIfNullId(controllerId);
+        SampleSdnRedirectionApi sdnApi = ((SampleSdnRedirectionApi) this.api
+                .createRedirectionApi(new VirtualizationConnectorElementImpl("Sample", controllerId), "TEST"));
 
-        SampleSdnRedirectionApi sdnApi = RestServerApiUtils.getSdnApi(controllerId);
-        if (sdnApi == null) {
-            VirtualizationConnectorElement vc = new VirtualizationConnectorElementImpl("Sample", controllerId);
-            sdnApi = (SampleSdnRedirectionApi) this.api.createRedirectionApi(vc, "TEST");
-
-            RestServerApiUtils.insertSdnApi(controllerId, sdnApi);
-        }
+        new RedirectionApiUtils(null, null).throwExceptionIfNullId(controllerId);
 
         sdnApi.deletePort(elementId);
     }
@@ -138,15 +127,10 @@ public class NetworkElementApis {
     public List<String> getNetworkElementIds(@PathParam("controllerId") String controllerId) throws Exception {
         LOG.info("Listing network elements ids'");
 
-        RestServerApiUtils.throwExceptionIfNullId(controllerId);
+        SampleSdnRedirectionApi sdnApi = ((SampleSdnRedirectionApi) this.api
+                .createRedirectionApi(new VirtualizationConnectorElementImpl("Sample", controllerId), "TEST"));
 
-        SampleSdnRedirectionApi sdnApi = RestServerApiUtils.getSdnApi(controllerId);
-        if (sdnApi == null) {
-            VirtualizationConnectorElement vc = new VirtualizationConnectorElementImpl("Sample", controllerId);
-            sdnApi = (SampleSdnRedirectionApi) this.api.createRedirectionApi(vc, "TEST");
-
-            RestServerApiUtils.insertSdnApi(controllerId, sdnApi);
-        }
+        new RedirectionApiUtils(null, null).throwExceptionIfNullId(controllerId);
 
         return sdnApi.getPortIds();
     }
@@ -156,24 +140,15 @@ public class NetworkElementApis {
     public NetworkElementEntity getNetworkElement(@PathParam("controllerId") String controllerId,
             @PathParam("elementId") String elementId)
                     throws Exception {
-        LOG.info("Getting the network for id %s ", elementId);
+        LOG.info("Getting the network for id {} ", elementId);
 
-        RestServerApiUtils.throwExceptionIfNullId(controllerId);
+        SampleSdnRedirectionApi sdnApi = ((SampleSdnRedirectionApi) this.api
+                .createRedirectionApi(new VirtualizationConnectorElementImpl("Sample", controllerId), "TEST"));
 
-        SampleSdnRedirectionApi sdnApi = RestServerApiUtils.getSdnApi(controllerId);
-        if (sdnApi == null) {
-            VirtualizationConnectorElement vc = new VirtualizationConnectorElementImpl("Sample", controllerId);
-            sdnApi = (SampleSdnRedirectionApi) this.api.createRedirectionApi(vc, "TEST");
+        new RedirectionApiUtils(null, null).throwExceptionIfNullId(controllerId);
 
-            RestServerApiUtils.insertSdnApi(controllerId, sdnApi);
-        }
-
-        return sdnApi.getPort(elementId);
-    }
-
-    public void close() throws Exception {
-        LOG.info("NetworkElementApis instance is deleted");
-
-        RestServerApiUtils.flushSdnApiCache();
+        NetworkElementEntity portElement = sdnApi.getPort(elementId);
+        portElement.setInspectionHook(null);
+        return portElement;
     }
 }

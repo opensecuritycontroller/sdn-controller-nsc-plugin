@@ -73,8 +73,8 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
         try {
             return this.utils.findInspHookByInspectedAndPort(inspectedPort, inspectionPort);
         } catch (Exception e) {
-            LOG.error("Exception finding Network Element (Inspected %s ; Inspection Port %s):", "" + inspectedPort,
-                    "" + inspectionPort, e);
+            LOG.error("Exception finding Network Element (Inspected {} ; Inspection Port {}):", inspectedPort,
+                    inspectionPort, e);
             return null;
         }
     }
@@ -91,9 +91,8 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
             throw new IllegalArgumentException("Attempt to install an Inspection Hook with null Inspection Port");
         }
 
-        LOG.info("Installing Inspection Hook for (Inspected %s ; Inspection Port %s):", inspectedPort,
-                inspectionPort);
-        LOG.info("Tag: %d; EncType: %s; Order: %d, Fail Policy: %s", tag, encType, order, failurePolicyType);
+        LOG.info("Installing Inspection Hook for (Inspected {} ; Inspection Port {}):", inspectedPort, inspectionPort);
+        LOG.info("Tag: {}; EncType: {}; Order: {}, Fail Policy: {}", tag, encType, order, failurePolicyType);
 
         InspectionHookEntity retValEntity = this.txControl.required(() -> {
             InspectionPortEntity dbInspectionPort = (InspectionPortEntity) getInspectionPort(inspectionPort);
@@ -136,9 +135,9 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
             if (inspectionHook != null) {
                 this.utils.removeSingleInspectionHook(inspectionHook.getHookId());
             } else {
-                LOG.warn(String.format(
-                        "Attempt to remove nonexistent inspection hook for Inspected %s and Inspection Port %s",
-                        inspectedPort, inspectionPort));
+                LOG.warn(
+                        "Attempt to remove nonexistent inspection hook for Inspected {} and Inspection Port {}",
+                        inspectedPort, inspectionPort);
             }
 
             return null;
@@ -169,7 +168,7 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
             if (inspectionHook != null) {
                 inspectionHook.setTag(tag);
             } else {
-                LOG.warn("Attempt to modify nonexistent inspection hook for inspected port %s and inspection port %s",
+                LOG.warn("Attempt to modify nonexistent inspection hook for inspected port {} and inspection port {}",
                         inspectedPort, inspectionPort);
             }
 
@@ -210,7 +209,7 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
             if (inspectionHook != null) {
                 inspectionHook.setFailurePolicyType(failurePolicyType);
             }  else {
-                LOG.warn("Attempt to modify nonexistent inspection hook for inspected port %s and inspection port %s",
+                LOG.warn("Attempt to modify nonexistent inspection hook for inspected port {} and inspection port {}",
                         inspectedPort, inspectionPort);
             }
 
@@ -310,7 +309,7 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
             if (inspectionHook != null) {
                 inspectionHook.setOrder(order);
             } else {
-                LOG.warn("Attempt to modify nonexistent Inspection Hook for Inspected port %s and Inspection Port %s",
+                LOG.warn("Attempt to modify nonexistent Inspection Hook for Inspected port {} and Inspection Port {}",
                         inspectedPort, inspectionPort);
             }
 
@@ -373,7 +372,7 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
             // We will return any port that matches this prefix, we are using a mod hash here to add some level of randomness.
             int index = Math.abs(deviceId.hashCode() % devicePorts.size());
             devicePort = devicePorts.get(index);
-            LOG.info(String.format("Returning device port index %s id %s", index, devicePort.getElementId()));
+            LOG.info("Returning device port index {} id {}", index, devicePort.getElementId());
         }
 
         return devicePort;
@@ -402,7 +401,9 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
             PortGroupEntity portGroupEntity = this.utils.txPortGroupEntity(portGroup.getElementId(), portGroup.getParentId());
 
             if (portGroupEntity == null) {
-                throw new IllegalArgumentException(String.format("No port group entity found for the id '%s' and parentId %s", portGroup.getElementId(), portGroup.getParentId()));
+                throw new IllegalArgumentException(
+                        String.format("No port group entity found for the id '%s' and parentId %s",
+                                portGroup.getElementId(), portGroup.getParentId()));
             }
 
             portGroupEntity.setVirtualPorts(this.utils.networkElementsToEntities(inspectedPorts));
@@ -421,7 +422,7 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
 
             if (portGroupEntity == null) {
                 LOG.info(
-                        "No port group entity found for the id '%s' and parentId %s while deleting a port group. Noop.",
+                        "No port group entity found for the id '{}' and parentId {} while deleting a port group. Noop.",
                         portGroup.getElementId(), portGroup.getParentId());
                 return null;
             }
@@ -460,8 +461,7 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
             NetworkElement ingress = inspectionPort.getIngressPort();
             NetworkElement egress = inspectionPort.getEgressPort();
 
-            LOG.warn("Attempt to remove nonexistent Inspection Port for ingress %s and egress %s", "" + ingress,
-                    "" + egress);
+            LOG.warn("Attempt to remove nonexistent Inspection Port for ingress {} and egress {}", ingress, egress);
         }
     }
 
@@ -504,33 +504,27 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
         });
     }
 
-    public Element updateInspectionPort(InspectionPortElement inspectionPort) throws Exception {
+    public Element updateInspectionPort(InspectionPortEntity inspectionPort) throws Exception {
 
         InspectionPortEntity inspectionPortEntity = (InspectionPortEntity) getInspectionPort(inspectionPort);
         this.utils.throwExceptionIfNullElement(inspectionPortEntity);
 
-        if (inspectionPort.getIngressPort() == null) {
+        if (inspectionPort.getIngressPort().equals(null)
+                || inspectionPort.getIngressPort().getElementId().equals(null)) {
             this.utils.throwExceptionIfNullElement(inspectionPort.getIngressPort(), "Ingress port is null");
         }
-        if (inspectionPort.getEgressPort() == null) {
+        if (inspectionPort.getEgressPort().equals(null) || inspectionPort.getEgressPort().getElementId().equals(null)) {
             this.utils.throwExceptionIfNullElement(inspectionPort.getEgressPort(), "Egress port is null");
         }
 
-        if (inspectionPort.getEgressPort().getElementId() == inspectionPort.getIngressPort().getElementId()) {
-            NetworkElementEntity element = this.utils
-                    .findNetworkElementEntityByElementId(inspectionPort.getEgressPort().getElementId());
-            this.utils.throwExceptionIfNullElement(element, "Egress port not valid");
-        } else {
-            NetworkElementEntity element = this.utils
-                    .findNetworkElementEntityByElementId(inspectionPort.getEgressPort().getElementId());
-            this.utils.throwExceptionIfNullElement(element, "Egress port not valid");
-            element = this.utils.findNetworkElementEntityByElementId(inspectionPort.getIngressPort().getElementId());
-            this.utils.throwExceptionIfNullElement(element, "Ingress port not valid");
-        }
+        this.utils.throwExceptionIfIdMismatch(inspectionPortEntity.getEgressPort().getElementId(),
+                inspectionPort.getEgressPort().getElementId());
+        this.utils.throwExceptionIfIdMismatch(inspectionPortEntity.getIngressPort().getElementId(),
+                inspectionPort.getIngressPort().getElementId());
 
         return this.txControl.required(() -> {
-            inspectionPortEntity.setEgressPort((NetworkElementEntity) inspectionPort.getEgressPort());
-            inspectionPortEntity.setIngressPort((NetworkElementEntity) inspectionPort.getIngressPort());
+            inspectionPortEntity.setEgressPort(inspectionPort.getEgressPort());
+            inspectionPortEntity.setIngressPort(inspectionPort.getIngressPort());
 
             return this.em.merge(inspectionPortEntity);
         });
@@ -590,7 +584,7 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
             NetworkElementEntity element = this.utils.txNetworkElementEntityByElementId(id);
 
             if (element == null) {
-                LOG.warn("Attempt to delete network element for id %s and network element not found, no-op.", id);
+                LOG.warn("Attempt to delete network element for id {} and network element not found, no-op.", id);
                 return null;
             }
 
