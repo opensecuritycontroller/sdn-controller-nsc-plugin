@@ -23,15 +23,12 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 
 import org.junit.Assert;
-import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
 import org.osgi.service.transaction.control.ScopedWorkException;
 import org.osgi.service.transaction.control.TransactionContext;
 import org.osgi.service.transaction.control.TransactionControl;
 import org.osgi.service.transaction.control.TransactionException;
 import org.osgi.service.transaction.control.TransactionRolledBackException;
 
-@RunWith(MockitoJUnitRunner.class)
 abstract class TestTransactionControl implements TransactionControl, TransactionContext {
 
     private EntityManager txCtrlEm;
