@@ -26,15 +26,15 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.osc.controller.nsc.api.SampleSdnRedirectionApi;
 import org.osc.controller.nsc.entities.InspectionHookEntity;
 import org.osc.controller.nsc.entities.InspectionPortEntity;
 import org.osc.controller.nsc.entities.NetworkElementEntity;
 import org.osc.controller.nsc.utils.RedirectionApiUtils;
-import org.osc.sdk.controller.element.Element;
-import org.powermock.modules.junit4.PowerMockRunner;;
+import org.osc.sdk.controller.element.Element;;
 
-@RunWith(PowerMockRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 public class RedirectionApiUtilsTest extends AbstractSampleSdnPluginTest {
 
     private RedirectionApiUtils utils;

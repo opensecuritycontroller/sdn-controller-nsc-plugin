@@ -15,7 +15,7 @@
     limitations under the License.
  -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.osc.plugin</groupId>
     <artifactId>sdn-controller-nsc-plugin</artifactId>
@@ -45,7 +45,7 @@
             <version>1.7.25</version>
             <scope>provided</scope>
         </dependency>
-         <dependency>
+        <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <version>1.2.3</version>
@@ -86,7 +86,7 @@
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.scr</artifactId>
-            <version>2.0.4</version>    
+            <version>2.0.4</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
@@ -191,18 +191,12 @@
 
         <!-- testing dependencies -->
         <dependency>
-            <groupId>org.powermock</groupId>
-            <artifactId>powermock-api-mockito</artifactId>
-            <version>1.6.5</version>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>1.10.19</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.powermock</groupId>
-            <artifactId>powermock-module-junit4</artifactId>
-            <version>1.6.5</version>
-            <scope>test</scope>
-        </dependency>
-
+        
         <!-- OSGi testing dependencies -->
         <dependency>
             <groupId>org.osgi</groupId>
@@ -365,14 +359,17 @@
                         <configuration>
                             <target>
                                 <!-- Full version examples: 1.0.0-SNAPSHOT-0-HASH, 1.0.0-0-HASH, 1.0.0-1-HASH, etc -->
-                                <exec outputproperty="fullVersion" dir="." executable="sh">
-                                    <arg value="-c"/>
-                                    <arg value="git describe --long | tr -d v"/>
+                                <exec outputproperty="fullVersion"
+                                    dir="." executable="sh">
+                                    <arg value="-c" />
+                                    <arg value="git describe --long | tr -d v" />
                                 </exec>
                                 <!-- Version examples: 1.0.0-SNAPSHOT, 1.0.0, etc -->
-                                <exec outputproperty="releaseVersion" dir="." executable="sh">
-                                    <arg value="-c"/>
-                                    <arg value="git describe --abbrev=0 | tr -d v"/>
+                                <exec outputproperty="releaseVersion"
+                                    dir="." executable="sh">
+                                    <arg value="-c" />
+                                    <arg
+                                        value="git describe --abbrev=0 | tr -d v" />
                                 </exec>
                                 <echo>Full Version: ${fullVersion}</echo>
                                 <echo>Version: ${releaseVersion}</echo>
@@ -389,69 +386,106 @@
                         <configuration>
                             <tasks>
                                 <!-- Create plugin .bar -->
-                                <jar destfile="${project.build.directory}/NscSdnControllerPlugin.bar">
-                                    <fileset dir="${project.build.directory}/plugin"/>
+                                <jar
+                                    destfile="${project.build.directory}/NscSdnControllerPlugin.bar">
+                                    <fileset
+                                        dir="${project.build.directory}/plugin" />
                                     <manifest>
-                                        <attribute name="Deployment-Name" value="NSC"/>
-                                        <attribute name="Deployment-Type" value="SDN"/>
-                                        <attribute name="Deployment-SymbolicName" value="NscSdnControllerPlugin"/>
-                                        <attribute name="Deployment-Version" value="${fullVersion}"/>
-                                        <attribute name="Require-Bundle" value="sdn-controller-nsc-plugin"/>
+                                        <attribute name="Deployment-Name"
+                                            value="NSC" />
+                                        <attribute name="Deployment-Type"
+                                            value="SDN" />
+                                        <attribute
+                                            name="Deployment-SymbolicName"
+                                            value="NscSdnControllerPlugin" />
+                                        <attribute name="Deployment-Version"
+                                            value="${fullVersion}" />
+                                        <attribute name="Require-Bundle"
+                                            value="sdn-controller-nsc-plugin" />
                                     </manifest>
                                 </jar>
                             </tasks>
                         </configuration>
                     </execution>
-                       
-                     <execution>
-                      <id>h2-fragment</id>
-                      <phase>prepare-package</phase>
-                      <goals>
-                        <goal>run</goal>
-                      </goals>
-                      <configuration>
-                        <tasks>
-                          <jar destfile="${project.build.directory}/plugin/h2ServiceExport.jar">
-                            <manifest>
-                              <attribute name="Bundle-ManifestVersion" value="2" />
-                              <attribute name="Bundle-SymbolicName" value="org.osc.manager.nsc.h2.fragment" />
-                              <attribute name="Bundle-Version" value="1.0.0" />
-                              <attribute name="Fragment-Host" value="org.h2;version=&quot;[1.3,2)&quot;" />
-                              <attribute name="Provide-Capability" value="osgi.service;objectClass=org.osgi.service.jdbc.DataSourceFactory" />
-                            </manifest>
-                          </jar>
-                          <jar destfile="${project.build.directory}/plugin/ariesJpaServiceExport.jar">
-                            <manifest>
-                              <attribute name="Bundle-ManifestVersion" value="2" />
-                              <attribute name="Bundle-SymbolicName" value="org.osc.manager.nsc.aries.jpa.fragment" />
-                              <attribute name="Bundle-Version" value="1.0.0" />
-                              <attribute name="Fragment-Host" value="org.apache.aries.jpa.container;version=&quot;[2.5,2.6)&quot;" />
-                              <attribute name="Provide-Capability" value="osgi.service;objectClass=org.osgi.service.jpa.EntityManagerFactoryBuilder" />
-                            </manifest>
-                          </jar>
-                          <jar destfile="${project.build.directory}/plugin/ariesTxControlServiceExport.jar">
-                            <manifest>
-                              <attribute name="Bundle-ManifestVersion" value="2" />
-                              <attribute name="Bundle-SymbolicName" value="org.osc.manager.nsc.aries.tx.control.fragment" />
-                              <attribute name="Bundle-Version" value="1.0.0" />
-                              <attribute name="Fragment-Host" value="tx-control-service-local;version=&quot;[0.0.2,0.0.3)&quot;" />
-                              <attribute name="Provide-Capability" value="osgi.service;objectClass=org.osgi.service.transaction.control.TransactionControl;osgi.local.enabled=true" />
-                            </manifest>
-                          </jar>
-                          <jar destfile="${project.build.directory}/plugin/hibernateServiceExport.jar">
-                            <manifest>
-                              <attribute name="Bundle-ManifestVersion" value="2" />
-                              <attribute name="Bundle-SymbolicName" value="org.osc.manager.nsc.hibernate.fragment" />
-                              <attribute name="Bundle-Version" value="1.0.0" />
-                              <attribute name="Fragment-Host" value="org.hibernate.osgi;version=&quot;[5.2,5.3)&quot;" />
-                              <attribute name="Provide-Capability" value="osgi.service;objectClass=javax.persistence.spi.PersistenceProvider" />
-                              <attribute name="Import-Package" value="antlr; resolution := optional" />
-                            </manifest>
-                          </jar>
-                        </tasks>
-                      </configuration>
+
+                    <execution>
+                        <id>h2-fragment</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <tasks>
+                                <jar
+                                    destfile="${project.build.directory}/plugin/h2ServiceExport.jar">
+                                    <manifest>
+                                        <attribute
+                                            name="Bundle-ManifestVersion"
+                                            value="2" />
+                                        <attribute name="Bundle-SymbolicName"
+                                            value="org.osc.manager.nsc.h2.fragment" />
+                                        <attribute name="Bundle-Version"
+                                            value="1.0.0" />
+                                        <attribute name="Fragment-Host"
+                                            value="org.h2;version=&quot;[1.3,2)&quot;" />
+                                        <attribute name="Provide-Capability"
+                                            value="osgi.service;objectClass=org.osgi.service.jdbc.DataSourceFactory" />
+                                    </manifest>
+                                </jar>
+                                <jar
+                                    destfile="${project.build.directory}/plugin/ariesJpaServiceExport.jar">
+                                    <manifest>
+                                        <attribute
+                                            name="Bundle-ManifestVersion"
+                                            value="2" />
+                                        <attribute name="Bundle-SymbolicName"
+                                            value="org.osc.manager.nsc.aries.jpa.fragment" />
+                                        <attribute name="Bundle-Version"
+                                            value="1.0.0" />
+                                        <attribute name="Fragment-Host"
+                                            value="org.apache.aries.jpa.container;version=&quot;[2.5,2.6)&quot;" />
+                                        <attribute name="Provide-Capability"
+                                            value="osgi.service;objectClass=org.osgi.service.jpa.EntityManagerFactoryBuilder" />
+                                    </manifest>
+                                </jar>
+                                <jar
+                                    destfile="${project.build.directory}/plugin/ariesTxControlServiceExport.jar">
+                                    <manifest>
+                                        <attribute
+                                            name="Bundle-ManifestVersion"
+                                            value="2" />
+                                        <attribute name="Bundle-SymbolicName"
+                                            value="org.osc.manager.nsc.aries.tx.control.fragment" />
+                                        <attribute name="Bundle-Version"
+                                            value="1.0.0" />
+                                        <attribute name="Fragment-Host"
+                                            value="tx-control-service-local;version=&quot;[0.0.2,0.0.3)&quot;" />
+                                        <attribute name="Provide-Capability"
+                                            value="osgi.service;objectClass=org.osgi.service.transaction.control.TransactionControl;osgi.local.enabled=true" />
+                                    </manifest>
+                                </jar>
+                                <jar
+                                    destfile="${project.build.directory}/plugin/hibernateServiceExport.jar">
+                                    <manifest>
+                                        <attribute
+                                            name="Bundle-ManifestVersion"
+                                            value="2" />
+                                        <attribute name="Bundle-SymbolicName"
+                                            value="org.osc.manager.nsc.hibernate.fragment" />
+                                        <attribute name="Bundle-Version"
+                                            value="1.0.0" />
+                                        <attribute name="Fragment-Host"
+                                            value="org.hibernate.osgi;version=&quot;[5.2,5.3)&quot;" />
+                                        <attribute name="Provide-Capability"
+                                            value="osgi.service;objectClass=javax.persistence.spi.PersistenceProvider" />
+                                        <attribute name="Import-Package"
+                                            value="antlr; resolution := optional" />
+                                    </manifest>
+                                </jar>
+                            </tasks>
+                        </configuration>
                     </execution>
-                    
+
                 </executions>
             </plugin>
 
@@ -469,14 +503,17 @@
                             <rules>
                                 <requireProperty>
                                     <property>project.version</property>
-                                    <message>The project version must be set.</message>
+                                    <message>The project version must be
+                                        set.</message>
                                     <regex>${releaseVersion}</regex>
-                                    <regexMessage>The project version is ${project.version} but it must be
+                                    <regexMessage>The project version is
+                                        ${project.version} but it must
+                                        be
                                         ${releaseVersion}.
                                     </regexMessage>
                                 </requireProperty>
                             </rules>
-                            <fail>false</fail> 
+                            <fail>false</fail>
                         </configuration>
                     </execution>
                 </executions>
