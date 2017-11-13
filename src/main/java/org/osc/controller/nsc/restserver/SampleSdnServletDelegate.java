@@ -31,7 +31,7 @@ import org.glassfish.jersey.server.ServerProperties;
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.osc.controller.nsc.restserver.api.InspectionHookApis;
 import org.osc.controller.nsc.restserver.api.InspectionPortApis;
-import org.osc.controller.nsc.restserver.api.NetworkElementApis;
+import org.osc.controller.nsc.restserver.api.PortApis;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -52,7 +52,7 @@ public class SampleSdnServletDelegate extends ResourceConfig implements Servlet 
     private InspectionPortApis inspectionPortApis;
 
     @Reference
-    private NetworkElementApis networkElementApis;
+    private PortApis portApis;
 
     @Reference
     private InspectionHookApis inspectionHookApis;
@@ -65,7 +65,7 @@ public class SampleSdnServletDelegate extends ResourceConfig implements Servlet 
 
         super.register(JacksonJaxbJsonProvider.class);
         super.property(ServerProperties.FEATURE_AUTO_DISCOVERY_DISABLE, true);
-        super.registerInstances(this.inspectionPortApis, this.networkElementApis, this.inspectionHookApis);
+        super.registerInstances(this.inspectionPortApis, this.portApis, this.inspectionHookApis);
         this.container = new ServletContainer(this);
     }
 

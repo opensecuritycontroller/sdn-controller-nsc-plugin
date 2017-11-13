@@ -30,7 +30,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.osc.controller.nsc.api.SampleSdnRedirectionApi;
 import org.osc.controller.nsc.entities.InspectionHookEntity;
 import org.osc.controller.nsc.entities.InspectionPortEntity;
-import org.osc.controller.nsc.entities.NetworkElementEntity;
+import org.osc.controller.nsc.entities.PortEntity;
 import org.osc.controller.nsc.utils.RedirectionApiUtils;
 import org.osc.sdk.controller.element.Element;;
 
@@ -77,8 +77,8 @@ public class RedirectionApiUtilsTest extends AbstractSampleSdnPluginTest {
         });
 
         // Act.
-        NetworkElementEntity foundNE = this.txControl.required(() -> {
-            NetworkElementEntity e = this.utils.txNetworkElementEntityByElementId(inspected.getElementId());
+        PortEntity foundNE = this.txControl.required(() -> {
+            PortEntity e = this.utils.txPortEntityByElementId(inspected.getElementId());
             return e;
         });
 

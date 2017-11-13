@@ -47,11 +47,11 @@ public class InspectionPortEntity implements InspectionPortElement {
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = false, fetch = EAGER, optional = true)
     @JoinColumn(name = "ingress_fk", nullable = true, updatable = true)
-    private NetworkElementEntity ingressPort;
+    private PortEntity ingressPort;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = false, fetch = EAGER, optional = true)
     @JoinColumn(name = "egress_fk", nullable = true, updatable = true)
-    private NetworkElementEntity egressPort;
+    private PortEntity egressPort;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = false, fetch = EAGER, mappedBy="inspectionPort")
     private Set<InspectionHookEntity> inspectionHooks;
@@ -59,7 +59,7 @@ public class InspectionPortEntity implements InspectionPortElement {
     public InspectionPortEntity() {
     }
 
-    public InspectionPortEntity(String elementId, NetworkElementEntity ingress, NetworkElementEntity egress) {
+    public InspectionPortEntity(String elementId, PortEntity ingress, PortEntity egress) {
         this.elementId = elementId;
         this.ingressPort = ingress;
         this.egressPort = egress;
@@ -76,20 +76,20 @@ public class InspectionPortEntity implements InspectionPortElement {
     }
 
     @Override
-    public NetworkElementEntity getIngressPort() {
+    public PortEntity getIngressPort() {
         return this.ingressPort;
     }
 
-    public void setIngressPort(NetworkElementEntity ingressPort) {
+    public void setIngressPort(PortEntity ingressPort) {
         this.ingressPort = ingressPort;
     }
 
     @Override
-    public NetworkElementEntity getEgressPort() {
+    public PortEntity getEgressPort() {
         return this.egressPort;
     }
 
-    public void setEgressPort(NetworkElementEntity egressPort) {
+    public void setEgressPort(PortEntity egressPort) {
         this.egressPort = egressPort;
     }
 
@@ -105,6 +105,11 @@ public class InspectionPortEntity implements InspectionPortElement {
     public String getParentId() {
         // TODO Implement for SFC
         return null;
+    }
+
+    //Jersey unit tests requires set access.
+    public void setParentId(String id) {
+        return;
     }
 
     @Override

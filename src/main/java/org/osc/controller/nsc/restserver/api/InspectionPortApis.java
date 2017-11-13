@@ -31,14 +31,9 @@ import javax.ws.rs.core.MediaType;
 import org.osc.controller.nsc.api.SampleSdnRedirectionApi;
 import org.osc.controller.nsc.entities.InspectionPortEntity;
 import org.osc.controller.nsc.model.VirtualizationConnectorElementImpl;
-import org.osc.controller.nsc.utils.RedirectionApiUtils;
 import org.osc.sdk.controller.api.SdnControllerApi;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.jdbc.DataSourceFactory;
-import org.osgi.service.jpa.EntityManagerFactoryBuilder;
-import org.osgi.service.transaction.control.TransactionControl;
-import org.osgi.service.transaction.control.jpa.JPAEntityManagerProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,18 +44,6 @@ import org.slf4j.LoggerFactory;
 public class InspectionPortApis {
 
     private static Logger LOG = LoggerFactory.getLogger(InspectionPortApis.class);
-
-    @Reference(target = "(osgi.local.enabled=true)")
-    private TransactionControl txControl;
-
-    @Reference(target = "(osgi.unit.name=nsc-mgr)")
-    private EntityManagerFactoryBuilder builder;
-
-    @Reference(target = "(osgi.jdbc.driver.class=org.h2.Driver)")
-    private DataSourceFactory jdbcFactory;
-
-    @Reference(target = "(osgi.local.enabled=true)")
-    private JPAEntityManagerProviderFactory resourceFactory;
 
     @Reference
     private SdnControllerApi api;
@@ -75,7 +58,7 @@ public class InspectionPortApis {
         SampleSdnRedirectionApi sdnApi = ((SampleSdnRedirectionApi) this.api
                 .createRedirectionApi(new VirtualizationConnectorElementImpl("Sample", controllerId), "TEST"));
 
-        new RedirectionApiUtils(null, null).throwExceptionIfNullId(controllerId);
+        sdnApi.throwExceptionIfNullId(controllerId);
 
         InspectionPortEntity inspectionPort = (InspectionPortEntity) sdnApi.registerInspectionPort(entity);
 
@@ -92,11 +75,9 @@ public class InspectionPortApis {
         SampleSdnRedirectionApi sdnApi = ((SampleSdnRedirectionApi) this.api
                 .createRedirectionApi(new VirtualizationConnectorElementImpl("Sample", controllerId), "TEST"));
 
-        RedirectionApiUtils utilsApi = new RedirectionApiUtils(null, null);
+        sdnApi.throwExceptionIfNullId(controllerId);
 
-        utilsApi.throwExceptionIfNullId(controllerId);
-
-        utilsApi.throwExceptionIfIdMismatch(entity.getElementId(), inspectionPortId, "InspectionPort");
+        sdnApi.throwExceptionIfIdMismatch(entity.getElementId(), inspectionPortId, "InspectionPort");
 
         return (InspectionPortEntity) sdnApi.updateInspectionPort(entity);
     }
@@ -112,7 +93,7 @@ public class InspectionPortApis {
         SampleSdnRedirectionApi sdnApi = ((SampleSdnRedirectionApi) this.api
                 .createRedirectionApi(new VirtualizationConnectorElementImpl("Sample", controllerId), "TEST"));
 
-        new RedirectionApiUtils(null, null).throwExceptionIfNullId(controllerId);
+        sdnApi.throwExceptionIfNullId(controllerId);
 
         sdnApi.removeInspectionPort(new InspectionPortEntity(inspectionPortId, null, null));
     }
@@ -125,7 +106,7 @@ public class InspectionPortApis {
         SampleSdnRedirectionApi sdnApi = ((SampleSdnRedirectionApi) this.api
                 .createRedirectionApi(new VirtualizationConnectorElementImpl("Sample", controllerId), "TEST"));
 
-        new RedirectionApiUtils(null, null).throwExceptionIfNullId(controllerId);
+        sdnApi.throwExceptionIfNullId(controllerId);
 
         return sdnApi.getInspectionPortsIds();
     }
@@ -140,11 +121,15 @@ public class InspectionPortApis {
         SampleSdnRedirectionApi sdnApi = ((SampleSdnRedirectionApi) this.api
                 .createRedirectionApi(new VirtualizationConnectorElementImpl("Sample", controllerId), "TEST"));
 
-        new RedirectionApiUtils(null, null).throwExceptionIfNullId(controllerId);
+        sdnApi.throwExceptionIfNullId(controllerId);
 
         InspectionPortEntity inspectionPort = (InspectionPortEntity) sdnApi
                 .getInspectionPort(new InspectionPortEntity(inspectionPortId, null, null));
-        inspectionPort.getInspectionHooks().clear();
+
+        if (inspectionPort.getInspectionHooks() != null) {
+            inspectionPort.getInspectionHooks().clear();
+        }
+
         return inspectionPort;
     }
 }

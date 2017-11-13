@@ -42,7 +42,7 @@ public class PortGroupEntity implements NetworkElement {
     private String elementId;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = false, fetch = EAGER, mappedBy="portGroup")
-    private Set<NetworkElementEntity> virtualPorts;
+    private Set<PortEntity> virtualPorts;
 
     @Column(name = "parent_id")
     private String parentId;
@@ -50,7 +50,7 @@ public class PortGroupEntity implements NetworkElement {
     public PortGroupEntity() {
     }
 
-    public PortGroupEntity(String elementId, String parentId, Set<NetworkElementEntity> virtualPorts) {
+    public PortGroupEntity(String elementId, String parentId, Set<PortEntity> virtualPorts) {
         this.elementId = elementId;
         this.parentId = parentId;
         this.virtualPorts = virtualPorts;
@@ -65,11 +65,11 @@ public class PortGroupEntity implements NetworkElement {
         this.elementId = elementId;
     }
 
-    public void setVirtualPorts(Set<NetworkElementEntity> virtualPorts) {
+    public void setVirtualPorts(Set<PortEntity> virtualPorts) {
         this.virtualPorts = virtualPorts;
     }
 
-    public Set<NetworkElementEntity> getVirtualPorts() {
+    public Set<PortEntity> getVirtualPorts() {
         return this.virtualPorts;
     }
 

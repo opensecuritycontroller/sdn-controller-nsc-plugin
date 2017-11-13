@@ -21,6 +21,7 @@ import static org.osc.controller.nsc.TestData.*;
 import static org.osc.sdk.controller.FailurePolicyType.NA;
 import static org.osc.sdk.controller.TagEncapsulationType.VLAN;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -32,7 +33,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.osc.controller.nsc.api.SampleSdnRedirectionApi;
 import org.osc.controller.nsc.entities.InspectionHookEntity;
 import org.osc.controller.nsc.entities.InspectionPortEntity;
-import org.osc.controller.nsc.entities.NetworkElementEntity;
+import org.osc.controller.nsc.entities.PortEntity;
 import org.osc.controller.nsc.entities.PortGroupEntity;
 import org.osc.controller.nsc.utils.RedirectionApiUtils;
 import org.osc.sdk.controller.element.Element;
@@ -84,8 +85,8 @@ public class SampleSdnRedirectionApiTest extends AbstractSampleSdnPluginTest {
         inspectionPortElement = (InspectionPortElement) this.redirApi.registerInspectionPort(inspectionPortElement);
 
         // Assert.
-        NetworkElementEntity foundIngress = this.txControl.required(() -> {
-            return utils.txNetworkElementEntityByElementId(ingress.getElementId());
+        PortEntity foundIngress = this.txControl.required(() -> {
+            return utils.txPortEntityByElementId(ingress.getElementId());
         });
 
         assertNotNull(foundIngress);
@@ -109,8 +110,8 @@ public class SampleSdnRedirectionApiTest extends AbstractSampleSdnPluginTest {
         inspectionPortElement = (InspectionPortElement) this.redirApi.registerInspectionPort(inspectionPortElement);
 
         // Assert.
-        NetworkElementEntity foundEgress = this.txControl.required(() -> {
-            return utils.txNetworkElementEntityByElementId(egress.getElementId());
+        PortEntity foundEgress = this.txControl.required(() -> {
+            return utils.txPortEntityByElementId(egress.getElementId());
         });
 
         assertNotNull(foundEgress);
@@ -188,7 +189,7 @@ public class SampleSdnRedirectionApiTest extends AbstractSampleSdnPluginTest {
 
         PortGroupEntity createdPortGroupEntity = utils.findPortGroupEntity(portGroup.getElementId(), portGroup.getParentId());
 
-        NetworkElementEntity updatedVirtualPort = utils.findNetworkElementEntityByElementId(ingress.getElementId());
+        PortEntity updatedVirtualPort = utils.findPortEntityByElementId(ingress.getElementId());
 
         assertNotNull(createdPortGroupEntity);
         assertNotNull(createdPortGroupEntity.getElementId());
@@ -220,7 +221,7 @@ public class SampleSdnRedirectionApiTest extends AbstractSampleSdnPluginTest {
 
         assertNull(deletedPortGroupEntity);
 
-        NetworkElementEntity updatedVirtualPort = utils.findNetworkElementEntityByElementId(ingress.getElementId());
+        PortEntity updatedVirtualPort = utils.findPortEntityByElementId(ingress.getElementId());
 
         assertNotNull(updatedVirtualPort);
         assertNotNull(portGroup);
@@ -422,7 +423,7 @@ public class SampleSdnRedirectionApiTest extends AbstractSampleSdnPluginTest {
         assertNotNull(inspectedId);
 
         this.txControl.required(() -> {
-            NetworkElementEntity tmp = this.em.find(NetworkElementEntity.class, inspectedId);
+            PortEntity tmp = this.em.find(PortEntity.class, inspectedId);
             assertEquals(null, tmp);
             return null;
         });
@@ -433,8 +434,8 @@ public class SampleSdnRedirectionApiTest extends AbstractSampleSdnPluginTest {
 
         assertNotNull(hookId);
 
-        NetworkElementEntity foundInspectedPort = this.txControl.required(() -> {
-            return this.em.find(NetworkElementEntity.class, inspectedId);
+        PortEntity foundInspectedPort = this.txControl.required(() -> {
+            return this.em.find(PortEntity.class, inspectedId);
         });
 
         assertNotNull(foundInspectedPort);
@@ -447,7 +448,7 @@ public class SampleSdnRedirectionApiTest extends AbstractSampleSdnPluginTest {
 
         // Assert.
         this.txControl.required(() -> {
-            NetworkElementEntity tmpNE = this.em.find(NetworkElementEntity.class, inspectedId);
+            PortEntity tmpNE = this.em.find(PortEntity.class, inspectedId);
             assertEquals(null, tmpNE);
             return null;
         });
@@ -462,7 +463,7 @@ public class SampleSdnRedirectionApiTest extends AbstractSampleSdnPluginTest {
         assertNotNull(inspectedId);
 
         this.txControl.required(() -> {
-            NetworkElementEntity tmp = this.em.find(NetworkElementEntity.class, inspectedId);
+            PortEntity tmp = this.em.find(PortEntity.class, inspectedId);
             assertEquals(null, tmp);
             return null;
         });
@@ -522,5 +523,215 @@ public class SampleSdnRedirectionApiTest extends AbstractSampleSdnPluginTest {
         });
 
         assertEquals(null, foundInspectionPort);
+    }
+
+    @Test
+    public void testApiRegisterPort() throws Exception {
+        //Arrange
+        port.setParentId(UUID.randomUUID().toString());
+        port.setDeviceOwnerId("DeviceOwnerId");
+
+        //Act
+        NetworkElement registeredPort = this.redirApi.registerPort(port);
+
+        //Assert
+        assertNotNull(registeredPort);
+        assertNotNull(registeredPort.getElementId());
+        assertNotNull(registeredPort.getParentId());
+        assertNotNull(registeredPort.getMacAddresses());
+        assertNotNull(registeredPort.getPortIPs());
+    }
+
+    @Test
+    public void testApiDeletePort() throws Exception {
+        //Arrange
+        port.setParentId(UUID.randomUUID().toString());
+        port.setDeviceOwnerId("DeviceOwnerId");
+
+        this.redirApi.registerPort(port);
+
+        //Act
+        this.redirApi.deletePort(port.getElementId());
+
+        //Assert
+        assertEquals(null, this.redirApi.getPort(port.getElementId()));
+    }
+
+    @Test
+    public void testGetPortIds() throws Exception {
+        //Arrange
+        this.redirApi.registerPort(ingress);
+        this.redirApi.registerPort(egress);
+        this.redirApi.registerPort(port);
+
+        //Act
+        List<String> portIds = this.redirApi.getPortIds();
+
+        //Assert
+        assertNotNull(portIds);
+        assertEquals(3, portIds.size());
+        assertTrue(portIds.contains(ingress.getElementId()));
+        assertTrue(portIds.contains(egress.getElementId()));
+        assertTrue(portIds.contains(port.getElementId()));
+    }
+
+    @Test
+    public void testApiGetPort() throws Exception {
+        //Arrange
+        port.setParentId(UUID.randomUUID().toString());
+        port.setDeviceOwnerId("DeviceOwnerId");
+
+        assertNotNull(this.redirApi.registerPort(port));
+
+        //Act
+        PortEntity registeredPort = this.redirApi.getPort(port.getElementId());
+
+        //Assert
+        assertNotNull(registeredPort);
+        assertNotNull(registeredPort.getElementId());
+        assertNotNull(registeredPort.getParentId());
+        assertNotNull(registeredPort.getMacAddresses());
+        assertNotNull(registeredPort.getPortIPs());
+    }
+
+    @Test
+    public void testApiUpdatePort() throws Exception {
+        //Arrange
+        final ArrayList<String> macAdresses = new ArrayList<String>(
+                Arrays.asList("ff:ff:ff:bb:aa:02", "ff:ff:ff:bb:aa:03"));
+
+        final ArrayList<String> ipAdresses = new ArrayList<String>(Arrays.asList("10.5.2.3", "10.5.3.4"));
+
+        final String newParentId = "NewParentId";
+
+        final String newDeviceOwnerId = "NewDeviceOwnerId";
+
+        this.redirApi = new SampleSdnRedirectionApi(this.txControl, this.em);
+
+        this.redirApi.registerPort(port);
+
+        PortEntity portEntity = this.redirApi.getPort(port.getElementId());
+        portEntity.setMacAddresses(macAdresses);
+        portEntity.setPortIPs(ipAdresses);
+        portEntity.setParentId(newParentId);
+        portEntity.setDeviceOwnerId(newDeviceOwnerId);
+
+        //Act
+        PortEntity updatedPort = this.redirApi.updatePort(portEntity);
+
+        //Assert
+        assertNotNull(updatedPort);
+        assertEquals(newDeviceOwnerId, updatedPort.getDeviceOwnerId());
+        assertEquals(newParentId, updatedPort.getParentId());
+        assertEquals(macAdresses, updatedPort.getMacAddresses());
+        assertEquals(ipAdresses, updatedPort.getPortIPs());
+    }
+
+    @Test
+    public void testApiGetInspectionPortsIds() throws Exception {
+        //Arrange
+        this.redirApi = new SampleSdnRedirectionApi(this.txControl, this.em);
+
+        InspectionPortElement inspectionPortElement = new InspectionPortEntity(null, ingress, egress);
+        inspectionPortElement = (InspectionPortElement) this.redirApi.registerInspectionPort(inspectionPortElement);
+
+        //Act
+        final String inspectionPortElementId = inspectionPortElement.getElementId();
+
+        //Assert
+        assertEquals(1, this.redirApi.getInspectionPortsIds().size());
+        assertTrue(this.redirApi.getInspectionPortsIds().contains(inspectionPortElementId));
+    }
+
+    @Test
+    public void testApiGetInspectionHooksIds() throws Exception {
+        //Arrange
+        this.redirApi = new SampleSdnRedirectionApi(this.txControl, this.em);
+
+        InspectionPortEntity inspectionPortElement = new InspectionPortEntity(null, ingress, egress);
+
+        Element registeredElement = this.redirApi.registerInspectionPort(inspectionPortElement);
+
+        assertNotNull(registeredElement);
+        assertNotNull(registeredElement.getElementId());
+
+        //Act
+        final String hookId = this.redirApi.installInspectionHook(inspected, inspectionPortElement, 0L, VLAN, 0L, NA);
+
+        //Assert
+        assertNotNull(hookId);
+        assertTrue(this.redirApi.getInspectionHooksIds().contains(hookId));
+        assertEquals(1, this.redirApi.getInspectionHooksIds().size());
+    }
+
+    @Test
+    public void testApiUpdateInspectionPort() throws Exception {
+        //Arrange
+        final ArrayList<String> newIngressMacAdresses = new ArrayList<String>(
+                Arrays.asList("ff:ff:ff:bb:cc:01", "ff:ff:ff:bb:aa:01"));
+
+        final ArrayList<String> newIngressIPAdresses = new ArrayList<String>(Arrays.asList("10.5.2.3", "10.5.3.4"));
+
+        final ArrayList<String> newEgressMacAdresses = new ArrayList<String>(
+                Arrays.asList("ff:ff:ff:bb:aa:02", "ff:ff:ff:bb:aa:03"));
+
+        final ArrayList<String> newEggressIPAdresses = new ArrayList<String>(Arrays.asList("10.5.2.5", "10.5.3.6"));
+
+        this.redirApi = new SampleSdnRedirectionApi(this.txControl, this.em);
+
+        assertNotNull(this.redirApi.registerPort(ingress));
+        assertNotNull(this.redirApi.registerPort(egress));
+
+        InspectionPortEntity inspectionPortElement = new InspectionPortEntity(null, ingress, egress);
+        InspectionPortEntity registeredPortEntity = (InspectionPortEntity) this.redirApi
+                .registerInspectionPort(inspectionPortElement);
+
+        ingress.setMacAddresses(newIngressMacAdresses);
+        ingress.setPortIPs(newIngressIPAdresses);
+
+        egress.setMacAddresses(newEgressMacAdresses);
+        egress.setPortIPs(newEggressIPAdresses);
+
+        registeredPortEntity.setEgressPort(egress);
+        registeredPortEntity.setIngressPort(ingress);
+
+        assertNotNull(registeredPortEntity.getEgressPort().getElementId());
+        assertNotNull(registeredPortEntity.getIngressPort().getElementId());
+
+        //Act
+        InspectionPortEntity updatedPortEntity = (InspectionPortEntity) this.redirApi
+                .updateInspectionPort(registeredPortEntity);
+
+        //Assert
+        assertNotNull(updatedPortEntity);
+        assertEquals(egress.getElementId(), updatedPortEntity.getEgressPort().getElementId());
+        assertTrue(egress.getMacAddresses().containsAll(updatedPortEntity.getEgressPort().getMacAddresses()));
+        assertEquals(ingress.getElementId(), updatedPortEntity.getIngressPort().getElementId());
+        assertTrue(ingress.getMacAddresses().containsAll(updatedPortEntity.getIngressPort().getMacAddresses()));
+    }
+
+    @Test
+    public void testApiGetPortForUnregisteredPort() throws Exception {
+        //Arrange
+        port.setParentId(UUID.randomUUID().toString());
+        port.setDeviceOwnerId("DeviceOwnerId");
+
+        //Act
+        PortEntity registeredPort = this.redirApi.getPort(port.getElementId());
+
+        //Assert
+        assertNull(registeredPort);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testApiUpdateUnregisteredPort() throws Exception {
+        //Arrange
+        this.redirApi = new SampleSdnRedirectionApi(this.txControl, this.em);
+
+        port.setParentId("peNewParentId");
+        port.setDeviceOwnerId("peNewDeviceOwnerId");
+
+        //Act
+        this.redirApi.updatePort(port);
     }
 }

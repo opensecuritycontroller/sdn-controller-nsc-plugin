@@ -32,10 +32,11 @@ import javax.persistence.criteria.Root;
 
 import org.osc.controller.nsc.entities.InspectionHookEntity;
 import org.osc.controller.nsc.entities.InspectionPortEntity;
-import org.osc.controller.nsc.entities.NetworkElementEntity;
+import org.osc.controller.nsc.entities.PortEntity;
 import org.osc.controller.nsc.entities.PortGroupEntity;
 import org.osc.sdk.controller.FailurePolicyType;
 import org.osc.sdk.controller.TagEncapsulationType;
+import org.osc.sdk.controller.element.Element;
 import org.osc.sdk.controller.element.InspectionPortElement;
 import org.osc.sdk.controller.element.NetworkElement;
 import org.osgi.service.transaction.control.TransactionControl;
@@ -63,25 +64,25 @@ public class RedirectionApiUtils {
 
         NetworkElement ingress = inspectionPortElement.getIngressPort();
         throwExceptionIfNullElement(ingress, "Null ingress element.");
-        NetworkElementEntity ingressEntity = null;
+        PortEntity ingressEntity = null;
         if (ingress.getElementId() != null) {
-            ingressEntity = findNetworkElementEntityByElementId(ingress.getElementId());
+            ingressEntity = findPortEntityByElementId(ingress.getElementId());
         }
 
-        ingressEntity = ingressEntity == null ? makeNetworkElementEntity(ingress) : ingressEntity;
+        ingressEntity = ingressEntity == null ? makePortEntity(ingress) : ingressEntity;
 
         NetworkElement egress = inspectionPortElement.getEgressPort();
-        NetworkElementEntity egressEntity = null;
+        PortEntity egressEntity = null;
         throwExceptionIfNullElement(egress, "Null egeress element.");
 
         if (ingressEntity != null && ingressEntity.getElementId().equals(egress.getElementId())) {
             egressEntity = ingressEntity;
         } else {
             if (egress.getElementId() != null) {
-                egressEntity = findNetworkElementEntityByElementId(egress.getElementId());
+                egressEntity = findPortEntityByElementId(egress.getElementId());
             }
 
-            egressEntity = egressEntity == null ? makeNetworkElementEntity(egress) : egressEntity;
+            egressEntity = egressEntity == null ? makePortEntity(egress) : egressEntity;
         }
 
         return new InspectionPortEntity(inspectionPortElement.getElementId(), ingressEntity, egressEntity);
@@ -91,7 +92,7 @@ public class RedirectionApiUtils {
         // Using the same parent id as the inspected ports, all the parent ids of the inspected ports
         // are expected to be the same.
         PortGroupEntity portGroupEntity = new PortGroupEntity(null, inspectedPorts.get(0).getParentId(), null);
-        Set<NetworkElementEntity> inspectedPortEntities = networkElementsToEntities(inspectedPorts);
+        Set<PortEntity> inspectedPortEntities = portToEntities(inspectedPorts);
 
         inspectedPortEntities.forEach(inspectedPortEntity -> inspectedPortEntity.setPortGroup(portGroupEntity));
         portGroupEntity.setVirtualPorts(inspectedPortEntities);
@@ -99,19 +100,19 @@ public class RedirectionApiUtils {
         return portGroupEntity;
     }
 
-    public Set<NetworkElementEntity> networkElementsToEntities(List<NetworkElement> inspectedPorts) {
+    public Set<PortEntity> portToEntities(List<NetworkElement> inspectedPorts) {
         throwExceptionIfNullInspectedPorts(inspectedPorts);
-        Set<NetworkElementEntity> inspectedPortEntities = new HashSet<>();
+        Set<PortEntity> inspectedPortEntities = new HashSet<>();
 
         for (NetworkElement inspectedPort : inspectedPorts) {
-            NetworkElementEntity inspectedPortEntity = null;
+            PortEntity inspectedPortEntity = null;
 
             if (inspectedPort.getElementId() != null) {
-                inspectedPortEntity = findNetworkElementEntityByElementId(inspectedPort.getElementId());
+                inspectedPortEntity = findPortEntityByElementId(inspectedPort.getElementId());
             }
 
             inspectedPortEntities.add(inspectedPortEntity == null ?
-                    makeNetworkElementEntity(inspectedPort) : inspectedPortEntity);
+                    makePortEntity(inspectedPort) : inspectedPortEntity);
         }
 
         return inspectedPortEntities;
@@ -128,7 +129,7 @@ public class RedirectionApiUtils {
         encType = (encType != null ? encType : VLAN);
         failurePolicyType = (failurePolicyType != null ? failurePolicyType : NA);
 
-        NetworkElementEntity inspected = makeNetworkElementEntity(inspectedPort);
+        PortEntity inspected = makePortEntity(inspectedPort);
         InspectionHookEntity retVal = new InspectionHookEntity();
 
         retVal.setInspectedPort(inspected);
@@ -144,17 +145,17 @@ public class RedirectionApiUtils {
         return retVal;
     }
 
-    public NetworkElementEntity findNetworkElementEntityByElementId(String elementId) {
+    public PortEntity findPortEntityByElementId(String elementId) {
         return this.txControl.required(() -> {
-            return txNetworkElementEntityByElementId(elementId);
+            return txPortEntityByElementId(elementId);
         });
     }
 
-    public NetworkElementEntity txNetworkElementEntityByElementId(String elementId) {
+    public PortEntity txPortEntityByElementId(String elementId) {
         CriteriaBuilder cb = this.em.getCriteriaBuilder();
 
-        CriteriaQuery<NetworkElementEntity> q = cb.createQuery(NetworkElementEntity.class);
-        Root<NetworkElementEntity> r = q.from(NetworkElementEntity.class);
+        CriteriaQuery<PortEntity> q = cb.createQuery(PortEntity.class);
+        Root<PortEntity> r = q.from(PortEntity.class);
         q.where(cb.equal(r.get("elementId"), elementId));
 
         try {
@@ -186,11 +187,11 @@ public class RedirectionApiUtils {
         });
     }
 
-    public NetworkElementEntity findNetworkElementEntityByDeviceOwnerId(String deviceOwnerId) {
+    public PortEntity findPortEntityByDeviceOwnerId(String deviceOwnerId) {
         CriteriaBuilder cb = this.em.getCriteriaBuilder();
 
-        CriteriaQuery<NetworkElementEntity> q = cb.createQuery(NetworkElementEntity.class);
-        Root<NetworkElementEntity> r = q.from(NetworkElementEntity.class);
+        CriteriaQuery<PortEntity> q = cb.createQuery(PortEntity.class);
+        Root<PortEntity> r = q.from(PortEntity.class);
         q.where(cb.equal(r.get("deviceOwnerId"), deviceOwnerId));
         return this.txControl.required(() -> {
             try {
@@ -202,18 +203,18 @@ public class RedirectionApiUtils {
         });
     }
 
-    public List<NetworkElementEntity> findNetworkElementEntitiesByDeviceOwnerPrefixId(String deviceOwnerPrefixId) {
+    public List<PortEntity> findPortEntitiesByDeviceOwnerPrefixId(String deviceOwnerPrefixId) {
         CriteriaBuilder cb = this.em.getCriteriaBuilder();
 
-        CriteriaQuery<NetworkElementEntity> q = cb.createQuery(NetworkElementEntity.class);
-        Root<NetworkElementEntity> r = q.from(NetworkElementEntity.class);
+        CriteriaQuery<PortEntity> q = cb.createQuery(PortEntity.class);
+        Root<PortEntity> r = q.from(PortEntity.class);
         q.where(cb.like(r.get("deviceOwnerId"), deviceOwnerPrefixId + "%"));
 
         return this.txControl.required(() -> {
             try {
                 return this.em.createQuery(q).getResultList();
             } catch (Exception e) {
-                LOG.error("Finding Network Elements with Prefix Id {} ", deviceOwnerPrefixId, e);
+                LOG.error("Finding port Elements with Prefix Id {} ", deviceOwnerPrefixId, e);
                 return new ArrayList<>();
             }
         });
@@ -254,15 +255,15 @@ public class RedirectionApiUtils {
         return this.em.createQuery(query).getResultList();
     }
 
-    public NetworkElementEntity txNetworkElementEntityById(Long id) {
-        return this.em.find(NetworkElementEntity.class, id);
+    public PortEntity txPortEntityById(Long id) {
+        return this.em.find(PortEntity.class, id);
     }
 
-    public List<NetworkElementEntity> txNetworkElementEntities() {
+    public List<PortEntity> txPortEntities() {
         CriteriaBuilder criteriaBuilder = this.em.getCriteriaBuilder();
 
-        CriteriaQuery<NetworkElementEntity> query = criteriaBuilder.createQuery(NetworkElementEntity.class);
-        Root<NetworkElementEntity> r = query.from(NetworkElementEntity.class);
+        CriteriaQuery<PortEntity> query = criteriaBuilder.createQuery(PortEntity.class);
+        Root<PortEntity> r = query.from(PortEntity.class);
         query.select(r);
 
         return this.em.createQuery(query).getResultList();
@@ -283,7 +284,7 @@ public class RedirectionApiUtils {
                 return null;
             }
 
-            NetworkElementEntity dbInspectedPort = dbInspectionHook.getInspectedPort();
+            PortEntity dbInspectedPort = dbInspectionHook.getInspectedPort();
 
             dbInspectedPort.setInspectionHook(null);
             dbInspectionHook.setInspectedPort(null);
@@ -295,7 +296,7 @@ public class RedirectionApiUtils {
         }
 
         this.txControl.required(() -> {
-            NetworkElementEntity dbNetworkElement = this.em.find(NetworkElementEntity.class, inspectedId);
+            PortEntity dbNetworkElement = this.em.find(PortEntity.class, inspectedId);
 
             this.em.remove(dbNetworkElement);
 
@@ -367,17 +368,9 @@ public class RedirectionApiUtils {
         }
     }
 
-    public void throwExceptionIfIdMismatch(String entityId, String id, String objName) throws Exception {
-        if (!id.equals(entityId)) {
-            throw new IllegalArgumentException(
-                    String.format("The ID %s specified in the '%s' data does not match the id specified in the URL",
-                            entityId, objName));
-        }
-    }
-
-    public void throwExceptionIfNullId(String id) {
-        if (id == null) {
-            String msg = "null passed for the id argument!";
+    public void throwExceptionIfNullElementAndId(Element element, String type) {
+        if (element == null || element.getElementId() == null) {
+            String msg = String.format("null passed for %s !", type);
             LOG.error(msg);
             throw new IllegalArgumentException(msg);
         }
@@ -460,8 +453,8 @@ public class RedirectionApiUtils {
         }
     }
 
-    private static NetworkElementEntity makeNetworkElementEntity(NetworkElement networkElement) {
-        NetworkElementEntity retVal = new NetworkElementEntity();
+    private static PortEntity makePortEntity(NetworkElement networkElement) {
+        PortEntity retVal = new PortEntity();
 
         retVal.setElementId(networkElement.getElementId());
         retVal.setMacAddresses(networkElement.getMacAddresses());

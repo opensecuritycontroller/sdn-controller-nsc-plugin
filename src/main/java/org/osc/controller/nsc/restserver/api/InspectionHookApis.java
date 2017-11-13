@@ -31,14 +31,9 @@ import javax.ws.rs.core.MediaType;
 import org.osc.controller.nsc.api.SampleSdnRedirectionApi;
 import org.osc.controller.nsc.entities.InspectionHookEntity;
 import org.osc.controller.nsc.model.VirtualizationConnectorElementImpl;
-import org.osc.controller.nsc.utils.RedirectionApiUtils;
 import org.osc.sdk.controller.api.SdnControllerApi;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.jdbc.DataSourceFactory;
-import org.osgi.service.jpa.EntityManagerFactoryBuilder;
-import org.osgi.service.transaction.control.TransactionControl;
-import org.osgi.service.transaction.control.jpa.JPAEntityManagerProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,18 +44,6 @@ import org.slf4j.LoggerFactory;
 public class InspectionHookApis {
 
     private static Logger LOG = LoggerFactory.getLogger(InspectionHookApis.class);
-
-    @Reference(target = "(osgi.local.enabled=true)")
-    private TransactionControl txControl;
-
-    @Reference(target = "(osgi.unit.name=nsc-mgr)")
-    private EntityManagerFactoryBuilder builder;
-
-    @Reference(target = "(osgi.jdbc.driver.class=org.h2.Driver)")
-    private DataSourceFactory jdbcFactory;
-
-    @Reference(target = "(osgi.local.enabled=true)")
-    private JPAEntityManagerProviderFactory resourceFactory;
 
     @Reference
     private SdnControllerApi api;
@@ -74,7 +57,7 @@ public class InspectionHookApis {
         SampleSdnRedirectionApi sdnApi = ((SampleSdnRedirectionApi) this.api
                 .createRedirectionApi(new VirtualizationConnectorElementImpl("Sample", controllerId), "TEST"));
 
-        new RedirectionApiUtils(null, null).throwExceptionIfNullId(controllerId);
+        sdnApi.throwExceptionIfNullId(controllerId);
 
         return sdnApi.installInspectionHook(entity.getInspectedPort(), entity.getInspectionPort(), entity.getTag(),
                 entity.getEncType(), entity.getOrder(), entity.getFailurePolicyType());
@@ -88,11 +71,9 @@ public class InspectionHookApis {
         SampleSdnRedirectionApi sdnApi = ((SampleSdnRedirectionApi) this.api
                 .createRedirectionApi(new VirtualizationConnectorElementImpl("Sample", controllerId), "TEST"));
 
-        RedirectionApiUtils utilsApi = new RedirectionApiUtils(null, null);
+        sdnApi.throwExceptionIfNullId(controllerId);
 
-        utilsApi.throwExceptionIfNullId(controllerId);
-
-        utilsApi.throwExceptionIfIdMismatch(entity.getHookId(), inspectionHookId, "InspectionHook");
+        sdnApi.throwExceptionIfIdMismatch(entity.getHookId(), inspectionHookId, "InspectionHook");
 
         sdnApi.updateInspectionHook(entity);
         return entity;
@@ -108,7 +89,7 @@ public class InspectionHookApis {
         SampleSdnRedirectionApi sdnApi = ((SampleSdnRedirectionApi) this.api
                 .createRedirectionApi(new VirtualizationConnectorElementImpl("Sample", controllerId), "TEST"));
 
-        new RedirectionApiUtils(null, null).throwExceptionIfNullId(controllerId);
+        sdnApi.throwExceptionIfNullId(controllerId);
 
         sdnApi.removeInspectionHook(inspectionHookId);
     }
@@ -121,7 +102,7 @@ public class InspectionHookApis {
         SampleSdnRedirectionApi sdnApi = ((SampleSdnRedirectionApi) this.api
                 .createRedirectionApi(new VirtualizationConnectorElementImpl("Sample", controllerId), "TEST"));
 
-        new RedirectionApiUtils(null, null).throwExceptionIfNullId(controllerId);
+        sdnApi.throwExceptionIfNullId(controllerId);
 
         return sdnApi.getInspectionHooksIds();
     }
@@ -137,7 +118,7 @@ public class InspectionHookApis {
         SampleSdnRedirectionApi sdnApi = ((SampleSdnRedirectionApi) this.api
                 .createRedirectionApi(new VirtualizationConnectorElementImpl("Sample", controllerId), "TEST"));
 
-        new RedirectionApiUtils(null, null).throwExceptionIfNullId(controllerId);
+        sdnApi.throwExceptionIfNullId(controllerId);
 
         InspectionHookEntity inspectionHook = (InspectionHookEntity) sdnApi.getInspectionHook(inspectionHookId);
 

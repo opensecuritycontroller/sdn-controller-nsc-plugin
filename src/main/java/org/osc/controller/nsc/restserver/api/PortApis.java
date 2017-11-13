@@ -29,125 +29,102 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import org.osc.controller.nsc.api.SampleSdnRedirectionApi;
-import org.osc.controller.nsc.entities.NetworkElementEntity;
+import org.osc.controller.nsc.entities.PortEntity;
 import org.osc.controller.nsc.model.VirtualizationConnectorElementImpl;
-import org.osc.controller.nsc.utils.RedirectionApiUtils;
 import org.osc.sdk.controller.api.SdnControllerApi;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.jdbc.DataSourceFactory;
-import org.osgi.service.jpa.EntityManagerFactoryBuilder;
-import org.osgi.service.transaction.control.TransactionControl;
-import org.osgi.service.transaction.control.jpa.JPAEntityManagerProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component(service = NetworkElementApis.class)
-@Path("/controller/{controllerId}/networkElements")
+@Component(service = PortApis.class)
+@Path("/controller/{controllerId}/portElements")
 @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-public class NetworkElementApis {
+public class PortApis {
 
-    private static Logger LOG = LoggerFactory.getLogger(NetworkElementApis.class);
-
-    @Reference(target = "(osgi.local.enabled=true)")
-    private TransactionControl txControl;
-
-    @Reference(target = "(osgi.unit.name=nsc-mgr)")
-    private EntityManagerFactoryBuilder builder;
-
-    @Reference(target = "(osgi.jdbc.driver.class=org.h2.Driver)")
-    private DataSourceFactory jdbcFactory;
-
-    @Reference(target = "(osgi.local.enabled=true)")
-    private JPAEntityManagerProviderFactory resourceFactory;
+    private static Logger LOG = LoggerFactory.getLogger(PortApis.class);
 
     @Reference
     private SdnControllerApi api;
 
     @Path("/{elementId}")
     @POST
-    public String createNetworkElement(@PathParam("controllerId") String controllerId,
-            @PathParam("elementId") String elementId, NetworkElementEntity entity) throws Exception {
-        // TODO:SUDHIR - Rename Rest API's to Port instead of NetworkElement, for eg: createPort etc.
-        // TODO:SUDHIR - Rename NetworkElementEntity to PortEntity.
+    public String createPort(@PathParam("controllerId") String controllerId,
+            @PathParam("elementId") String elementId, PortEntity entity) throws Exception {
 
         if (entity == null) {
-            throw new IllegalArgumentException("Attempt to create network element with no network entities");
+            throw new IllegalArgumentException("Attempt to create port element with no port entities");
         }
 
         SampleSdnRedirectionApi sdnApi = ((SampleSdnRedirectionApi) this.api
                 .createRedirectionApi(new VirtualizationConnectorElementImpl("Sample", controllerId), "TEST"));
 
-        RedirectionApiUtils utilsApi = new RedirectionApiUtils(null, null);
+        sdnApi.throwExceptionIfNullId(controllerId);
 
-        utilsApi.throwExceptionIfNullId(controllerId);
+        LOG.info("Creating port element with elementId  {}", elementId);
 
-        LOG.info("Creating network element with elementId  {}", elementId);
-
-        utilsApi.throwExceptionIfIdMismatch(entity.getElementId(), elementId, "Port");
+        sdnApi.throwExceptionIfIdMismatch(entity.getElementId(), elementId, "Port");
 
         return sdnApi.registerPort(entity).getElementId();
     }
 
     @Path("/{elementId}")
     @PUT
-    public NetworkElementEntity updateNetworkElement(@PathParam("controllerId") String controllerId,
-            @PathParam("elementId") String elementId, NetworkElementEntity entity) throws Exception {
-        LOG.info("Updating the network element id {} ", elementId);
+    public PortEntity updatePort(@PathParam("controllerId") String controllerId,
+            @PathParam("elementId") String elementId, PortEntity entity) throws Exception {
+        LOG.info("Updating the port element id {} ", elementId);
 
         SampleSdnRedirectionApi sdnApi = ((SampleSdnRedirectionApi) this.api
                 .createRedirectionApi(new VirtualizationConnectorElementImpl("Sample", controllerId), "TEST"));
 
-        RedirectionApiUtils utilsApi = new RedirectionApiUtils(null, null);
+        sdnApi.throwExceptionIfNullId(controllerId);
 
-        utilsApi.throwExceptionIfNullId(controllerId);
-
-        utilsApi.throwExceptionIfIdMismatch(entity.getElementId(), elementId, "Port");
+        sdnApi.throwExceptionIfIdMismatch(entity.getElementId(), elementId, "Port");
 
         return sdnApi.updatePort(entity);
     }
 
     @Path("/{elementId}")
     @DELETE
-    public void deleteNetworkElement(@PathParam("controllerId") String controllerId,
+    public void deletePort(@PathParam("controllerId") String controllerId,
             @PathParam("elementId") String elementId)
                     throws Exception {
-        LOG.info("Deleting the network element for id {} ", elementId);
+        LOG.info("Deleting the port element for id {} ", elementId);
 
         SampleSdnRedirectionApi sdnApi = ((SampleSdnRedirectionApi) this.api
                 .createRedirectionApi(new VirtualizationConnectorElementImpl("Sample", controllerId), "TEST"));
 
-        new RedirectionApiUtils(null, null).throwExceptionIfNullId(controllerId);
+        sdnApi.throwExceptionIfNullId(controllerId);
 
         sdnApi.deletePort(elementId);
     }
 
     @GET
-    public List<String> getNetworkElementIds(@PathParam("controllerId") String controllerId) throws Exception {
-        LOG.info("Listing network elements ids'");
+    public List<String> getPortIds(@PathParam("controllerId") String controllerId) throws Exception {
+        LOG.info("Listing port elements ids'");
 
         SampleSdnRedirectionApi sdnApi = ((SampleSdnRedirectionApi) this.api
                 .createRedirectionApi(new VirtualizationConnectorElementImpl("Sample", controllerId), "TEST"));
 
-        new RedirectionApiUtils(null, null).throwExceptionIfNullId(controllerId);
+        sdnApi.throwExceptionIfNullId(controllerId);
 
         return sdnApi.getPortIds();
     }
 
     @Path("/{elementId}")
     @GET
-    public NetworkElementEntity getNetworkElement(@PathParam("controllerId") String controllerId,
+    public PortEntity getPort(@PathParam("controllerId") String controllerId,
             @PathParam("elementId") String elementId)
                     throws Exception {
-        LOG.info("Getting the network for id {} ", elementId);
+        LOG.info("Getting the port for id {} ", elementId);
 
         SampleSdnRedirectionApi sdnApi = ((SampleSdnRedirectionApi) this.api
                 .createRedirectionApi(new VirtualizationConnectorElementImpl("Sample", controllerId), "TEST"));
 
-        new RedirectionApiUtils(null, null).throwExceptionIfNullId(controllerId);
+        sdnApi.throwExceptionIfNullId(controllerId);
 
-        NetworkElementEntity portElement = sdnApi.getPort(elementId);
+        PortEntity portElement = sdnApi.getPort(elementId);
         portElement.setInspectionHook(null);
         return portElement;
     }
