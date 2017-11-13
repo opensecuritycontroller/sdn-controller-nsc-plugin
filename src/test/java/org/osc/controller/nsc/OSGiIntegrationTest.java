@@ -21,6 +21,7 @@ import static org.junit.Assert.*;
 import static org.ops4j.pax.exam.CoreOptions.*;
 import static org.osgi.service.jdbc.DataSourceFactory.*;
 
+import java.io.File;
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.Properties;
@@ -75,70 +76,77 @@ public class OSGiIntegrationTest {
 
     private SdnRedirectionApi redirApi;
 
-    private static final VirtualizationConnectorElement VC =
-            new VirtualizationConnectorElement() {
+    private static final VirtualizationConnectorElement VC = new VirtualizationConnectorElement() {
 
-                @Override
-                public String getName() {
-                    return "dummy";
-                }
+        @Override
+        public String getName() {
+            return "dummy";
+        }
 
-                @Override
-                public String getControllerIpAddress() {
-                    return "dummy";                }
+        @Override
+        public String getControllerIpAddress() {
+            return "dummy";
+        }
 
-                @Override
-                public String getControllerUsername() {
-                    return "dummy";                }
+        @Override
+        public String getControllerUsername() {
+            return "dummy";
+        }
 
-                @Override
-                public String getControllerPassword() {
-                    return "dummy";                }
+        @Override
+        public String getControllerPassword() {
+            return "dummy";
+        }
 
-                @Override
-                public boolean isControllerHttps() {
-                    return false;
-                }
+        @Override
+        public boolean isControllerHttps() {
+            return false;
+        }
 
-                @Override
-                public String getProviderIpAddress() {
-                    return "dummy";                }
+        @Override
+        public String getProviderIpAddress() {
+            return "dummy";
+        }
 
-                @Override
-                public String getProviderUsername() {
-                    return "dummy";                }
+        @Override
+        public String getProviderUsername() {
+            return "dummy";
+        }
 
-                @Override
-                public String getProviderPassword() {
-                    return "dummy";                }
+        @Override
+        public String getProviderPassword() {
+            return "dummy";
+        }
 
-                @Override
-                public String getProviderAdminTenantName() {
-                    return "dummy";                }
+        @Override
+        public String getProviderAdminTenantName() {
+            return "dummy";
+        }
 
-                @Override
-                public String getProviderAdminDomainId() {
-                    return "dummy";                }
+        @Override
+        public String getProviderAdminDomainId() {
+            return "dummy";
+        }
 
-                @Override
-                public boolean isProviderHttps() {
-                    return false;
-                }
+        @Override
+        public boolean isProviderHttps() {
+            return false;
+        }
 
-                @Override
-                public Map<String, String> getProviderAttributes() {
-                    return null;
-                }
+        @Override
+        public Map<String, String> getProviderAttributes() {
+            return null;
+        }
 
-                @Override
-                public SSLContext getSslContext() {
-                    return null;
-                }
+        @Override
+        public SSLContext getSslContext() {
+            return null;
+        }
 
-                @Override
-                public TrustManager[] getTruststoreManager() throws Exception {
-                    return null;
-                }
+        @Override
+        public TrustManager[] getTruststoreManager() throws Exception {
+            return null;
+        }
     };
 
     @org.ops4j.pax.exam.Configuration
@@ -188,9 +196,9 @@ public class OSGiIntegrationTest {
                     systemPackage("javax.transaction.xa;version=1.1"),
 
                     mavenBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.antlr")
-                    .versionAsInProject(),
+                            .versionAsInProject(),
                     mavenBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.dom4j")
-                    .versionAsInProject(),
+                            .versionAsInProject(),
                     mavenBundle("org.javassist", "javassist").versionAsInProject(),
                     mavenBundle("org.jboss.logging", "jboss-logging").versionAsInProject(),
                     mavenBundle("org.jboss", "jandex").versionAsInProject(),
@@ -211,7 +219,7 @@ public class OSGiIntegrationTest {
                     //                    CoreOptions.vmOption("-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=1044"),
 
                     bootClasspathLibrary(mavenBundle("org.apache.geronimo.specs", "geronimo-jta_1.1_spec", "1.1.1"))
-                    .beforeFramework(),
+                            .beforeFramework(),
                     junitBundles());
         } catch (Throwable t) {
 
@@ -266,11 +274,23 @@ public class OSGiIntegrationTest {
     @After
     public void tearDown() throws Exception {
         this.txControl.required(() -> {
-            this.em.createNativeQuery("drop all objects").executeUpdate(); return null;
+            this.em.createNativeQuery("drop all objects").executeUpdate();
+            return null;
         });
 
         if (this.redirApi != null) {
             this.redirApi.close();
+        }
+
+        File dbfile = new File("nscPlugin_dummy.h2.db");
+
+        if (dbfile.exists() && !dbfile.delete()) {
+            throw new IllegalStateException("Failed to delete database file : " + dbfile.getAbsolutePath());
+        }
+
+        File tracefile = new File("nscPlugin_dummy.trace.db");
+        if (tracefile.exists() && !tracefile.delete()) {
+            throw new IllegalStateException("Failed to delete trace file : " + tracefile.getAbsolutePath());
         }
     }
 
