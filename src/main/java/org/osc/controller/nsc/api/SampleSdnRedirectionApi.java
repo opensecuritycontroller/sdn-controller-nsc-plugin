@@ -537,7 +537,7 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
 
         PortEntity element = this.utils.findPortEntityByElementId(portElement.getElementId());
         if (element != null) {
-            String msg = String.format("Network element already exists id: %s\n", portElement.getElementId());
+            String msg = String.format("Port element already exists id: %s\n", portElement.getElementId());
             LOG.error(msg);
             throw new IllegalArgumentException(msg);
         }
@@ -574,7 +574,7 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
             PortEntity element = this.utils.txPortEntityByElementId(id);
 
             if (element == null) {
-                LOG.warn("Attempt to delete network element for id {} and network element not found, no-op.", id);
+                LOG.warn("Attempt to delete port element for id {} and port element not found, no-op.", id);
                 return null;
             }
 
@@ -604,14 +604,6 @@ public class SampleSdnRedirectionApi implements SdnRedirectionApi {
             throw new IllegalArgumentException(
                     String.format("The ID %s specified in the '%s' data does not match the id specified in the URL",
                             entityId, objName));
-        }
-    }
-
-    public void throwExceptionIfNullId(String id) {
-        if (id == null) {
-            String msg = "null passed for the id argument!";
-            LOG.error(msg);
-            throw new IllegalArgumentException(msg);
         }
     }
 }

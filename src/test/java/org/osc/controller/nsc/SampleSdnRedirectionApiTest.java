@@ -525,8 +525,9 @@ public class SampleSdnRedirectionApiTest extends AbstractSampleSdnPluginTest {
         assertEquals(null, foundInspectionPort);
     }
 
+
     @Test
-    public void testApiRegisterPort() throws Exception {
+    public void testApi_RegisterPort_Succeeds() throws Exception {
         //Arrange
         port.setParentId(UUID.randomUUID().toString());
         port.setDeviceOwnerId("DeviceOwnerId");
@@ -543,7 +544,7 @@ public class SampleSdnRedirectionApiTest extends AbstractSampleSdnPluginTest {
     }
 
     @Test
-    public void testApiDeletePort() throws Exception {
+    public void testApi_DeletePort_PortDeleted() throws Exception {
         //Arrange
         port.setParentId(UUID.randomUUID().toString());
         port.setDeviceOwnerId("DeviceOwnerId");
@@ -558,7 +559,7 @@ public class SampleSdnRedirectionApiTest extends AbstractSampleSdnPluginTest {
     }
 
     @Test
-    public void testGetPortIds() throws Exception {
+    public void testApi_GetPortIds_Succeeds() throws Exception {
         //Arrange
         this.redirApi.registerPort(ingress);
         this.redirApi.registerPort(egress);
@@ -576,7 +577,7 @@ public class SampleSdnRedirectionApiTest extends AbstractSampleSdnPluginTest {
     }
 
     @Test
-    public void testApiGetPort() throws Exception {
+    public void testApi_GetPort_Succeeds() throws Exception {
         //Arrange
         port.setParentId(UUID.randomUUID().toString());
         port.setDeviceOwnerId("DeviceOwnerId");
@@ -595,16 +596,16 @@ public class SampleSdnRedirectionApiTest extends AbstractSampleSdnPluginTest {
     }
 
     @Test
-    public void testApiUpdatePort() throws Exception {
+    public void testApi_UpdatePort_PortUpdated() throws Exception {
         //Arrange
-        final ArrayList<String> macAdresses = new ArrayList<String>(
+        ArrayList<String> macAdresses = new ArrayList<String>(
                 Arrays.asList("ff:ff:ff:bb:aa:02", "ff:ff:ff:bb:aa:03"));
 
-        final ArrayList<String> ipAdresses = new ArrayList<String>(Arrays.asList("10.5.2.3", "10.5.3.4"));
+        ArrayList<String> ipAdresses = new ArrayList<String>(Arrays.asList("10.5.2.3", "10.5.3.4"));
 
-        final String newParentId = "NewParentId";
+        String newParentId = "NewParentId";
 
-        final String newDeviceOwnerId = "NewDeviceOwnerId";
+        String newDeviceOwnerId = "NewDeviceOwnerId";
 
         this.redirApi = new SampleSdnRedirectionApi(this.txControl, this.em);
 
@@ -628,7 +629,7 @@ public class SampleSdnRedirectionApiTest extends AbstractSampleSdnPluginTest {
     }
 
     @Test
-    public void testApiGetInspectionPortsIds() throws Exception {
+    public void testApi_GetInspectionPortsIds_Succeeds() throws Exception {
         //Arrange
         this.redirApi = new SampleSdnRedirectionApi(this.txControl, this.em);
 
@@ -636,7 +637,7 @@ public class SampleSdnRedirectionApiTest extends AbstractSampleSdnPluginTest {
         inspectionPortElement = (InspectionPortElement) this.redirApi.registerInspectionPort(inspectionPortElement);
 
         //Act
-        final String inspectionPortElementId = inspectionPortElement.getElementId();
+        String inspectionPortElementId = inspectionPortElement.getElementId();
 
         //Assert
         assertEquals(1, this.redirApi.getInspectionPortsIds().size());
@@ -644,7 +645,7 @@ public class SampleSdnRedirectionApiTest extends AbstractSampleSdnPluginTest {
     }
 
     @Test
-    public void testApiGetInspectionHooksIds() throws Exception {
+    public void testApi_GetInspectionHooksIds_Succeeds() throws Exception {
         //Arrange
         this.redirApi = new SampleSdnRedirectionApi(this.txControl, this.em);
 
@@ -656,7 +657,7 @@ public class SampleSdnRedirectionApiTest extends AbstractSampleSdnPluginTest {
         assertNotNull(registeredElement.getElementId());
 
         //Act
-        final String hookId = this.redirApi.installInspectionHook(inspected, inspectionPortElement, 0L, VLAN, 0L, NA);
+        String hookId = this.redirApi.installInspectionHook(inspected, inspectionPortElement, 0L, VLAN, 0L, NA);
 
         //Assert
         assertNotNull(hookId);
@@ -665,17 +666,17 @@ public class SampleSdnRedirectionApiTest extends AbstractSampleSdnPluginTest {
     }
 
     @Test
-    public void testApiUpdateInspectionPort() throws Exception {
+    public void testApi_UpdateInspectionPort_InspectionPortUpdated() throws Exception {
         //Arrange
-        final ArrayList<String> newIngressMacAdresses = new ArrayList<String>(
+        ArrayList<String> newIngressMacAdresses = new ArrayList<String>(
                 Arrays.asList("ff:ff:ff:bb:cc:01", "ff:ff:ff:bb:aa:01"));
 
-        final ArrayList<String> newIngressIPAdresses = new ArrayList<String>(Arrays.asList("10.5.2.3", "10.5.3.4"));
+        ArrayList<String> newIngressIPAdresses = new ArrayList<String>(Arrays.asList("10.5.2.3", "10.5.3.4"));
 
-        final ArrayList<String> newEgressMacAdresses = new ArrayList<String>(
+        ArrayList<String> newEgressMacAdresses = new ArrayList<String>(
                 Arrays.asList("ff:ff:ff:bb:aa:02", "ff:ff:ff:bb:aa:03"));
 
-        final ArrayList<String> newEggressIPAdresses = new ArrayList<String>(Arrays.asList("10.5.2.5", "10.5.3.6"));
+        ArrayList<String> newEggressIPAdresses = new ArrayList<String>(Arrays.asList("10.5.2.5", "10.5.3.6"));
 
         this.redirApi = new SampleSdnRedirectionApi(this.txControl, this.em);
 
@@ -711,7 +712,7 @@ public class SampleSdnRedirectionApiTest extends AbstractSampleSdnPluginTest {
     }
 
     @Test
-    public void testApiGetPortForUnregisteredPort() throws Exception {
+    public void testApi_GetPortForUnregisteredPort_PortNotFound() throws Exception {
         //Arrange
         port.setParentId(UUID.randomUUID().toString());
         port.setDeviceOwnerId("DeviceOwnerId");
@@ -724,7 +725,7 @@ public class SampleSdnRedirectionApiTest extends AbstractSampleSdnPluginTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testApiUpdateUnregisteredPort() throws Exception {
+    public void testApi_UpdateUnregisteredPort_ThrowsIllegalArgumentException() throws Exception {
         //Arrange
         this.redirApi = new SampleSdnRedirectionApi(this.txControl, this.em);
 

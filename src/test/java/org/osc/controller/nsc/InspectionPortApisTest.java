@@ -81,9 +81,10 @@ public class InspectionPortApisTest extends BaseJerseyTest {
 
         try {
             Mockito.<List<String>> when(sdnRedirApi.getInspectionPortsIds()).thenReturn(this.expectedResponseList);
-            Mockito.<InspectionPortElement> when(sdnRedirApi.getInspectionPort(any())).thenReturn(getInspectionPortEntity());
-            Mockito.<Element> when(sdnRedirApi.registerInspectionPort(any())).thenReturn(getInspectionPortEntity());
-            Mockito.<Element> when(sdnRedirApi.updateInspectionPort(any())).thenReturn(getInspectionPortEntity());
+            Mockito.<InspectionPortElement> when(sdnRedirApi.getInspectionPort(any()))
+                    .thenReturn(createInspectionPortEntity());
+            Mockito.<Element> when(sdnRedirApi.registerInspectionPort(any())).thenReturn(createInspectionPortEntity());
+            Mockito.<Element> when(sdnRedirApi.updateInspectionPort(any())).thenReturn(createInspectionPortEntity());
             Mockito.doNothing().when(sdnRedirApi).removeInspectionPort(any());
             super.callRealMethods(sdnRedirApi);
         }
@@ -95,7 +96,7 @@ public class InspectionPortApisTest extends BaseJerseyTest {
     }
 
     @Test
-    public void testGetInspectionPort_expectStatusOk() {
+    public void testExecute_WithGetInspectionPort_ExpectStatusOk() {
         // Assume.
         Response response = null;
         try {
@@ -103,7 +104,7 @@ public class InspectionPortApisTest extends BaseJerseyTest {
             // Act.
             response = target("controller/1.2.3.0/inspectionPorts/InspPortId")
                     .request()
-                    .header(this.authorizationHeader, this.authorizationCreds)
+                    .header(this.AUTHORIZATION_HEADER, this.AUTHORIZATION_CREDS)
                     .get();
 
             response.close();
@@ -119,7 +120,7 @@ public class InspectionPortApisTest extends BaseJerseyTest {
     }
 
     @Test
-    public void testGetInspectionPortIds_expectStatusOk() {
+    public void testExecute_WithGetInspectionPortIds_ExpectStatusOk() {
         // Assume.
         Response response = null;
         try {
@@ -127,7 +128,7 @@ public class InspectionPortApisTest extends BaseJerseyTest {
             // Act.
             response = target("controller/1.2.3.0/inspectionPorts")
                     .request()
-                    .header(this.authorizationHeader, this.authorizationCreds)
+                    .header(this.AUTHORIZATION_HEADER, this.AUTHORIZATION_CREDS)
                     .get();
 
             response.close();
@@ -143,12 +144,12 @@ public class InspectionPortApisTest extends BaseJerseyTest {
     }
 
     @Test
-    public void testPostInspectionPort_expectStatusOk() {
+    public void testExecute_WithPostInspectionPort_ExpectStatusOk() {
         // Assume.
         Response response = null;
         try {
 
-            InspectionPortEntity inspectionPort = getInspectionPortEntity();
+            InspectionPortEntity inspectionPort = createInspectionPortEntity();
 
             Entity<InspectionPortEntity> entity = Entity.
                     entity(inspectionPort, MediaType.APPLICATION_JSON);
@@ -156,7 +157,7 @@ public class InspectionPortApisTest extends BaseJerseyTest {
             // Act.
             response = target("controller/1.2.3.0/inspectionPorts")
                     .request()
-                    .header(this.authorizationHeader, this.authorizationCreds)
+                    .header(this.AUTHORIZATION_HEADER, this.AUTHORIZATION_CREDS)
                     .post(entity);
 
             response.close();
@@ -172,17 +173,17 @@ public class InspectionPortApisTest extends BaseJerseyTest {
     }
 
     @Test
-    public void testUpdateInspectionPort_expectStatusOk() {
+    public void testExecute_WithUpdateInspectionPort_ExpectStatusOk() {
         // Assume.
         Response response = null;
         try {
 
-            InspectionPortElement inspectionPort = getInspectionPortEntity();
+            InspectionPortElement inspectionPort = createInspectionPortEntity();
             Entity<InspectionPortElement> entity = Entity.entity(inspectionPort, MediaType.APPLICATION_JSON);
             // Act.
             response = target("controller/1.2.3.0/inspectionPorts/InspPortId")
                     .request()
-                    .header(this.authorizationHeader, this.authorizationCreds)
+                    .header(this.AUTHORIZATION_HEADER, this.AUTHORIZATION_CREDS)
                     .put(entity);
 
             response.close();
@@ -198,19 +199,19 @@ public class InspectionPortApisTest extends BaseJerseyTest {
     }
 
     @Test
-    public void testUpdateInspectionPort_withBadRequest_expectErrorCode() {
+    public void testExecute_WithUpdateInspectionPort_ExpectErrorCode() {
         // Assume.
         Response response = null;
         try {
 
-            InspectionPortElement inspectionPort = getInspectionPortEntity();
+            InspectionPortElement inspectionPort = createInspectionPortEntity();
             Entity<InspectionPortElement> entity = Entity.entity(inspectionPort, MediaType.APPLICATION_JSON);
 
             String badParam = "IdNotMatching";
             // Act.
             response = target("controller/1.2.3.0/inspectionPorts/" + badParam)
                     .request()
-                    .header(this.authorizationHeader, this.authorizationCreds)
+                    .header(this.AUTHORIZATION_HEADER, this.AUTHORIZATION_CREDS)
                     .put(entity);
             response.close();
 
@@ -225,7 +226,7 @@ public class InspectionPortApisTest extends BaseJerseyTest {
     }
 
     @Test
-    public void testDeletePort_expectStatusOk() {
+    public void testExecute_WithDeletePort_ExpectNoContent() {
         // Assume.
         Response response = null;
         try {
@@ -233,7 +234,7 @@ public class InspectionPortApisTest extends BaseJerseyTest {
             // Act.
             response = target("controller/1.2.3.0/inspectionPorts/PortId")
                     .request()
-                    .header(this.authorizationHeader, this.authorizationCreds)
+                    .header(this.AUTHORIZATION_HEADER, this.AUTHORIZATION_CREDS)
                     .delete();
 
             response.close();
@@ -248,7 +249,7 @@ public class InspectionPortApisTest extends BaseJerseyTest {
         }
     }
 
-    private PortEntity getPortEntity() {
+    private PortEntity createPortEntity() {
         PortEntity port = new PortEntity();
         port.setElementId("ElementId");
         port.setPortIPs(Arrays.asList("10.1.1.1","10.1.1.2"));
@@ -258,9 +259,9 @@ public class InspectionPortApisTest extends BaseJerseyTest {
         return port;
     }
 
-    private InspectionPortEntity getInspectionPortEntity() {
-        PortEntity ingress = getPortEntity();
-        PortEntity egress = getPortEntity();
+    private InspectionPortEntity createInspectionPortEntity() {
+        PortEntity ingress = createPortEntity();
+        PortEntity egress = createPortEntity();
 
         InspectionHookEntity inspectionHook = new InspectionHookEntity();
         Collection<InspectionHookEntity> inspectionHooks = new HashSet<InspectionHookEntity>();

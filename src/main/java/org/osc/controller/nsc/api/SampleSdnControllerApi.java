@@ -88,8 +88,9 @@ public class SampleSdnControllerApi implements SdnControllerApi {
     @Override
     public SdnRedirectionApi createRedirectionApi(VirtualizationConnectorElement vc, String region) {
 
-        if (vc == null || vc.getName() == null || vc.getName().length() == 0) {
-            throw new IllegalArgumentException("Non-null VC with non-empty name required!");
+        if (vc == null || vc.getName() == null || vc.getName().length() == 0 || vc.getProviderIpAddress() == null) {
+            throw new IllegalArgumentException(
+                    "Non-null VC with non-empty name, non-empty provider ip address required!");
         }
 
         Properties props = new Properties();

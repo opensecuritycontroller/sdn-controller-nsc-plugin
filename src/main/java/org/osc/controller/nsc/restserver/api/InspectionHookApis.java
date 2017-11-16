@@ -57,8 +57,6 @@ public class InspectionHookApis {
         SampleSdnRedirectionApi sdnApi = ((SampleSdnRedirectionApi) this.api
                 .createRedirectionApi(new VirtualizationConnectorElementImpl("Sample", controllerId), "TEST"));
 
-        sdnApi.throwExceptionIfNullId(controllerId);
-
         return sdnApi.installInspectionHook(entity.getInspectedPort(), entity.getInspectionPort(), entity.getTag(),
                 entity.getEncType(), entity.getOrder(), entity.getFailurePolicyType());
     }
@@ -70,8 +68,6 @@ public class InspectionHookApis {
 
         SampleSdnRedirectionApi sdnApi = ((SampleSdnRedirectionApi) this.api
                 .createRedirectionApi(new VirtualizationConnectorElementImpl("Sample", controllerId), "TEST"));
-
-        sdnApi.throwExceptionIfNullId(controllerId);
 
         sdnApi.throwExceptionIfIdMismatch(entity.getHookId(), inspectionHookId, "InspectionHook");
 
@@ -89,8 +85,6 @@ public class InspectionHookApis {
         SampleSdnRedirectionApi sdnApi = ((SampleSdnRedirectionApi) this.api
                 .createRedirectionApi(new VirtualizationConnectorElementImpl("Sample", controllerId), "TEST"));
 
-        sdnApi.throwExceptionIfNullId(controllerId);
-
         sdnApi.removeInspectionHook(inspectionHookId);
     }
 
@@ -101,8 +95,6 @@ public class InspectionHookApis {
 
         SampleSdnRedirectionApi sdnApi = ((SampleSdnRedirectionApi) this.api
                 .createRedirectionApi(new VirtualizationConnectorElementImpl("Sample", controllerId), "TEST"));
-
-        sdnApi.throwExceptionIfNullId(controllerId);
 
         return sdnApi.getInspectionHooksIds();
     }
@@ -117,8 +109,6 @@ public class InspectionHookApis {
 
         SampleSdnRedirectionApi sdnApi = ((SampleSdnRedirectionApi) this.api
                 .createRedirectionApi(new VirtualizationConnectorElementImpl("Sample", controllerId), "TEST"));
-
-        sdnApi.throwExceptionIfNullId(controllerId);
 
         InspectionHookEntity inspectionHook = (InspectionHookEntity) sdnApi.getInspectionHook(inspectionHookId);
 

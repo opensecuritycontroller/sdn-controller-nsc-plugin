@@ -58,8 +58,6 @@ public class InspectionPortApis {
         SampleSdnRedirectionApi sdnApi = ((SampleSdnRedirectionApi) this.api
                 .createRedirectionApi(new VirtualizationConnectorElementImpl("Sample", controllerId), "TEST"));
 
-        sdnApi.throwExceptionIfNullId(controllerId);
-
         InspectionPortEntity inspectionPort = (InspectionPortEntity) sdnApi.registerInspectionPort(entity);
 
         return inspectionPort == null ? null : inspectionPort.getElementId();
@@ -74,8 +72,6 @@ public class InspectionPortApis {
 
         SampleSdnRedirectionApi sdnApi = ((SampleSdnRedirectionApi) this.api
                 .createRedirectionApi(new VirtualizationConnectorElementImpl("Sample", controllerId), "TEST"));
-
-        sdnApi.throwExceptionIfNullId(controllerId);
 
         sdnApi.throwExceptionIfIdMismatch(entity.getElementId(), inspectionPortId, "InspectionPort");
 
@@ -93,8 +89,6 @@ public class InspectionPortApis {
         SampleSdnRedirectionApi sdnApi = ((SampleSdnRedirectionApi) this.api
                 .createRedirectionApi(new VirtualizationConnectorElementImpl("Sample", controllerId), "TEST"));
 
-        sdnApi.throwExceptionIfNullId(controllerId);
-
         sdnApi.removeInspectionPort(new InspectionPortEntity(inspectionPortId, null, null));
     }
 
@@ -105,8 +99,6 @@ public class InspectionPortApis {
 
         SampleSdnRedirectionApi sdnApi = ((SampleSdnRedirectionApi) this.api
                 .createRedirectionApi(new VirtualizationConnectorElementImpl("Sample", controllerId), "TEST"));
-
-        sdnApi.throwExceptionIfNullId(controllerId);
 
         return sdnApi.getInspectionPortsIds();
     }
@@ -120,8 +112,6 @@ public class InspectionPortApis {
 
         SampleSdnRedirectionApi sdnApi = ((SampleSdnRedirectionApi) this.api
                 .createRedirectionApi(new VirtualizationConnectorElementImpl("Sample", controllerId), "TEST"));
-
-        sdnApi.throwExceptionIfNullId(controllerId);
 
         InspectionPortEntity inspectionPort = (InspectionPortEntity) sdnApi
                 .getInspectionPort(new InspectionPortEntity(inspectionPortId, null, null));

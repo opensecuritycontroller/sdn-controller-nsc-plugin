@@ -60,8 +60,6 @@ public class PortApis {
         SampleSdnRedirectionApi sdnApi = ((SampleSdnRedirectionApi) this.api
                 .createRedirectionApi(new VirtualizationConnectorElementImpl("Sample", controllerId), "TEST"));
 
-        sdnApi.throwExceptionIfNullId(controllerId);
-
         LOG.info("Creating port element with elementId  {}", elementId);
 
         sdnApi.throwExceptionIfIdMismatch(entity.getElementId(), elementId, "Port");
@@ -78,8 +76,6 @@ public class PortApis {
         SampleSdnRedirectionApi sdnApi = ((SampleSdnRedirectionApi) this.api
                 .createRedirectionApi(new VirtualizationConnectorElementImpl("Sample", controllerId), "TEST"));
 
-        sdnApi.throwExceptionIfNullId(controllerId);
-
         sdnApi.throwExceptionIfIdMismatch(entity.getElementId(), elementId, "Port");
 
         return sdnApi.updatePort(entity);
@@ -95,8 +91,6 @@ public class PortApis {
         SampleSdnRedirectionApi sdnApi = ((SampleSdnRedirectionApi) this.api
                 .createRedirectionApi(new VirtualizationConnectorElementImpl("Sample", controllerId), "TEST"));
 
-        sdnApi.throwExceptionIfNullId(controllerId);
-
         sdnApi.deletePort(elementId);
     }
 
@@ -106,8 +100,6 @@ public class PortApis {
 
         SampleSdnRedirectionApi sdnApi = ((SampleSdnRedirectionApi) this.api
                 .createRedirectionApi(new VirtualizationConnectorElementImpl("Sample", controllerId), "TEST"));
-
-        sdnApi.throwExceptionIfNullId(controllerId);
 
         return sdnApi.getPortIds();
     }
@@ -121,8 +113,6 @@ public class PortApis {
 
         SampleSdnRedirectionApi sdnApi = ((SampleSdnRedirectionApi) this.api
                 .createRedirectionApi(new VirtualizationConnectorElementImpl("Sample", controllerId), "TEST"));
-
-        sdnApi.throwExceptionIfNullId(controllerId);
 
         PortEntity portElement = sdnApi.getPort(elementId);
         portElement.setInspectionHook(null);

@@ -77,7 +77,7 @@ public class InspectionHookApisTest extends BaseJerseyTest {
         try {
             Mockito.<List<String>> when(sdnRedirApi.getInspectionHooksIds()).thenReturn(this.expectedResponseList);
             Mockito.<InspectionHookElement> when(sdnRedirApi.getInspectionHook(any()))
-            .thenReturn(getInspectionHookEntity());
+                    .thenReturn(createInspectionHookEntity());
             Mockito.<String> when(sdnRedirApi.installInspectionHook(any(), any(), any(), any(), any(), any()))
             .thenReturn("HookId");
             Mockito.doNothing().when(sdnRedirApi).updateInspectionHook(any());
@@ -91,7 +91,7 @@ public class InspectionHookApisTest extends BaseJerseyTest {
     }
 
     @Test
-    public void testGetInspectionHook_expectStatusOk() {
+    public void testExecute_WithGetInspectionHook_ExpectStatusOk() {
         // Assume.
         Response response = null;
         try {
@@ -99,7 +99,7 @@ public class InspectionHookApisTest extends BaseJerseyTest {
             // Act.
             response = target("controller/1.2.3.0/inspectionHooks/HookId")
                     .request()
-                    .header(this.authorizationHeader, this.authorizationCreds)
+                    .header(this.AUTHORIZATION_HEADER, this.AUTHORIZATION_CREDS)
                     .get();
 
             response.close();
@@ -115,7 +115,7 @@ public class InspectionHookApisTest extends BaseJerseyTest {
     }
 
     @Test
-    public void testGetInspectionHookIds_expectStatusOk() {
+    public void testExecute_WithGetInspectionHookIds_ExpectStatusOk() {
         // Assume.
         Response response = null;
         try {
@@ -123,7 +123,7 @@ public class InspectionHookApisTest extends BaseJerseyTest {
             // Act.
             response = target("controller/1.2.3.0/inspectionHooks")
                     .request()
-                    .header(this.authorizationHeader, this.authorizationCreds)
+                    .header(this.AUTHORIZATION_HEADER, this.AUTHORIZATION_CREDS)
                     .get();
 
             response.close();
@@ -139,19 +139,19 @@ public class InspectionHookApisTest extends BaseJerseyTest {
     }
 
     @Test
-    public void testPostInspectionHook_expectStatusOk() {
+    public void testExecute_WithPostInspectionHook_ExpectStatusOk() {
         // Assume.
         Response response = null;
         try {
 
-            InspectionHookEntity inspectionHook = getInspectionHookEntity();
+            InspectionHookEntity inspectionHook = createInspectionHookEntity();
 
             Entity<InspectionHookEntity> entity = Entity.entity(inspectionHook, MediaType.APPLICATION_JSON);
 
             // Act.
             response = target("controller/1.2.3.0/inspectionHooks")
                     .request()
-                    .header(this.authorizationHeader, this.authorizationCreds)
+                    .header(this.AUTHORIZATION_HEADER, this.AUTHORIZATION_CREDS)
                     .post(entity);
 
             response.close();
@@ -167,18 +167,18 @@ public class InspectionHookApisTest extends BaseJerseyTest {
     }
 
     @Test
-    public void testUpdateInspectionHook_expectStatusOk() {
+    public void testExecute_WithUpdateInspectionHook_ExpectStatusOk() {
         // Assume.
         Response response = null;
         try {
 
-            InspectionHookEntity inspectionHook = getInspectionHookEntity();
+            InspectionHookEntity inspectionHook = createInspectionHookEntity();
 
             Entity<InspectionHookEntity> entity = Entity.entity(inspectionHook, MediaType.APPLICATION_JSON);
             // Act.
             response = target("controller/1.2.3.0/inspectionHooks/HookId")
                     .request()
-                    .header(this.authorizationHeader, this.authorizationCreds)
+                    .header(this.AUTHORIZATION_HEADER, this.AUTHORIZATION_CREDS)
                     .put(entity);
 
             response.close();
@@ -194,12 +194,12 @@ public class InspectionHookApisTest extends BaseJerseyTest {
     }
 
     @Test
-    public void testUpdateInspectionHook_withBadRequest_expectErrorCode() {
+    public void testExecute_WithUpdateInspectionHook_ExpectErrorCode() {
         // Assume.
         Response response = null;
         try {
 
-            InspectionHookEntity inspectionHook = getInspectionHookEntity();
+            InspectionHookEntity inspectionHook = createInspectionHookEntity();
 
             Entity<InspectionHookEntity> entity = Entity.entity(inspectionHook, MediaType.APPLICATION_JSON);
 
@@ -207,7 +207,7 @@ public class InspectionHookApisTest extends BaseJerseyTest {
             // Act.
             response = target("controller/1.2.3.0/inspectionHooks/" + badParam)
                     .request()
-                    .header(this.authorizationHeader, this.authorizationCreds)
+                    .header(this.AUTHORIZATION_HEADER, this.AUTHORIZATION_CREDS)
                     .put(entity);
 
             response.close();
@@ -223,7 +223,7 @@ public class InspectionHookApisTest extends BaseJerseyTest {
     }
 
     @Test
-    public void testDeleteInspectionHook_expectNoContent() {
+    public void testExecute_WithDeleteInspectionHook_ExpectNoContent() {
         // Assume.
         Response response = null;
         try {
@@ -231,7 +231,7 @@ public class InspectionHookApisTest extends BaseJerseyTest {
             // Act.
             response = target("controller/1.2.3.0/inspectionHooks/HookId")
                     .request()
-                    .header(this.authorizationHeader, this.authorizationCreds)
+                    .header(this.AUTHORIZATION_HEADER, this.AUTHORIZATION_CREDS)
                     .delete();
 
             response.close();
@@ -246,7 +246,7 @@ public class InspectionHookApisTest extends BaseJerseyTest {
         }
     }
 
-    private PortEntity getPortEntity() {
+    private PortEntity createPortEntity() {
         PortEntity port = new PortEntity();
         port.setElementId("ElementId");
         port.setPortIPs(Arrays.asList("10.1.1.1", "10.1.1.2"));
@@ -256,11 +256,11 @@ public class InspectionHookApisTest extends BaseJerseyTest {
         return port;
     }
 
-    private InspectionHookEntity getInspectionHookEntity() {
+    private InspectionHookEntity createInspectionHookEntity() {
         InspectionHookEntity inspectionHookEntity = new InspectionHookEntity();
         inspectionHookEntity.setHookId("HookId");
         inspectionHookEntity.setInspectionPort(new InspectionPortEntity("InspPortId", null, null));
-        inspectionHookEntity.setInspectedPort(getPortEntity());
+        inspectionHookEntity.setInspectedPort(createPortEntity());
 
         return inspectionHookEntity;
     }

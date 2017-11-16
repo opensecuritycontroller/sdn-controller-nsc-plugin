@@ -77,15 +77,14 @@ public class RedirectionApiUtilsTest extends AbstractSampleSdnPluginTest {
         });
 
         // Act.
-        PortEntity foundNE = this.txControl.required(() -> {
-            PortEntity e = this.utils.txPortEntityByElementId(inspected.getElementId());
-            return e;
+        PortEntity foundPortEntity = this.txControl.required(() -> {
+            return this.utils.txPortEntityByElementId(inspected.getElementId());
         });
 
         // Assert.
-        assertNotNull(foundNE);
-        assertNotNull(foundNE.getMacAddresses());
-        assertEquals(1, foundNE.getMacAddresses().size());
+        assertNotNull(foundPortEntity);
+        assertNotNull(foundPortEntity.getMacAddresses());
+        assertEquals(1, foundPortEntity.getMacAddresses().size());
 
     }
 

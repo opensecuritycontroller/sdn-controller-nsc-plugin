@@ -27,9 +27,9 @@ import org.osc.sdk.controller.api.SdnControllerApi;
 
 public class BaseJerseyTest extends JerseyTest {
 
-    protected final String authorizationHeader = "Authorization";
+    protected final String AUTHORIZATION_HEADER = "Authorization";
 
-    protected final String authorizationCreds = "Basic YWRtaW46YWRtaW4xMjM=";
+    protected final String AUTHORIZATION_CREDS = "Basic YWRtaW46YWRtaW4xMjM=";
 
     public BaseJerseyTest() {
     }
@@ -47,7 +47,6 @@ public class BaseJerseyTest extends JerseyTest {
     }
 
     protected void callRealMethods(SampleSdnRedirectionApi sdnApi) throws Exception {
-        doCallRealMethod().when(sdnApi).throwExceptionIfNullId(any());
         doCallRealMethod().when(sdnApi).throwExceptionIfIdMismatch(any(), any(), any());
     }
 }

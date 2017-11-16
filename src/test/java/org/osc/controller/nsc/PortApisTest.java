@@ -74,9 +74,9 @@ public class PortApisTest extends BaseJerseyTest {
 
         try {
             Mockito.<List<String>> when(sdnRedirApi.getPortIds()).thenReturn(this.expectedResponseList);
-            Mockito.<NetworkElement> when(sdnRedirApi.registerPort(any())).thenReturn(getPortEntity());
+            Mockito.<NetworkElement> when(sdnRedirApi.registerPort(any())).thenReturn(createPortEntity());
             Mockito.<NetworkElement> when(sdnRedirApi.getPort(any())).thenReturn(new PortEntity());
-            Mockito.<NetworkElement> when(sdnRedirApi.updatePort(any())).thenReturn(getPortEntity());
+            Mockito.<NetworkElement> when(sdnRedirApi.updatePort(any())).thenReturn(createPortEntity());
             Mockito.doNothing().when(sdnRedirApi).removeInspectionPort(any());
             super.callRealMethods(sdnRedirApi);
         } catch (Exception ex) {
@@ -87,7 +87,7 @@ public class PortApisTest extends BaseJerseyTest {
     }
 
     @Test
-    public void testGetPortIds_expectStatusOk() {
+    public void testExecute_WithGetPortIds_ExpectStatusOk() {
         // Assume.
         Response response = null;
         try {
@@ -95,7 +95,7 @@ public class PortApisTest extends BaseJerseyTest {
             // Act.
             response = target("controller/1.2.3.0/portElements")
                     .request()
-                    .header(this.authorizationHeader, this.authorizationCreds)
+                    .header(this.AUTHORIZATION_HEADER, this.AUTHORIZATION_CREDS)
                     .get();
 
             response.close();
@@ -111,18 +111,18 @@ public class PortApisTest extends BaseJerseyTest {
     }
 
     @Test
-    public void testPostPort_withGoodRequest_expectStatusOk() {
+    public void testExecute_WithPostPort_ExpectStatusOk() {
         // Assume.
         Response response = null;
         try {
-            PortEntity port = getPortEntity();
+            PortEntity port = createPortEntity();
 
             Entity<PortEntity> portEntity = Entity.entity(port, MediaType.APPLICATION_JSON);
 
             // Act.
             response = target("controller/1.2.3.0/portElements/ElementId")
                     .request()
-                    .header(this.authorizationHeader, this.authorizationCreds)
+                    .header(this.AUTHORIZATION_HEADER, this.AUTHORIZATION_CREDS)
                     .post(portEntity);
 
             response.close();
@@ -137,11 +137,11 @@ public class PortApisTest extends BaseJerseyTest {
     }
 
     @Test
-    public void testPostPort_withBadRequest_expectErrorCode() {
+    public void testExecute_WithPostPort_ExpectErrorCode() {
         // Assume.
         Response response = null;
         try {
-            PortEntity port = getPortEntity();
+            PortEntity port = createPortEntity();
 
             Entity<PortEntity> portEntity = Entity.entity(port, MediaType.APPLICATION_JSON);
 
@@ -149,7 +149,7 @@ public class PortApisTest extends BaseJerseyTest {
             // Act.
             response = target("controller/1.2.3.0/portElements/" + badParam)
                     .request()
-                    .header(this.authorizationHeader, this.authorizationCreds)
+                    .header(this.AUTHORIZATION_HEADER, this.AUTHORIZATION_CREDS)
                     .post(portEntity);
 
             response.close();
@@ -164,7 +164,7 @@ public class PortApisTest extends BaseJerseyTest {
     }
 
     @Test
-    public void testGetPort_StatusOk() {
+    public void testExecute_WithGetPort_ExpectStatusOk() {
         // Assume.
         Response response = null;
         try {
@@ -172,7 +172,7 @@ public class PortApisTest extends BaseJerseyTest {
             // Act.
             response = target("controller/1.2.3.0/portElements/ElementId")
                     .request()
-                    .header(this.authorizationHeader, this.authorizationCreds)
+                    .header(this.AUTHORIZATION_HEADER, this.AUTHORIZATION_CREDS)
                     .get();
 
             response.close();
@@ -188,17 +188,17 @@ public class PortApisTest extends BaseJerseyTest {
     }
 
     @Test
-    public void testUpdatePort_withGoodRequest_StatusOk() {
+    public void testExecute_WithUpdatePort_ExpectStatusOk() {
         // Assume.
         Response response = null;
         try {
-            PortEntity port = getPortEntity();
+            PortEntity port = createPortEntity();
             Entity<PortEntity> portEntity = Entity.entity(port, MediaType.APPLICATION_JSON);
 
             // Act.
             response = target("controller/1.2.3.0/portElements/ElementId")
                     .request()
-                    .header(this.authorizationHeader, this.authorizationCreds)
+                    .header(this.AUTHORIZATION_HEADER, this.AUTHORIZATION_CREDS)
                     .put(portEntity);
 
             response.close();
@@ -214,7 +214,7 @@ public class PortApisTest extends BaseJerseyTest {
     }
 
     @Test
-    public void testDeletePort_withGoodRequest_StatusNoContent() {
+    public void testExecute_WithDeletePort_ExpectNoContent() {
         // Assume.
         Response response = null;
         try {
@@ -222,7 +222,7 @@ public class PortApisTest extends BaseJerseyTest {
             // Act.
             response = target("controller/1.2.3.0/portElements/elementId")
                     .request()
-                    .header(this.authorizationHeader, this.authorizationCreds)
+                    .header(this.AUTHORIZATION_HEADER, this.AUTHORIZATION_CREDS)
                     .delete();
 
             response.close();
@@ -238,7 +238,7 @@ public class PortApisTest extends BaseJerseyTest {
     }
 
     @Test
-    public void testDeletePort_withBadRequest_expectErrorCode() {
+    public void testExecute_WithDeletePort_ExpectErrorCode() {
         // Assume.
         Response response = null;
         try {
@@ -247,7 +247,7 @@ public class PortApisTest extends BaseJerseyTest {
             // Act.
             response = target("controller/1.2.3.0/portElements/" + badParam)
                     .request()
-                    .header(this.authorizationHeader, this.authorizationCreds)
+                    .header(this.AUTHORIZATION_HEADER, this.AUTHORIZATION_CREDS)
                     .delete();
 
             response.close();
@@ -263,18 +263,18 @@ public class PortApisTest extends BaseJerseyTest {
     }
 
     @Test
-    public void testUpdatePort_withBadRequest_expectErrorCode() {
+    public void testExecute_WithUpdatePort_ExpectErrorCode() {
         // Assume.
         Response response = null;
         try {
-            PortEntity port = getPortEntity();
+            PortEntity port = createPortEntity();
             Entity<PortEntity> portEntity = Entity.entity(port, MediaType.APPLICATION_JSON);
 
             String badParam = "IdNotMatching";
             // Act.
             response = target("controller/1.2.3.0/portElements/" + badParam)
                     .request()
-                    .header(this.authorizationHeader, this.authorizationCreds)
+                    .header(this.AUTHORIZATION_HEADER, this.AUTHORIZATION_CREDS)
                     .put(portEntity);
 
             response.close();
@@ -289,7 +289,7 @@ public class PortApisTest extends BaseJerseyTest {
         }
     }
 
-    private PortEntity getPortEntity() {
+    private PortEntity createPortEntity() {
         PortEntity port = new PortEntity();
         port.setElementId("ElementId");
         port.setPortIPs(Arrays.asList("10.1.1.1", "10.1.1.2"));
