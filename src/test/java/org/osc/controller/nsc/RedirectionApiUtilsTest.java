@@ -30,7 +30,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.osc.controller.nsc.api.SampleSdnRedirectionApi;
 import org.osc.controller.nsc.entities.InspectionHookEntity;
 import org.osc.controller.nsc.entities.InspectionPortEntity;
-import org.osc.controller.nsc.entities.NetworkElementEntity;
+import org.osc.controller.nsc.entities.PortEntity;
 import org.osc.controller.nsc.utils.RedirectionApiUtils;
 import org.osc.sdk.controller.element.Element;;
 
@@ -77,15 +77,14 @@ public class RedirectionApiUtilsTest extends AbstractSampleSdnPluginTest {
         });
 
         // Act.
-        NetworkElementEntity foundNE = this.txControl.required(() -> {
-            NetworkElementEntity e = this.utils.txNetworkElementEntityByElementId(inspected.getElementId());
-            return e;
+        PortEntity foundPortEntity = this.txControl.required(() -> {
+            return this.utils.txPortEntityByElementId(inspected.getElementId());
         });
 
         // Assert.
-        assertNotNull(foundNE);
-        assertNotNull(foundNE.getMacAddresses());
-        assertEquals(1, foundNE.getMacAddresses().size());
+        assertNotNull(foundPortEntity);
+        assertNotNull(foundPortEntity.getMacAddresses());
+        assertEquals(1, foundPortEntity.getMacAddresses().size());
 
     }
 

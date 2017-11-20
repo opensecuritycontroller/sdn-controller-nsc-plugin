@@ -47,7 +47,7 @@ public class InspectionHookEntity implements InspectionHookElement {
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = false, fetch = EAGER, optional = true)
     @JoinColumn(name = "inspected_port_fk", nullable = true, updatable = true)
-    private NetworkElementEntity inspectedPort;
+    private PortEntity inspectedPort;
 
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH}, fetch = EAGER, optional = true)
     @JoinColumn(name = "inspection_port_fk", nullable = true, updatable = true)
@@ -80,11 +80,11 @@ public class InspectionHookEntity implements InspectionHookElement {
     }
 
     @Override
-    public NetworkElementEntity getInspectedPort() {
+    public PortEntity getInspectedPort() {
         return this.inspectedPort;
     }
 
-    public void setInspectedPort(NetworkElementEntity inspectedPort) {
+    public void setInspectedPort(PortEntity inspectedPort) {
         this.inspectedPort = inspectedPort;
     }
 

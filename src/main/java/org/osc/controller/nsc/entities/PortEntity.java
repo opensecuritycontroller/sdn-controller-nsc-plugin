@@ -38,7 +38,7 @@ import org.osc.sdk.controller.element.NetworkElement;
 
 @Entity
 @Table(name = "NETWORK_ELEMENT")
-public class NetworkElementEntity implements NetworkElement {
+public class PortEntity implements NetworkElement {
 
     @Id
     @Column(name = "element_id", unique = true)
@@ -71,16 +71,24 @@ public class NetworkElementEntity implements NetworkElement {
     @JoinColumn(name = "port_group_fk", nullable = true, updatable = true)
     private PortGroupEntity portGroup;
 
-    public NetworkElementEntity() {
+    public PortEntity() {
     }
 
-    public NetworkElementEntity(String elementId, List<String> macAddressEntities, List<String> portIpEntities,
+    public PortEntity(String elementId, List<String> macAddressEntities, List<String> portIpEntities,
             String parentId) {
         super();
         this.elementId = elementId;
         this.parentId = parentId;
         this.macAddresses = macAddressEntities;
         this.portIPs = portIpEntities;
+    }
+
+    public PortEntity(PortEntity element){
+        this.elementId = element.elementId;
+        this.deviceOwnerId = element.deviceOwnerId;
+        this.parentId = element.parentId;
+        this.macAddresses = element.macAddresses;
+        this.portIPs = element.portIPs;
     }
 
     @Override
@@ -125,6 +133,14 @@ public class NetworkElementEntity implements NetworkElement {
 
     public void setParentId(String parentId) {
         this.parentId = parentId;
+    }
+
+    public String getDeviceOwnerId() {
+        return this.deviceOwnerId;
+    }
+
+    public void setDeviceOwnerId(String deviceOwnerId) {
+        this.deviceOwnerId = deviceOwnerId;
     }
 
     public PortGroupEntity getPortGroup() {
